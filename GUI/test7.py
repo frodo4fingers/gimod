@@ -3,7 +3,7 @@
 
 import numpy as np
 # from sklearn.neighbors import KDTree
-from scipy.spatial import KDTree
+# from scipy.spatial import KDTree
 import sys
 # import math
 # from openpyxl import load_workbook
@@ -11,13 +11,13 @@ import sys
 import cv2
 
 import matplotlib
+matplotlib.use("Qt4Agg")
 from matplotlib.figure import Figure
 # from matplotlib import pyplot as plt
 from matplotlib import patches
 from matplotlib.widgets import RectangleSelector
 from matplotlib.patches import Polygon as mpl_polygon
 # from matplotlib.patches import Rectangle
-matplotlib.use("Qt4Agg")
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from PyQt4 import QtGui, QtCore
@@ -63,26 +63,33 @@ class PlotWidget(QtGui.QWidget):
         self.setLayout(layout)
 
 
-class DraggablePoint:
+class DraggablePoint(object):
     """
 http://stackoverflow.com/questions/21654008/matplotlib-drag-overlapping-points-interactively
     """
     lock = None #only one can be animated at a time
-    def __init__(self, point):
-        print("dp init")
+    def __init__(self, point=None, marker=None, center=None):
+        # print("dp init")
         self.point = point
         self.press = None
         self.background = None
+        self.center = center
+        self.marker = marker
+        self.params = (self.marker, self.center)
+        self.dict = {}
+        # FIXME: WTF!!!! die initialisierung SCHEINT hier notwendig, da die funktionen on_press/release/motion andernfalls nicht aufgerufen werden. WARUM AUCH IMMER. unnötig bei python 3.4.3 und mpl 1.4.3 @nico
+        self.on_press = self.on_press
 
     def connect(self):
         'connect to all the events we need'
-        print("dp connect")
+        # print("dp connect")
         self.cidpress = self.point.figure.canvas.mpl_connect('button_press_event', self.on_press)
         self.cidrelease = self.point.figure.canvas.mpl_connect('button_release_event', self.on_release)
         self.cidmotion = self.point.figure.canvas.mpl_connect('motion_notify_event', self.on_motion)
 
     def on_press(self, event):
-        print("dp press")
+        # print("dp on_press")
+        # print(self.params)
         if event.inaxes != self.point.axes: return
         if DraggablePoint.lock is not None: return
         contains, attrd = self.point.contains(event)
@@ -104,7 +111,7 @@ http://stackoverflow.com/questions/21654008/matplotlib-drag-overlapping-points-i
         canvas.blit(axes.bbox)
 
     def on_motion(self, event):
-        print("dp motion")
+        # print("dp on_motion")
         if DraggablePoint.lock is not self:
             return
         if event.inaxes != self.point.axes: return
@@ -125,7 +132,7 @@ http://stackoverflow.com/questions/21654008/matplotlib-drag-overlapping-points-i
         canvas.blit(axes.bbox)
 
     def on_release(self, event):
-        print("dp release")
+        # print("dp on_release")
         'on release we reset the press data'
         if DraggablePoint.lock is not self:
             return
@@ -139,10 +146,19 @@ http://stackoverflow.com/questions/21654008/matplotlib-drag-overlapping-points-i
 
         # redraw the full figure
         self.point.figure.canvas.draw()
+        self.center = event.xdata, event.ydata
+        # return self.marker, self.center
+        self.returnValue()
+
+    def returnValue(self):
+        self.dict[self.marker] = self.point.center
+        # print("bei returnValue:", self.marker, self.point.center)
+        return self.dict
 
     def disconnect(self):
-        print("dp disconnect")
+        # print("disconnected")
         'disconnect all the stored connection ids'
+        # print(self.marker, self.point.center)
         self.point.figure.canvas.mpl_disconnect(self.cidpress)
         self.point.figure.canvas.mpl_disconnect(self.cidrelease)
         self.point.figure.canvas.mpl_disconnect(self.cidmotion)
@@ -173,13 +189,15 @@ class MainWindow(QtGui.QMainWindow):
         self.sld_paths.sliderReleased.connect(self.changed_sld_paths)
         self.spb_paths.valueChanged.connect(self.changed_sld_paths)
 
-        self.btn_rs.clicked.connect(self.triggeredRectangleSelection)
-        self.btn_del.clicked.connect(self.imageDeleteSelected)
-        self.btn_undo.clicked.connect(self.clickedImageDeleteUndo)
+        # self.btn_rs.clicked.connect(self.triggeredRectangleSelection)
+        # self.btn_del.clicked.connect(self.imageDeleteSelected)
+        # self.btn_undo.clicked.connect(self.clickedImageDeleteUndo)
         #
         self.btn_region_init.clicked.connect(self.regionTable)
         self.btn_region_refresh.clicked.connect(self.regionRefresh)
-        self.chbx_region_check.stateChanged.connect(self.regionCheckMarkerPosition)
+        # self.chbx_region_check.stateChanged.connect(self.regionCheckMarkerPosition)
+        # self.chbx_region_check_finished.stateChanged.connect(self.regionMoveMarkersFinished)
+        self.btn_region_check.toggled.connect(self.regionCheckMarkerPosition)
         #
         self.chbx_mesh_refine.stateChanged.connect(self.changedChbxMeshRefine)
         self.chbx_smooth.stateChanged.connect(self.changedChbxSmooth)
@@ -314,33 +332,33 @@ class MainWindow(QtGui.QMainWindow):
         vbox_sld_paths = QtGui.QVBoxLayout()
         vbox_sld_paths.addLayout(hbox_sld_paths)
 
-        # ## rectangle selection button
-        self.btn_rs = QtGui.QPushButton(self)
-        self.btn_rs.setToolTip("activate point selection")
-        self.btn_rs.setCheckable(True)
-        self.btn_rs.setStyleSheet(style_btn_rs)
-        self.btn_rs.setIcon(QtGui.QIcon("icons2/External-Link.svg"))
-        # self.btn_rs.setIconSize(QtCore.QSize(30, 30))
-        self.btn_del = QtGui.QPushButton(self)
-        self.btn_del.setToolTip("delete selected points")
-        self.btn_del.setIcon(
-            self.style().standardIcon(QtGui.QStyle.SP_TrashIcon))
-        # self.btn_del.setIconSize(QtCore.QSize(30, 30))
-        self.btn_del.setEnabled(False)
-        self.btn_del.setStyleSheet(style_btn)
-        self.btn_undo = QtGui.QPushButton(self)
-        # self.btn_undo.setIcon(QtGui.QIcon("icons2/Delete.svg"))
-        # self.btn_undo.setIcon(QtGui.QIcon.fromTheme(QtCore.QString.fromUtf8("document-open")))
-        self.btn_undo.setIcon(
-                self.style().standardIcon(QtGui.QStyle.SP_ArrowBack))
-        self.btn_undo.setToolTip("undo deletions")
-        # self.btn_undo.setIconSize(QtCore.QSize(30, 30))
-        self.btn_undo.setEnabled(False)
-        self.btn_undo.setStyleSheet(style_btn)
-        hbox_dot_options = QtGui.QHBoxLayout()
-        hbox_dot_options.addWidget(self.btn_rs)
-        hbox_dot_options.addWidget(self.btn_del)
-        hbox_dot_options.addWidget(self.btn_undo)
+        # # ## rectangle selection button
+        # self.btn_rs = QtGui.QPushButton(self)
+        # self.btn_rs.setToolTip("activate point selection")
+        # self.btn_rs.setCheckable(True)
+        # self.btn_rs.setStyleSheet(style_btn_rs)
+        # self.btn_rs.setIcon(QtGui.QIcon("icons2/External-Link.svg"))
+        # # self.btn_rs.setIconSize(QtCore.QSize(30, 30))
+        # self.btn_del = QtGui.QPushButton(self)
+        # self.btn_del.setToolTip("delete selected points")
+        # self.btn_del.setIcon(
+        #     self.style().standardIcon(QtGui.QStyle.SP_TrashIcon))
+        # # self.btn_del.setIconSize(QtCore.QSize(30, 30))
+        # self.btn_del.setEnabled(False)
+        # self.btn_del.setStyleSheet(style_btn)
+        # self.btn_undo = QtGui.QPushButton(self)
+        # # self.btn_undo.setIcon(QtGui.QIcon("icons2/Delete.svg"))
+        # # self.btn_undo.setIcon(QtGui.QIcon.fromTheme(QtCore.QString.fromUtf8("document-open")))
+        # self.btn_undo.setIcon(
+        #         self.style().standardIcon(QtGui.QStyle.SP_ArrowBack))
+        # self.btn_undo.setToolTip("undo deletions")
+        # # self.btn_undo.setIconSize(QtCore.QSize(30, 30))
+        # self.btn_undo.setEnabled(False)
+        # self.btn_undo.setStyleSheet(style_btn)
+        # hbox_dot_options = QtGui.QHBoxLayout()
+        # hbox_dot_options.addWidget(self.btn_rs)
+        # hbox_dot_options.addWidget(self.btn_del)
+        # hbox_dot_options.addWidget(self.btn_undo)
 
         le_slds = QtGui.QLabel("Threshold")
         le_sld_dens = QtGui.QLabel("Point density")
@@ -354,7 +372,7 @@ class MainWindow(QtGui.QMainWindow):
         vbox_slider.addWidget(le_sld_paths)
         vbox_slider.addLayout(vbox_sld_paths)
         vbox_slider.addWidget(le_dot_opts)
-        vbox_slider.addLayout(hbox_dot_options)
+        # vbox_slider.addLayout(hbox_dot_options)
         # grp_dot_options = QtGui.QGroupBox("dot options")
         # grp_dot_options.setLayout(hbox_dot_options)
         # slider_widget = QtGui.QWidget()
@@ -402,9 +420,16 @@ class MainWindow(QtGui.QMainWindow):
         # plotting options... attributes
         self.chbx_region_attributes = QtGui.QCheckBox("plot attributes")
         # checkbox to open dialog for moving the marker points
-        self.chbx_region_check = QtGui.QCheckBox("check marker positions")
-        self.chbx_region_check.setEnabled(False)
+        # self.chbx_region_check = QtGui.QCheckBox("correct marker positions")
+        # self.chbx_region_check.setEnabled(False)
+        # self.chbx_region_check_finished = QtGui.QCheckBox("finished")
+        # hbox_region_check = QtGui.QHBoxLayout()
+        # hbox_region_check.addWidget(self.chbx_region_check)
+        # hbox_region_check.addWidget(self.chbx_region_check_finished)
 
+        # check regions
+        self.btn_region_check = QtGui.QPushButton("check region markers")
+        self.btn_region_check.setCheckable(True)
 
         hbox_region = QtGui.QHBoxLayout()
         hbox_region.addWidget(self.chbx_region_regions)
@@ -414,7 +439,9 @@ class MainWindow(QtGui.QMainWindow):
         vbox_region.addWidget(self.btn_region_init)
         vbox_region.addLayout(hbox_region)
         vbox_region.addWidget(self.region_table)
-        vbox_region.addWidget(self.chbx_region_check)
+        # vbox_region.addWidget(self.chbx_region_check)
+        # vbox_region.addLayout(hbox_region_check)
+        vbox_region.addWidget(self.btn_region_check)
         # vbox_region.addWidget(self.btn_region_refresh)
         # vbox_region.addWidget(self.chbx_region_regions)
         # vbox_region.addWidget(self.chbx_region_attributes)
@@ -821,57 +848,57 @@ class MainWindow(QtGui.QMainWindow):
             self.y_del = []
             self.imagePlot()
 
-    def clickedImageDeleteUndo(self):
-        try:
-            self.x_dens = self.x_dens + self.x_safe[-1]
-            self.y_dens = self.y_dens + self.y_safe[-1]
-            # since it will be plottet again, there is no need to save it.. so
-            # delete
-            del self.x_safe[-1]
-            del self.y_safe[-1]
+    # def clickedImageDeleteUndo(self):
+    #     try:
+    #         self.x_dens = self.x_dens + self.x_safe[-1]
+    #         self.y_dens = self.y_dens + self.y_safe[-1]
+    #         # since it will be plottet again, there is no need to save it.. so
+    #         # delete
+    #         del self.x_safe[-1]
+    #         del self.y_safe[-1]
+    #
+    #         self.imagePlot()
+    #     except IndexError:
+    #         # self.statusBar.showMessage("nothing to undo")
+    #         pass
 
-            self.imagePlot()
-        except IndexError:
-            # self.statusBar.showMessage("nothing to undo")
-            pass
+    # def rectSelectCallback(self, eclick, erelease):
+    #     'eclick and erelease are the press and release events'
+    #     # ## sort x and y
+    #     self.x1, self.x2 = min(eclick.xdata, erelease.xdata), max(
+    #         eclick.xdata, erelease.xdata)
+    #     self.y1, self.y2 = min(eclick.ydata, erelease.ydata), max(
+    #         eclick.ydata, erelease.ydata)
+    #     self.imagePlotSelected()
+    #
+    # def toggleSelector(self, event):
+    #     # print(' Key pressed.')
+    #     if event.key in ['Q', 'q'] and self.toggleSelector.active:
+    #         # print(' RectangleSelector deactivated.')
+    #         self.toggleSelector.set_active(False)
+    #     if event.key in ['A', 'a'] and not self.toggleSelector.active:
+    #         # print(' RectangleSelector activated.')
+    #         self.toggleSelector.set_active(True)
 
-    def rectSelectCallback(self, eclick, erelease):
-        'eclick and erelease are the press and release events'
-        # ## sort x and y
-        self.x1, self.x2 = min(eclick.xdata, erelease.xdata), max(
-            eclick.xdata, erelease.xdata)
-        self.y1, self.y2 = min(eclick.ydata, erelease.ydata), max(
-            eclick.ydata, erelease.ydata)
-        self.imagePlotSelected()
-
-    def toggleSelector(self, event):
-        # print(' Key pressed.')
-        if event.key in ['Q', 'q'] and self.toggleSelector.active:
-            # print(' RectangleSelector deactivated.')
-            self.toggleSelector.set_active(False)
-        if event.key in ['A', 'a'] and not self.toggleSelector.active:
-            # print(' RectangleSelector activated.')
-            self.toggleSelector.set_active(True)
-
-    def triggeredRectangleSelection(self):
-        if self.btn_rs.isChecked() is True:
-            self.btn_del.setEnabled(True)
-            self.btn_undo.setEnabled(True)
-
-            self.toggleSelector = RectangleSelector(self.plotWidget.axis,
-                                                     self.rectSelectCallback,
-                                                     drawtype='box', useblit=True,
-                                                     # only use left click
-                                                     button=[1],
-                                                     minspanx=5, minspany=5,
-                                                     spancoords='pixels',
-                                                     interactive=False)
-            self.plotWidget.canvas.draw()
-
-        else:
-            self.toggleSelector.set_active(False)
-            self.btn_del.setEnabled(False)
-            self.btn_undo.setEnabled(False)
+    # def triggeredRectangleSelection(self):
+    #     if self.btn_rs.isChecked() is True:
+    #         self.btn_del.setEnabled(True)
+    #         self.btn_undo.setEnabled(True)
+    #
+    #         self.toggleSelector = RectangleSelector(self.plotWidget.axis,
+    #                                                  self.rectSelectCallback,
+    #                                                  drawtype='box', useblit=True,
+    #                                                  # only use left click
+    #                                                  button=[1],
+    #                                                  minspanx=5, minspany=5,
+    #                                                  spancoords='pixels',
+    #                                                  interactive=False)
+    #         self.plotWidget.canvas.draw()
+    #
+    #     else:
+    #         self.toggleSelector.set_active(False)
+    #         self.btn_del.setEnabled(False)
+    #         self.btn_undo.setEnabled(False)
 
     def clickedBtnMesh(self):
         if self.mesh_refine is False:
@@ -937,11 +964,11 @@ class MainWindow(QtGui.QMainWindow):
         self.plotWidget.canvas.draw()
 
     """ ###############                      REGION MANAGER                      ############### """
-    def regionRefresh(self):
+    def regionRefresh(self, new_markers=None):
         """
         detect polygons, mark them im order and plot result
         """
-        # store the marker positions to check if they are in their unique area
+        # store the marker positions to check if they are in their respective polygon
         self.marker_positions = []
         # create world where model is placed with a certain distance to the border
         # TODO maybe add option to set the distance to boarder
@@ -950,11 +977,15 @@ class MainWindow(QtGui.QMainWindow):
         # print(type(self.region_table.cellWidget(0, 1).currentText()))
         for i, p in enumerate(self.polygons_dens):
             poly = plc.createPolygon(p, isClosed=True)
-            marker_pos = self.regionCentroid(p)
+            if new_markers:
+                marker_pos = new_markers[i][0]
+            else:
+                marker_pos = self.regionCentroid(p)
 
-            # check if polygon is hole
+            # check if polygon is not hole
             if self.region_table.cellWidget(i+1, 1).currentText() == "False":
                 pg.Mesh.addRegionMarker(poly, marker_pos, marker=int(self.region_table.cellWidget(i+1, 0).currentText()))
+            # or else
             else:
                 pg.Mesh.addHoleMarker(poly, marker_pos)
 
@@ -1024,19 +1055,12 @@ class MainWindow(QtGui.QMainWindow):
             # column 3 - attributes
             self.region_table.setItem(i, 2, QtGui.QTableWidgetItem("None"))
 
-            # # column 4 - x
-            # spb_x = QtGui.QSpinBox(self.region_table)
-            # spb_x.setMinimum(self.min_x)
-            # spb_x.setMaximum(self.max_x)
-            # spb_x.setValue(30.0)
-            # self.region_table.setItem(i, 3, )
-
         self.region_table.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         self.region_table.resizeColumnsToContents()
 
         # allow refresh option now since it doesnt make any sense before
         self.btn_region_refresh.setEnabled(True)
-        self.chbx_region_check.setEnabled(True)
+        # self.chbx_region_check.setEnabled(True)
         self.regionRefresh()
 
     def regionGetAttributes(self):
@@ -1055,7 +1079,7 @@ class MainWindow(QtGui.QMainWindow):
             marker position and polygon border should be shortest if its the own polygon!
         """
         warning = False
-        if self.chbx_region_check.isChecked() is True:
+        if self.btn_region_check.isChecked() is True:
             for i, mark in enumerate(self.marker_positions):
                 point = Point(mark)
                 for k, poly in enumerate(self.polygons_dens):
@@ -1067,47 +1091,42 @@ class MainWindow(QtGui.QMainWindow):
             if warning:
                 self.statusBar.showMessage("WARNING: possible multiple markers in a polygon... continue at own risk")
                 self.regionMoveMarkers()
+            else:
+                self.statusBar.showMessage("regions and markers seem to be fine", 3000)
+
+        else:
+            new_markers = []
+            for p in self.dps:
+                val = p.returnValue()
+                new_markers.append(list(val.values()))
+                p.disconnect()
+
+            self.regionRefresh(new_markers=new_markers)
 
     def regionMoveMarkers(self):
         """
             plots dots as marker positions which can be moved
         """
-        # for m in self.marker_positions:
-        #    self.plotWidget.axis.scatter(m[0], m[1], s=20, color="red")
-        # m_x = [m[0] for m in self.marker_positions]
-        # m_y = [m[1] for m in self.marker_positions]
-        drs = []
+        self.dps = []
 
-        # line, = self.plotWidget.axis.plot(m_x, m_y, "ro", ms=10., picker=5)  # 5 points tolerance
-        for m in self.marker_positions:
-            mark = patches.Circle(m, 8, fc='r')
+        for i, m in enumerate(self.marker_positions):
+            mark = patches.Circle(m, radius=8, fc="r")
             self.plotWidget.axis.add_patch(mark)
-            dr = DraggablePoint(mark)
-            dr.connect()
-            drs.append(dr)
-        # self.plotWidget.canvas.mpl_connect("pick_event", self.regionMoveMarkers_onPick)
-        # self.plotWidget.canvas.mpl_connect("motion_notify_event", self.regionMoveMarkers_onMotion)
-        print("bin durch")
+            dp = DraggablePoint(mark, i+2, m)
+            dp.connect()
+            self.dps.append(dp)
         self.plotWidget.canvas.draw()
 
-    def regionMoveMarkers_onPick(self, event):
-        """
-            happens if red dot is clicked
-        """
-        thisline = event.artist
-        xdata = thisline.get_xdata()
-        ydata = thisline.get_ydata()
-        ind = event.ind
-        points = tuple(zip(xdata[ind], ydata[ind]))[0]
-        print("onpick points:", points)
-        print("marker:", self.marker_positions.index(points) + 2)
-
-    def regionMoveMarkers_onMotion(self, event):
-        """
-            happens when red dot is clicked and moved
-        """
-
-
+    # def regionMoveMarkersFinished(self):
+    #     if self.chbx_region_check_finished.isChecked() is True:
+    #         # self.chbx_region_check.setSt
+    #         print("v"*25)
+    #         for p in self.dps:
+    #             # p.disconnect()
+    #             test = p.returnValue()
+    #             print(test)
+    #             # print(val)
+    #         print("^"*25)
 
 
 if __name__ == "__main__":
