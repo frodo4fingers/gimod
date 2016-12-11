@@ -203,6 +203,7 @@ class MainWindow(QtGui.QMainWindow):
         self.chbx_switches.stateChanged.connect(self.changedChbxSwitches)
         self.chbx_mesh_attr.stateChanged.connect(self.showMesh)
         self.btn_mesh.clicked.connect(self.clickedBtnMesh)
+        self.btn_mesh_export.clicked.connect(self.meshExport)
 
     def initUI(self):
         # ### icons from https://icons8.com/web-app/category/all/Very-Basic ### #
@@ -500,7 +501,8 @@ class MainWindow(QtGui.QMainWindow):
         self.la_mesh_show_attr = QtGui.QLabel("Show Attributes:")
         self.chbx_mesh_attr = QtGui.QCheckBox()
 
-        self.btn_mesh = QtGui.QPushButton("Mesh")
+        self.btn_mesh = QtGui.QPushButton("mesh")
+        self.btn_mesh_export = QtGui.QPushButton("mesh export")
         # labels stacked in vbox
         vbox_mesh_labels = QtGui.QVBoxLayout()
         vbox_mesh_labels.addWidget(self.la_mesh_quality)
@@ -538,6 +540,7 @@ class MainWindow(QtGui.QMainWindow):
         vbox_mesh = QtGui.QVBoxLayout()
         vbox_mesh.addLayout(hbox_mesh)
         vbox_mesh.addWidget(self.btn_mesh)
+        vbox_mesh.addWidget(self.btn_mesh_export)
         vbox_mesh.addStretch(1)
 
         mesh_widget = QtGui.QWidget()
@@ -874,25 +877,6 @@ class MainWindow(QtGui.QMainWindow):
             self.switches = self.le_switches.text()
             # TODO make th switches work --> http://pygimli.org/_examples_auto/modelling/plot_hybrid-mesh-2d.html?highlight=switches
 
-        # print("quality: %.2f" % (self.spb_mesh_quality.value()))
-        # print("area: %.2f" % (self.spb_cell_area.value()))
-        # print("refinement: %s - %s" % (self.mesh_refine, self.refine_method))
-        # print("smoothing: %s" % (str(self.smooth_method)))
-        # print("switches: %s" % (self.switches))
-        # print("*"*50)
-
-        # zip up the points
-        # tuple_ = [[float(self.x_dens[i]), float(self.y_dens[i])] for i in range(len(self.x_dens))]
-        # print(self.x_dens)
-        # print(self.y_dens)
-        # x_min, x_max = float(min(self.x_dens)), float(max(self.x_dens))
-        # y_min, y_max = float(min(self.y_dens)), float(max(self.y_dens))
-
-        # world = plc.createWorld(start=[x_min-100, 0], end=[x_max+100, y_max+100], marker=1)
-        # poly = plc.createPolygon(tuple_, isClosed=True)
-
-        # poly = plc.mergePLC([world, poly])
-
         self.mesh = createMesh(self.poly, quality=self.spb_mesh_quality.value(), area=self.spb_cell_area.value(), smooth=self.smooth_method, switches=self.switches)
 
         if self.mesh_refine is True and self.cbx_mesh_refine.currentText() == "quadratic":
@@ -917,6 +901,19 @@ class MainWindow(QtGui.QMainWindow):
         self.plotWidget.axis.set_ylim(self.plotWidget.axis.get_ylim()[::-1])
 
         self.plotWidget.canvas.draw()
+
+    def meshExport(self):
+        """
+            export the final mesh
+        """
+        export_mesh = QtGui.QFileDialog.getSaveFileName(
+            self, caption="Save Mesh")
+
+        # if export_poly:
+        if export_mesh.endswith(".bms"):
+            writePLC(self.mesh, export_mesh)
+        else:
+            writePLC(self.mesh, export_mesh + ".bms")
 
     """ ###############                      REGION MANAGER                      ############### """
     def regionRefresh(self, new_markers=False):
