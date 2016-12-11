@@ -15,7 +15,7 @@ matplotlib.use("Qt4Agg")
 from matplotlib.figure import Figure
 # from matplotlib import pyplot as plt
 from matplotlib import patches
-from matplotlib.widgets import RectangleSelector
+# from matplotlib.widgets import RectangleSelector
 from matplotlib.patches import Polygon as mpl_polygon
 # from matplotlib.patches import Rectangle
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -50,10 +50,6 @@ class PlotWidget(QtGui.QWidget):
         # this is the Navigation widget
         # it takes the Canvas widget and a parent
         self.toolbar = NavigationToolbar(self.canvas, self)
-
-        # Just some button connected to `plot` method
-        # self.button = QtGui.QPushButton('Plot')
-        # self.button.clicked.connect(self.plot)
 
         # set the layout
         layout = QtGui.QVBoxLayout()
@@ -432,23 +428,32 @@ class MainWindow(QtGui.QMainWindow):
         self.btn_region_check.setCheckable(True)
         self.btn_region_check.setEnabled(False)
 
-        hbox_region = QtGui.QHBoxLayout()
-        hbox_region.addWidget(self.chbx_region_regions)
-        hbox_region.addWidget(self.chbx_region_attributes)
-        hbox_region.addWidget(self.btn_region_refresh)
-        vbox_region = QtGui.QVBoxLayout()
-        vbox_region.addWidget(self.btn_region_init)
-        vbox_region.addLayout(hbox_region)
-        vbox_region.addWidget(self.region_table)
+        hbox_1 = QtGui.QHBoxLayout()
+        hbox_1.addWidget(self.chbx_region_regions)
+        hbox_1.addWidget(self.btn_region_refresh)
+        hbox_2 = QtGui.QHBoxLayout()
+        hbox_2.addWidget(self.chbx_region_attributes)
+        hbox_2.addStretch(1)
+
+        vbox_region1 = QtGui.QVBoxLayout()
+        # hbox_region.addWidget(self.chbx_region_regions)
+        # hbox_region.addWidget(self.chbx_region_attributes)
+        # hbox_region.addWidget(self.btn_region_refresh)
+        vbox_region1.addLayout(hbox_1)
+        vbox_region1.addLayout(hbox_2)
+        vbox_region2 = QtGui.QVBoxLayout()
+        vbox_region2.addWidget(self.btn_region_init)
+        vbox_region2.addLayout(vbox_region1)
+        vbox_region2.addWidget(self.region_table)
         # vbox_region.addWidget(self.chbx_region_check)
         # vbox_region.addLayout(hbox_region_check)
-        vbox_region.addWidget(self.btn_region_check)
+        vbox_region2.addWidget(self.btn_region_check)
         # vbox_region.addWidget(self.btn_region_refresh)
         # vbox_region.addWidget(self.chbx_region_regions)
         # vbox_region.addWidget(self.chbx_region_attributes)
 
         region_widget = QtGui.QWidget()
-        region_widget.setLayout(vbox_region)
+        region_widget.setLayout(vbox_region2)
 
         # ####################################################################################### #
         #                                    TAB MESH OPTIONS                                     #
@@ -651,7 +656,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.setGeometry(100, 100, 1000, 600)
         # window name
-        self.setWindowTitle("model builder test.")
+        self.setWindowTitle("GIMod")
         self.show()
 
     def movedSldMin(self):
