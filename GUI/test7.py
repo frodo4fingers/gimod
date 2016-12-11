@@ -503,6 +503,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.btn_mesh = QtGui.QPushButton("mesh")
         self.btn_mesh_export = QtGui.QPushButton("mesh export")
+        self.btn_mesh_export.setEnabled(False)
         # labels stacked in vbox
         vbox_mesh_labels = QtGui.QVBoxLayout()
         vbox_mesh_labels.addWidget(self.la_mesh_quality)
@@ -877,16 +878,18 @@ class MainWindow(QtGui.QMainWindow):
             self.switches = self.le_switches.text()
             # TODO make th switches work --> http://pygimli.org/_examples_auto/modelling/plot_hybrid-mesh-2d.html?highlight=switches
 
+        self.statusBar.showMessage("generating mesh...")
         self.mesh = createMesh(self.poly, quality=self.spb_mesh_quality.value(), area=self.spb_cell_area.value(), smooth=self.smooth_method, switches=self.switches)
 
         if self.mesh_refine is True and self.cbx_mesh_refine.currentText() == "quadratic":
+            self.statusBar.showMessage("create quadratic...")
             self.mesh = self.mesh.createP2()
         elif self.mesh_refine is True and self.cbx_mesh_refine.currentText() == "spatially":
+            self.statusBar.showMessage("create spatially...")
             self.mesh = self.mesh.createH2()
 
-        print("finished meshing")
-        print("loading mesh")
         self.statusBar.showMessage(str(self.mesh))
+        self.btn_mesh_export.setEnabled(True)
         self.showMesh()
 
     def showMesh(self):
