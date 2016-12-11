@@ -430,6 +430,7 @@ class MainWindow(QtGui.QMainWindow):
         # check regions
         self.btn_region_check = QtGui.QPushButton("check region markers")
         self.btn_region_check.setCheckable(True)
+        self.btn_region_check.setEnabled(False)
 
         hbox_region = QtGui.QHBoxLayout()
         hbox_region.addWidget(self.chbx_region_regions)
@@ -570,7 +571,7 @@ class MainWindow(QtGui.QMainWindow):
         #                                      SET UP TOOLBOX                                     #
         tool_box = QtGui.QToolBox()
         tool_box.addItem(file_widget, "start with sketch")
-        tool_box.addItem(scratch_widget, "start from scratch")
+        # tool_box.addItem(scratch_widget, "start from scratch")
         tool_box.addItem(region_widget, "region manager")
         tool_box.addItem(mesh_widget, "mesh options")
         tool_box.setStyleSheet(style_tbx)
@@ -1060,6 +1061,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # allow refresh option now since it doesnt make any sense before
         self.btn_region_refresh.setEnabled(True)
+        self.btn_region_check.setEnabled(True)
         # self.chbx_region_check.setEnabled(True)
         self.regionRefresh()
 
@@ -1100,6 +1102,7 @@ class MainWindow(QtGui.QMainWindow):
                 val = p.returnValue()
                 new_markers.append(list(val.values()))
                 p.disconnect()
+            self.statusBar.showMessage("updating...")
 
             self.regionRefresh(new_markers=new_markers)
 
