@@ -24,7 +24,7 @@ from PyQt4 import QtGui, QtCore
 
 import pygimli as pg
 from pygimli.meshtools import polytools as plc
-from pygimli.meshtools import createMesh
+from pygimli.meshtools import createMesh, writePLC
 from pygimli.mplviewer import drawMeshBoundaries, drawMesh, drawPLC, drawModel
 
 from shapely.geometry import Polygon, Point
@@ -193,7 +193,10 @@ class MainWindow(QtGui.QMainWindow):
         self.btn_region_refresh.clicked.connect(self.regionRefresh)
         # self.chbx_region_check.stateChanged.connect(self.regionCheckMarkerPosition)
         # self.chbx_region_check_finished.stateChanged.connect(self.regionMoveMarkersFinished)
+        # self.rbtn_region_regions.stateChanged.connect(self.toggledRegionCheckBoxes)
+        # self.rbtn_region_attributes.stateChanged.connect(self.toggledRegionCheckBoxes)
         self.btn_region_check.toggled.connect(self.regionCheckMarkerPosition)
+        self.btn_region_export.clicked.connect(self.regionExportPoly)
         #
         self.chbx_mesh_refine.stateChanged.connect(self.changedChbxMeshRefine)
         self.chbx_smooth.stateChanged.connect(self.changedChbxSmooth)
@@ -367,7 +370,7 @@ class MainWindow(QtGui.QMainWindow):
         vbox_slider.addLayout(vbox_sld_dens)
         vbox_slider.addWidget(le_sld_paths)
         vbox_slider.addLayout(vbox_sld_paths)
-        vbox_slider.addWidget(le_dot_opts)
+        # vbox_slider.addWidget(le_dot_opts)
         # vbox_slider.addLayout(hbox_dot_options)
         # grp_dot_options = QtGui.QGroupBox("dot options")
         # grp_dot_options.setLayout(hbox_dot_options)
@@ -411,10 +414,10 @@ class MainWindow(QtGui.QMainWindow):
         self.btn_region_refresh.setEnabled(False)
 
         # plotting options... regions
-        self.chbx_region_regions = QtGui.QCheckBox("plot regions")
-        self.chbx_region_regions.setChecked(True)
+        self.rbtn_region_regions = QtGui.QRadioButton("plot regions")
+        self.rbtn_region_regions.setChecked(True)
         # plotting options... attributes
-        self.chbx_region_attributes = QtGui.QCheckBox("plot attributes")
+        self.rbtn_region_attributes = QtGui.QRadioButton("plot attributes")
         # checkbox to open dialog for moving the marker points
         # self.chbx_region_check = QtGui.QCheckBox("correct marker positions")
         # self.chbx_region_check.setEnabled(False)
@@ -427,30 +430,25 @@ class MainWindow(QtGui.QMainWindow):
         self.btn_region_check = QtGui.QPushButton("check region markers")
         self.btn_region_check.setCheckable(True)
         self.btn_region_check.setEnabled(False)
+        self.btn_region_export = QtGui.QPushButton("export poly")
+        self.btn_region_export.setEnabled(False)
 
         hbox_1 = QtGui.QHBoxLayout()
-        hbox_1.addWidget(self.chbx_region_regions)
+        hbox_1.addWidget(self.rbtn_region_regions)
         hbox_1.addWidget(self.btn_region_refresh)
         hbox_2 = QtGui.QHBoxLayout()
-        hbox_2.addWidget(self.chbx_region_attributes)
+        hbox_2.addWidget(self.rbtn_region_attributes)
         hbox_2.addStretch(1)
 
         vbox_region1 = QtGui.QVBoxLayout()
-        # hbox_region.addWidget(self.chbx_region_regions)
-        # hbox_region.addWidget(self.chbx_region_attributes)
-        # hbox_region.addWidget(self.btn_region_refresh)
         vbox_region1.addLayout(hbox_1)
         vbox_region1.addLayout(hbox_2)
         vbox_region2 = QtGui.QVBoxLayout()
         vbox_region2.addWidget(self.btn_region_init)
         vbox_region2.addLayout(vbox_region1)
         vbox_region2.addWidget(self.region_table)
-        # vbox_region.addWidget(self.chbx_region_check)
-        # vbox_region.addLayout(hbox_region_check)
         vbox_region2.addWidget(self.btn_region_check)
-        # vbox_region.addWidget(self.btn_region_refresh)
-        # vbox_region.addWidget(self.chbx_region_regions)
-        # vbox_region.addWidget(self.chbx_region_attributes)
+        vbox_region2.addWidget(self.btn_region_export)
 
         region_widget = QtGui.QWidget()
         region_widget.setLayout(vbox_region2)
@@ -542,33 +540,6 @@ class MainWindow(QtGui.QMainWindow):
         vbox_mesh.addWidget(self.btn_mesh)
         vbox_mesh.addStretch(1)
 
-        # grid_mesh_options = QtGui.QGridLayout()
-        # grid_mesh_options.setSpacing(4)
-        # # widget, row, col, rowSpan, colSpan) #
-        # grid_mesh_options.addWidget(self.la_mesh_quality, 1, 0, 1, 1)
-        # grid_mesh_options.addWidget(self.spb_mesh_quality, 1, 1, 1, 3)
-        # grid_mesh_options.addWidget(self.la_cell_area, 2, 0, 1, 1)
-        # grid_mesh_options.addWidget(self.spb_cell_area, 2, 1, 1, 3)
-        # grid_mesh_options.addWidget(self.la_mesh_refine, 3, 0, 1, 1)
-        # grid_mesh_options.addWidget(self.chbx_mesh_refine, 3, 1, 1, 1)
-        # grid_mesh_options.addWidget(self.cbx_mesh_refine, 3, 2, 1, 2)
-        # grid_mesh_options.addWidget(self.la_smooth, 4, 0, 1, 1)
-        # grid_mesh_options.addWidget(self.chbx_smooth, 4, 1, 1, 1)
-        # grid_mesh_options.addWidget(self.cbx_smooth, 4, 2, 1, 1)
-        # grid_mesh_options.addWidget(self.spb_smooth, 4, 3, 1, 1)
-        # grid_mesh_options.addWidget(self.la_switches, 5, 0, 1, 1)
-        # grid_mesh_options.addWidget(self.chbx_switches, 5, 1, 1, 1)
-        # grid_mesh_options.addWidget(self.le_switches, 5, 2, 1, 2)
-        # grid_mesh_options.addWidget(self.la_mesh_show_attr, 6, 0, 1, 1)
-        # grid_mesh_options.addWidget(self.chbx_mesh_attr, 6, 1, 1, 1)
-        # grid_mesh_options.addWidget(self.btn_mesh, 7, 0, 1, 4)
-        # grp_mesh_options = QtGui.QGroupBox("mesh options")
-        # grp_mesh_options.setLayout(grid_mesh_options)
-        #
-        # vbox_mesh = QtGui.QVBoxLayout()
-        # # vbox_mesh.addWidget(grp_dot_options)
-        # vbox_mesh.addWidget(grp_mesh_options)
-
         mesh_widget = QtGui.QWidget()
         mesh_widget.setLayout(vbox_mesh)
 
@@ -613,31 +584,6 @@ class MainWindow(QtGui.QMainWindow):
         splitter.addWidget(frame_left)
         splitter.addWidget(frame_right)
 
-        # working_area = QtGui.QHBoxLayout()
-        # working_area.addWidget(tool_box)
-        # working_area.addWidget(self.plotWidget)
-        # working_widget = QtGui.QWidget()
-        # working_widget.setLayout(working_area)
-
-        #
-        # vbox_tab = QtGui.QVBoxLayout()
-        # vbox_tab.addLayout(hbox_btns)
-        # vbox_tab.addLayout(hbox_grps)
-        # vbox_tab.addWidget(self.plotWidget)
-
-        # self.tabWidget = QtGui.QTabWidget(self)
-        # self.tabWidget.addTab(self.table_widget, "Tabelle")
-
-        # widget = QtGui.QWidget(self)
-        # layout = QtGui.QGridLayout(widget)
-
-        # layout.addLayout(vbox_tab, 0, 0)
-        # layout.addWidget(self.plotWidget, 0, 0)
-
-        # self.tabWidget.addTab(widget, "Figure")
-        # toolbar above every python plot
-        # self.navi_toolbar = NavigationToolbar(self.plotWidget.canvas, self)
-        # statusbar seems necessary fro some reason
         self.statusBar = QtGui.QStatusBar()
         self.setStatusBar(self.statusBar)
         # self.statusBar()
@@ -764,10 +710,6 @@ class MainWindow(QtGui.QMainWindow):
 
     def changed_sld_paths(self):
         self.paths_cut = self.paths[:self.spb_paths.value()]
-        # TODO right fucking here!!!! ich brauch die scheiß tuple!!!!
-        #
-        # self.x = []
-        # self.y = []
         self.polygons = []
         for path in self.paths_cut:
             tuples = []
@@ -906,6 +848,13 @@ class MainWindow(QtGui.QMainWindow):
     #         self.btn_del.setEnabled(False)
     #         self.btn_undo.setEnabled(False)
 
+    # def toggledRegionCheckBoxes(self):
+    #     """ just turn off the other """
+    #     if self.rbtn_region_attributes.isChecked() is True:
+    #         self.rbtn_region_regions.setChecked(False)
+    #     elif self.rbtn_region_regions.isChecked() is True:
+    #         self.rbtn_region_attributes.setChecked(False)
+
     def clickedBtnMesh(self):
         if self.mesh_refine is False:
             self.refine_method = None
@@ -970,20 +919,21 @@ class MainWindow(QtGui.QMainWindow):
         self.plotWidget.canvas.draw()
 
     """ ###############                      REGION MANAGER                      ############### """
-    def regionRefresh(self, new_markers=None):
+    def regionRefresh(self, new_markers=False):
         """
         detect polygons, mark them im order and plot result
         """
         # store the marker positions to check if they are in their respective polygon
         self.marker_positions = []
         # create world where model is placed with a certain distance to the border
-        # TODO maybe add option to set the distance to boarder
+        # TODO maybe add option to set the distance to border
         self.poly = plc.createWorld(start=[self.min_x - 100, self.max_y + 100], end=[self.max_x + 100, self.min_y - 100], marker=1)
 
         # print(type(self.region_table.cellWidget(0, 1).currentText()))
         for i, p in enumerate(self.polygons_dens):
             poly = plc.createPolygon(p, isClosed=True)
             if new_markers:
+                print("wtf...", new_markers)
                 marker_pos = new_markers[i][0]
             else:
                 marker_pos = self.regionCentroid(p)
@@ -1018,10 +968,12 @@ class MainWindow(QtGui.QMainWindow):
             plot regions (or attribute table)
         """
         self.plotWidget.axis.cla()
-        if self.chbx_region_regions.isChecked() is True:
+        if self.rbtn_region_regions.isChecked() is True:
+            # self.rbtn_region_attributes.setChecked(False)
             drawPLC(self.plotWidget.axis, self.poly)
 
-        if self.chbx_region_attributes.isChecked() is True:
+        elif self.rbtn_region_attributes.isChecked() is True:
+            # self.rbtn_region_regions.setChecked(False)
             self.regionGetAttributes()
             # print(self.attr_map)
             mesh_tmp = createMesh(self.poly)
@@ -1064,9 +1016,10 @@ class MainWindow(QtGui.QMainWindow):
         self.region_table.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         self.region_table.resizeColumnsToContents()
 
-        # allow refresh option now since it doesnt make any sense before
+        # allow new options now since the poly exists now
         self.btn_region_refresh.setEnabled(True)
         self.btn_region_check.setEnabled(True)
+        self.btn_region_export.setEnabled(True)
         # self.chbx_region_check.setEnabled(True)
         self.regionRefresh()
 
@@ -1085,6 +1038,7 @@ class MainWindow(QtGui.QMainWindow):
             check if every marker position is in its respective polygon. the distance between
             marker position and polygon border should be shortest if its the own polygon!
         """
+        print("u should not see this")
         warning = False
         if self.btn_region_check.isChecked() is True:
             for i, mark in enumerate(self.marker_positions):
@@ -1125,16 +1079,18 @@ class MainWindow(QtGui.QMainWindow):
             self.dps.append(dp)
         self.plotWidget.canvas.draw()
 
-    # def regionMoveMarkersFinished(self):
-    #     if self.chbx_region_check_finished.isChecked() is True:
-    #         # self.chbx_region_check.setSt
-    #         print("v"*25)
-    #         for p in self.dps:
-    #             # p.disconnect()
-    #             test = p.returnValue()
-    #             print(test)
-    #             # print(val)
-    #         print("^"*25)
+    def regionExportPoly(self):
+        """
+            export the poly figure
+        """
+        export_poly = QtGui.QFileDialog.getSaveFileName(
+            self, caption="Save Poly Figure")
+
+        # if export_poly:
+        if export_poly.endswith(".poly"):
+            writePLC(self.poly, export_poly)
+        else:
+            writePLC(self.poly, export_poly + ".poly")
 
 
 if __name__ == "__main__":
