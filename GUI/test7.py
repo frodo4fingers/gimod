@@ -5,9 +5,6 @@ import numpy as np
 # from sklearn.neighbors import KDTree
 # from scipy.spatial import KDTree
 import sys
-# import math
-# from openpyxl import load_workbook
-# from openpyxl import Workbook
 import cv2
 
 import matplotlib
@@ -29,6 +26,8 @@ from pygimli.mplviewer import drawMeshBoundaries, drawMesh, drawPLC, drawModel
 
 from shapely.geometry import Polygon, Point
 import matplotlib.pyplot as plt
+
+from collections import defaultdict, Counter
 
 
 class PlotWidget(QtGui.QWidget):
@@ -61,9 +60,11 @@ class PlotWidget(QtGui.QWidget):
 
 class DraggablePoint(object):
     """
-http://stackoverflow.com/questions/21654008/matplotlib-drag-overlapping-points-interactively
+    thank you very much:
+    http://stackoverflow.com/questions/21654008/matplotlib-drag-overlapping-points-interactively
     """
-    lock = None #only one can be animated at a time
+    lock = None  # only one can be animated at a time
+
     def __init__(self, point=None, marker=None, center=None):
         # print("dp init")
         self.point = point
@@ -77,40 +78,41 @@ http://stackoverflow.com/questions/21654008/matplotlib-drag-overlapping-points-i
         self.on_press = self.on_press
 
     def connect(self):
-        'connect to all the events we need'
-        # print("dp connect")
+        """
+            connect to all the events we need
+        """
         self.cidpress = self.point.figure.canvas.mpl_connect('button_press_event', self.on_press)
         self.cidrelease = self.point.figure.canvas.mpl_connect('button_release_event', self.on_release)
         self.cidmotion = self.point.figure.canvas.mpl_connect('motion_notify_event', self.on_motion)
 
     def on_press(self, event):
-        # print("dp on_press")
-        # print(self.params)
-        if event.inaxes != self.point.axes: return
-        if DraggablePoint.lock is not None: return
+        # if press out ouf point boundary
+        if event.inaxes != self.point.axes:
+            return
+        # if more than one object oculd be moved
+        if DraggablePoint.lock is not None:
+            return
         contains, attrd = self.point.contains(event)
-        if not contains: return
+        if not contains:
+            return
         self.press = (self.point.center), event.xdata, event.ydata
         DraggablePoint.lock = self
-
         # draw everything but the selected rectangle and store the pixel buffer
         canvas = self.point.figure.canvas
         axes = self.point.axes
         self.point.set_animated(True)
         canvas.draw()
         self.background = canvas.copy_from_bbox(self.point.axes.bbox)
-
         # now redraw just the rectangle
         axes.draw_artist(self.point)
-
         # and blit just the redrawn area
         canvas.blit(axes.bbox)
 
     def on_motion(self, event):
-        # print("dp on_motion")
         if DraggablePoint.lock is not self:
             return
-        if event.inaxes != self.point.axes: return
+        if event.inaxes != self.point.axes:
+            return
         self.point.center, xpress, ypress = self.press
         dx = event.xdata - xpress
         dy = event.ydata - ypress
@@ -120,26 +122,22 @@ http://stackoverflow.com/questions/21654008/matplotlib-drag-overlapping-points-i
         axes = self.point.axes
         # restore the background region
         canvas.restore_region(self.background)
-
         # redraw just the current rectangle
         axes.draw_artist(self.point)
-
         # blit just the redrawn area
         canvas.blit(axes.bbox)
 
     def on_release(self, event):
-        # print("dp on_release")
-        'on release we reset the press data'
+        """
+            on release we reset the press data
+        """
         if DraggablePoint.lock is not self:
             return
-
         self.press = None
         DraggablePoint.lock = None
-
         # turn off the rect animation property and reset the background
         self.point.set_animated(False)
         self.background = None
-
         # redraw the full figure
         self.point.figure.canvas.draw()
         self.center = event.xdata, event.ydata
@@ -147,14 +145,16 @@ http://stackoverflow.com/questions/21654008/matplotlib-drag-overlapping-points-i
         self.returnValue()
 
     def returnValue(self):
+        """
+            added by myself to get the final marker position after movement out of the class objects
+        """
         self.dict[self.marker] = self.point.center
-        # print("bei returnValue:", self.marker, self.point.center)
         return self.dict
 
     def disconnect(self):
-        # print("disconnected")
-        'disconnect all the stored connection ids'
-        # print(self.marker, self.point.center)
+        """
+            disconnect all the stored connection ids
+        """
         self.point.figure.canvas.mpl_disconnect(self.cidpress)
         self.point.figure.canvas.mpl_disconnect(self.cidrelease)
         self.point.figure.canvas.mpl_disconnect(self.cidmotion)
@@ -901,8 +901,8 @@ class MainWindow(QtGui.QMainWindow):
             pg.show(drawMeshBoundaries(self.plotWidget.axis, self.mesh, hideMesh=False), ax=self.plotWidget.axis, fillRegion=False)
         else:
             pg.show(self.mesh, ax=self.plotWidget.axis)
-        self.plotWidget.axis.set_ylim(self.plotWidget.axis.get_ylim()[::-1])
 
+        self.plotWidget.axis.set_ylim(self.plotWidget.axis.get_ylim()[::-1])
         self.plotWidget.canvas.draw()
 
     def meshExport(self):
@@ -933,7 +933,6 @@ class MainWindow(QtGui.QMainWindow):
         for i, p in enumerate(self.polygons_dens):
             poly = plc.createPolygon(p, isClosed=True)
             if new_markers:
-                print("wtf...", new_markers)
                 marker_pos = new_markers[i][0]
             else:
                 marker_pos = self.regionCentroid(p)
@@ -969,23 +968,24 @@ class MainWindow(QtGui.QMainWindow):
         """
         self.plotWidget.axis.cla()
         if self.rbtn_region_regions.isChecked() is True:
-            # self.rbtn_region_attributes.setChecked(False)
             drawPLC(self.plotWidget.axis, self.poly)
 
         elif self.rbtn_region_attributes.isChecked() is True:
-            # self.rbtn_region_regions.setChecked(False)
             self.regionGetAttributes()
-            # print(self.attr_map)
             mesh_tmp = createMesh(self.poly)
             try:
                 attr_map = pg.solver.parseMapToCellArray(self.attr_map, mesh_tmp)
                 drawMeshBoundaries(self.plotWidget.axis, mesh_tmp, hideMesh=True)
                 drawModel(self.plotWidget.axis, mesh_tmp, tri=True, alpha=0.65, data=attr_map)
-            except AttributeError:
+
+            except (AttributeError, IndexError):
+                # self.statusBar.showMessage("unsufficient data in attribute table")
+                self.statusBar.showMessage("ERROR: wrong or missing values in attribute table")
                 pass
 
         self.plotWidget.axis.set_ylim(self.plotWidget.axis.get_ylim()[::-1])
         self.plotWidget.canvas.draw()
+
 
     def regionTable(self):
         """
@@ -1025,20 +1025,54 @@ class MainWindow(QtGui.QMainWindow):
 
     def regionGetAttributes(self):
         """
-            collect the attribute data for the model
+            before going on with plotting the attributes etc. check for nonsense and multiple value
+            specifications for the one marker
         """
-        try:
-            self.attr_map = [[i+1, float(self.region_table.item(i, 2).text())] for i in range(len(self.polygons_dens) + 1)]
-        except ValueError:
-            self.statusBar.showMessage("ERROR: values missing in attribute table")
-            pass
+        key_attr = False
+        self.attr_map = []
+        tmp_mark = []
+        tmp_attr = []
+        tmp_idx = []
+        for i in range(len(self.polygons_dens) + 1):
+            try:
+                # get values from attribute column
+                mark = int(self.region_table.cellWidget(i, 0).currentText())
+                attr = float(self.region_table.item(i, 2).text())
+                if mark not in tmp_mark:
+                    tmp_mark.append(mark)
+                else:
+                    tmp_idx.append(i)
+                    tmp_attr.append(attr)
+                self.attr_map.append([mark, attr])
+                if self.region_table.cellWidget(i, 1).currentText() == "False":
+                    # fill green if successfull
+                    self.region_table.item(i, 2).setBackground(QtGui.QColor(2, 164, 6, 0.5 * 255))
+                else:
+                    # or white if its hole and it doesnt matter
+                    self.region_table.item(i, 2).setBackground(QtGui.QColor(255, 255, 255, 0.5 * 255))
+            except ValueError:
+                if self.region_table.cellWidget(i, 1).currentText() == "False":
+                    # fill red if error
+                    self.region_table.item(i, 2).setBackground(QtGui.QColor(172, 7, 0, 0.5 * 255))
+                    key_attr = True
+                else:
+                    # or white if its hole and it doesnt matter
+                    self.region_table.item(i, 2).setBackground(QtGui.QColor(255, 255, 255, 0.5 * 255))
+        # check if duplicates in attribute column exists. len 0 means different  values for same
+        # marker
+        if len([k for k, v in Counter(tmp_attr).items() if v>1]) == 0:
+            for idx in tmp_idx:
+                self.region_table.item(idx, 2).setBackground(QtGui.QColor(255, 179, 0, 0.5 * 255))
+                key_attr = True
+
+        if key_attr:
+            self.statusBar.showMessage("WARNING: duplicate or wrong data in attribute table")
 
     def regionCheckMarkerPosition(self):
         """
             check if every marker position is in its respective polygon. the distance between
             marker position and polygon border should be shortest if its the own polygon!
         """
-        print("u should not see this")
         warning = False
         if self.btn_region_check.isChecked() is True:
             for i, mark in enumerate(self.marker_positions):
