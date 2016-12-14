@@ -12,4 +12,5 @@ GIMod is intended to make the creation of your basic model with/for [GIMLi](www.
 ## handling
 So far it is only possible to start with a sketch/ a picture (png, jpg, etc.) and handle the threshold for a black and white image. The result is the dotted shape of your image. You can adjust the number of polygons found within the shape and adjust the point density (the lower, the denser.. need to fix that)
 
-![image](https://raw.githubusercontent.com/frodo4fingers/PyNit/master/PyNit.png)
+
+<img src="https://gitlab.com/friedrich/gimod/raw/ac311dc2111a97e7daf6988d3931a2f116dd01a4/images/scrot_01.png" width="250">
