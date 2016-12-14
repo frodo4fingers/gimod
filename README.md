@@ -17,9 +17,7 @@ So far it is only possible to start with a sketch/ a picture (png, jpg, etc.) an
 
 After this is done the different regions are automatically initiated by click. There is a possibility that regions overlay each other, so the bottom button activates a mode where you can shift the marker positions for each region manually - click again to update. To the right the small button saves the poly file. You can plot the attributes if values are given to the right column.
 
-<img src="images/scrot_02.png" width="200">
-<img src="images/scrot_03.png" width="200">
-<img src="images/scrot_04.png" width="200">
+<img src="images/scrot_02.png" width="300"> <img src="images/scrot_03.png" width="300"> <img src="images/scrot_04.png" width="300">
 
 From the poly file the area can be meshed. Therefore the options from GIMLi are implemented and can be chosen individually (the **switches** part still needs to be done). After building the mesh can be saved via the small button to the right.
 
