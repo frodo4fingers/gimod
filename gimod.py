@@ -176,14 +176,17 @@ class MainWindow(QtGui.QMainWindow):
         self.sld_max.sliderReleased.connect(self.imageContour)
 
         self.sld_dens.valueChanged.connect(self.movedSldDens)
+        # self.sld_dens.sliderReleased.connect(self.movedSldDens)
         self.sld_dens.sliderReleased.connect(self.imageDensity)
+        self.spb_sld_dens.valueChanged.connect(self.changedSpbSldDens)
+        self.spb_sld_dens.valueChanged.connect(self.imageDensity)
         self.spb_sld_min.valueChanged.connect(self.changedSpbSldMin)
         self.spb_sld_max.valueChanged.connect(self.changedSpbSldMax)
-        self.spb_sld_dens.valueChanged.connect(self.changedSpbSldDens)
 
         self.sld_paths.valueChanged.connect(self.movedSldPaths)
-        self.sld_paths.sliderReleased.connect(self.changed_sld_paths)
-        self.spb_paths.valueChanged.connect(self.changed_sld_paths)
+        self.sld_paths.sliderReleased.connect(self.changedSldPaths)
+        self.spb_paths.valueChanged.connect(self.changedSpbSldPaths)
+        self.spb_paths.valueChanged.connect(self.changedSldPaths)
 
         # self.btn_rs.clicked.connect(self.triggeredRectangleSelection)
         # self.btn_del.clicked.connect(self.imageDeleteSelected)
@@ -644,7 +647,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def changedSpbSldDens(self):
         self.sld_dens.setSliderPosition(self.spb_sld_dens.value())
-        # self.imageContour()
+
+    def changedSpbSldPaths(self):
+        self.sld_paths.setSliderPosition(self.spb_paths.value())
 
     def changedChbxMeshRefine(self):
         if self.chbx_mesh_refine.isChecked() is True:
@@ -718,7 +723,7 @@ class MainWindow(QtGui.QMainWindow):
         self.spb_paths.setMaximum(len(self.paths))
         self.spb_paths.setValue(1)
         # draw initially
-        self.changed_sld_paths()
+        self.changedSldPaths()
         # print(len(self.paths))
         # print(len(paths[-11:-1]))
         # sys.exit()
@@ -726,7 +731,7 @@ class MainWindow(QtGui.QMainWindow):
     def movedSldPaths(self):
         self.spb_paths.setValue(self.sld_paths.sliderPosition())
 
-    def changed_sld_paths(self):
+    def changedSldPaths(self):
         self.paths_cut = self.paths[:self.spb_paths.value()]
         self.polygons = []
         for path in self.paths_cut:
