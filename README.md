@@ -30,3 +30,6 @@ From the poly file the area can be meshed. Therefore the options from GIMLi are 
 + handfull of todo's and fixme's
 + implement a tab for *drawing* by clicking around
 + get a more suitable example picture
+
+## do you
+have suggestions or stumbled upon an error? please open an [issue](https://gitlab.com/friedrich/gimod/issues)
