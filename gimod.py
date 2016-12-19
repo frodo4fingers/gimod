@@ -717,6 +717,10 @@ class MainWindow(QtGui.QMainWindow):
         # sort after polygon area and takes the 10 biggest
         paths = sorted(contours, key=cv2.contourArea)[::-1]  # [-11:-1]
         self.paths = [i for i in paths if len(i) > 5][1:]
+        if len(self.paths) >= 50:
+            self.statusBar.showMessage("WARNING: detected %i polygons... possible bad conditioned threshold or image" % (len(self.paths)))
+        else:
+            self.statusBar.clearMessage()
         self.sld_paths.setRange(1, len(self.paths))
         self.sld_paths.setSliderPosition(1)
         self.spb_paths.setMinimum(1)
@@ -972,8 +976,7 @@ class MainWindow(QtGui.QMainWindow):
     def regionCentroid(self, poly):
         """
             find centroid as marker position
-            # TODO
-            ...potentially dangerous method... since the center could be overlayed by another polygon
+            # FIXME ...potentially dangerous method... since the center could be overlayed by another polygon
         """
         ref_polygon = Polygon(poly)
         # get the x and y coordinate of the centroid
@@ -1005,7 +1008,6 @@ class MainWindow(QtGui.QMainWindow):
         self.plotWidget.axis.set_ylim(self.plotWidget.axis.get_ylim()[::-1])
         self.plotWidget.canvas.draw()
 
-
     def regionTable(self):
         """
             - overview the regions of the model
@@ -1014,8 +1016,6 @@ class MainWindow(QtGui.QMainWindow):
         # self.region_table.clear()
         self.region_table.setRowCount(len(self.polygons_dens) + 1)  # +1 for world around model
 
-        # TODO an die marker direkt rankommen.. wie viele sinds.. denn so lange bleibts ein
-        # HACK:
         for i in range(len(self.polygons_dens) + 1):  # row
             # column 1 - region marker no.
             cbx_marker = QtGui.QComboBox(self.region_table)
