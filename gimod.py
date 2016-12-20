@@ -748,6 +748,10 @@ class MainWindow(QtGui.QMainWindow):
         # TODO achse auf 0 - 1 begrenzen und skala selbst angeben können
 
     def findMinMax(self):
+        """
+            # TODO: force deprecation!!!!
+            nur gebraucht bei createWorld in regionRefresh
+        """
         min_x = []
         max_x = []
         min_y = []
@@ -791,37 +795,37 @@ class MainWindow(QtGui.QMainWindow):
         # if self.btn_rs.isChecked() is False and len(self.x) != 0:
         #     self.btn_mesh.setEnabled(True)
 
-    def imagePlotSelected(self):
-        # self.x_del = np.empty(1, dtype=int)
-        # self.y_del = np.empty(1, dtype=int)
-        x_ = np.where((self.x_dens >= self.x1) & (self.x_dens <= self.x2))[0]
-        y_ = np.where((self.y_dens >= self.y1) & (self.y_dens <= self.y2))[0]
-        self.common = np.intersect1d(x_, y_)
+    # def imagePlotSelected(self):
+    #     # self.x_del = np.empty(1, dtype=int)
+    #     # self.y_del = np.empty(1, dtype=int)
+    #     x_ = np.where((self.x_dens >= self.x1) & (self.x_dens <= self.x2))[0]
+    #     y_ = np.where((self.y_dens >= self.y1) & (self.y_dens <= self.y2))[0]
+    #     self.common = np.intersect1d(x_, y_)
+    #
+    #     self.x_del = [self.x_dens[i] for i in self.common]
+    #     self.y_del = [self.y_dens[i] for i in self.common]
+    #
+    #     if len(self.x_del) == 0 and len(self.y_del) == 0:
+    #         self.imagePlot()
+    #     else:
+    #         self.plotWidget.axis.scatter(
+    #             self.x_del, self.y_del, s=10, c="red", edgecolor="none")
+    #         self.plotWidget.canvas.draw()
 
-        self.x_del = [self.x_dens[i] for i in self.common]
-        self.y_del = [self.y_dens[i] for i in self.common]
-
-        if len(self.x_del) == 0 and len(self.y_del) == 0:
-            self.imagePlot()
-        else:
-            self.plotWidget.axis.scatter(
-                self.x_del, self.y_del, s=10, c="red", edgecolor="none")
-            self.plotWidget.canvas.draw()
-
-    def imageDeleteSelected(self):
-        if len(self.x_del) != 0 and len(self.y_del) != 0:
-            # construct new x, y arrays so deleting is reversible
-            self.x_dens = np.delete(self.x_dens, self.common).tolist()
-            self.y_dens = np.delete(self.y_dens, self.common).tolist()
-            # save them for possible undoing and reverse so the last change is the first to undo
-            # safer packing [] so the array will be contained even if its only
-            # one
-            self.x_safe.append(self.x_del)
-            self.y_safe.append(self.y_del)
-            # empty the deletion lists so nothing weird happens...
-            self.x_del = []
-            self.y_del = []
-            self.imagePlot()
+    # def imageDeleteSelected(self):
+    #     if len(self.x_del) != 0 and len(self.y_del) != 0:
+    #         # construct new x, y arrays so deleting is reversible
+    #         self.x_dens = np.delete(self.x_dens, self.common).tolist()
+    #         self.y_dens = np.delete(self.y_dens, self.common).tolist()
+    #         # save them for possible undoing and reverse so the last change is the first to undo
+    #         # safer packing [] so the array will be contained even if its only
+    #         # one
+    #         self.x_safe.append(self.x_del)
+    #         self.y_safe.append(self.y_del)
+    #         # empty the deletion lists so nothing weird happens...
+    #         self.x_del = []
+    #         self.y_del = []
+    #         self.imagePlot()
 
     # def clickedImageDeleteUndo(self):
     #     try:
