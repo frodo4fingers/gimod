@@ -28,6 +28,7 @@ from shapely.geometry import Polygon, Point
 import matplotlib.pyplot as plt
 
 from collections import defaultdict, Counter
+from builder import Builder
 
 
 class PlotWidget(QtGui.QWidget):
@@ -569,9 +570,16 @@ class MainWindow(QtGui.QMainWindow):
         tool_box = QtGui.QToolBox()
         tool_box.addItem(file_widget, "start with sketch")
         # tool_box.addItem(scratch_widget, "start from scratch")
+        # self.builder_widget = Builder(parent=self)
+        tool_box.addItem(Builder(parent=self), "model builder")
         tool_box.addItem(region_widget, "region manager")
         tool_box.addItem(mesh_widget, "mesh options")
         tool_box.setStyleSheet(style_tbx)
+        # vertical shit: http://stackoverflow.com/questions/3607709/how-to-change-text-alignment-in-qtabwidget
+        # tool_box = QtGui.QTabWidget(self)
+        # tool_box.addTab(file_widget, "start with sketch")
+        # tool_box.addTab(region_widget, "region manager")
+        # tool_box.addTab(mesh_widget, "mesh options")
         # make the toolbox frame ready... since this needs a QLayout
         v_tool_box = QtGui.QVBoxLayout()
         v_tool_box.addWidget(tool_box)
@@ -621,7 +629,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setCentralWidget(splitter)
         # self.setCentralWidget(central_widget)
 
-        self.setGeometry(100, 100, 1000, 600)
+        self.setGeometry(1500, 100, 1000, 600)
         # window name
         self.setWindowTitle("GIMod")
         self.show()
