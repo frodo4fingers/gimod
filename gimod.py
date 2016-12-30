@@ -59,7 +59,7 @@ class PlotWidget(QtGui.QWidget):
         self.setLayout(layout)
 
 
-class DraggablePoint(object):
+class DraggablePoint():
     """
     thank you very much:
     http://stackoverflow.com/questions/21654008/matplotlib-drag-overlapping-points-interactively
@@ -567,11 +567,13 @@ class MainWindow(QtGui.QMainWindow):
 
         # ####################################################################################### #
         #                                      SET UP TOOLBOX                                     #
+        # initialize the plot widget
+        self.plotWidget = PlotWidget(self)
         tool_box = QtGui.QToolBox()
         tool_box.addItem(file_widget, "start with sketch")
         # tool_box.addItem(scratch_widget, "start from scratch")
         # self.builder_widget = Builder(parent=self)
-        tool_box.addItem(Builder(parent=self), "model builder")
+        tool_box.addItem(Builder(self.plotWidget, parent=self), "model builder")
         tool_box.addItem(region_widget, "region manager")
         tool_box.addItem(mesh_widget, "mesh options")
         tool_box.setStyleSheet(style_tbx)
@@ -589,8 +591,6 @@ class MainWindow(QtGui.QMainWindow):
         # hbox_grps = QtGui.QHBoxLayout()
         # hbox_grps.addWidget(groupbox_slds)
         # hbox_grps.addWidget(groupbox_sld_dens)
-        # initialize the plot widget
-        self.plotWidget = PlotWidget(self)
         # self.plotWidget.setStatusTip("model area")
         v_plotWidget = QtGui.QVBoxLayout()
         v_plotWidget.addWidget(self.plotWidget)
