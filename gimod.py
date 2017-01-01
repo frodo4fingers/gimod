@@ -629,7 +629,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setCentralWidget(splitter)
         # self.setCentralWidget(central_widget)
 
-        self.setGeometry(1500, 100, 1000, 600)
+        self.setGeometry(500, 100, 1000, 600)
         # window name
         self.setWindowTitle("GIMod")
         self.show()
