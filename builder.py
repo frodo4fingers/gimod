@@ -5,7 +5,8 @@
 from PyQt4 import QtGui
 from pygimli.mplviewer import drawMesh
 from pygimli.meshtools import polytools as plc
-import pygimli as pg
+import numpy as np
+
 
 class Builder(QtGui.QWidget):
 
@@ -13,6 +14,9 @@ class Builder(QtGui.QWidget):
         # stuff
         super(Builder, self).__init__(parent)
         self.plotWidget = plotWidget
+        line, = self.plotWidget.axis.plot([0], [0])
+        self.line = line
+        self.background = None
         self.initLayout()
 
         """ connect buttons """
@@ -22,10 +26,9 @@ class Builder(QtGui.QWidget):
         """
             initiate the widget
         """
-
-        self.btn_circle = QtGui.QPushButton("A")
+        self.btn_circle = QtGui.QPushButton("C")
         # self.btn_circle.setToolTip("create a circle")
-        self.btn_circle.setStatusTip("TIP: create a circle and specify parameters by right click")
+        self.btn_circle.setStatusTip("HELP: create a circle and specify parameters by right click")
         self.btn_circle.setCheckable(True)
         self.btn_circle.setFixedSize(30, 30)
 
@@ -38,34 +41,80 @@ class Builder(QtGui.QWidget):
     def circleHandler(self):
         """
             draw a gimli circle
+            ...you get here by clicking the button "btn_circle"
         """
         if self.btn_circle.isChecked() is True:
-            # click iterator for counting markers
+            # clicked - iterate over clicks for marker counting
             self.clicked = 1
-            self.cid = self.plotWidget.canvas.mpl_connect("button_press_event", self.onClick)
-            self.x = self.plotWidget.axis.get_xlim()
-            self.y = self.plotWidget.axis.get_ylim()
-            # c = plc.createCircle(pos=(self.x_, self.y_))
-            # self.plotWidget.axis.plot(400, 200, "ro")
-            # self.drawPolyStuff(c)
+            self.cid_p = self.plotWidget.canvas.mpl_connect("button_press_event", self.onPress)
+            self.cid_m = self.plotWidget.canvas.mpl_connect("motion_notify_event", self.onMotion)
+            self.cid_r = self.plotWidget.canvas.mpl_connect("button_release_event", self.onRelease)
+            self.plotWidget.axis.set_xlim([-10, 10])
+            self.plotWidget.axis.set_ylim([-10, 10])
+            self.plotWidget.canvas.draw()
         else:
-            self.plotWidget.canvas.mpl_disconnect(self.cid)
+            self.plotWidget.canvas.mpl_disconnect(self.cid_p)
+            self.plotWidget.canvas.mpl_disconnect(self.cid_m)
+            self.plotWidget.canvas.mpl_disconnect(self.cid_r)
 
-    def drawPolyStuff(self, poly):
-        drawMesh(self.plotWidget.axis, poly)
-        self.plotWidget.axis.set_xlim(self.x)
-        self.plotWidget.axis.set_ylim(self.y)
-        self.plotWidget.canvas.draw()
-        # pg.show(poly, ax=self.plotWidget.axis, )
+    # def drawPolyStuff(self, poly):
+    #     drawMesh(self.plotWidget.axis, poly, fitView=False)
+    #     self.plotWidget.axis.set_aspect("equal")
+    #     self.plotWidget.canvas.draw()
 
-    def onClick(self, event):
-        self.x_ = event.xdata
-        self.y_ = event.ydata
-        print(self.clicked, self.x_, self.y_)
-        if self.clicked > 1:
-            self.poly = plc.mergePLC([self.poly, plc.createCircle(pos=(self.x_, self.y_), segments=6, radius=self.x[1]/10, marker=self.clicked)])
-        else:
-            self.poly = plc.createCircle(pos=(self.x_, self.y_), segments=6, radius=self.x[1]/10, marker=self.clicked)
+    def distance(self):
+        return round(np.sqrt((self.x_m - self.x_p)**2 + (self.y_m - self.y_p)**2), 2)
 
-        self.clicked += 1
-        self.drawPolyStuff(self.poly)
+    def onPress(self, event):
+        if event.button is 1:
+            self.x_p = event.xdata
+            self.y_p = event.ydata
+            # print("press", self.x_p, self.y_p)
+            self.line.set_animated(True)
+            self.plotWidget.canvas.draw()
+            self.background = self.plotWidget.canvas.copy_from_bbox(self.line.axes.bbox)
+            self.line.axes.draw_artist(self.line)
+            self.plotWidget.canvas.blit(self.line.axes.bbox)
+
+    def onMotion(self, event):
+        if event.inaxes != self.line.axes: return
+        try:
+            self.x_m = event.xdata
+            self.y_m = event.ydata
+            self.line.set_data([self.x_p, self.x_m], [self.y_p, self.y_m])
+            # TODO: den radius am ansatzpunkt anzeigen
+            # self.plotWidget.axis.annotate(self.distance(), xy=(self.x_p, self.y_p))
+
+            self.plotWidget.canvas.restore_region(self.background)
+            self.line.axes.draw_artist(self.line)
+            self.plotWidget.canvas.blit(self.line.axes.bbox)
+
+        except (AttributeError, TypeError):
+            pass
+
+    def onRelease(self, event):
+        try:
+            self.x_r = event.xdata
+            self.y_r = event.ydata
+            # create gimli circle
+            if self.clicked > 1:
+                self.poly = plc.mergePLC([self.poly, plc.createCircle(pos=(self.x_p, self.y_p), segments=6, radius=self.distance(), marker=self.clicked)])
+            else:
+                self.poly = plc.createCircle(pos=(self.x_p, self.y_p), segments=6, radius=self.distance(), marker=self.clicked)
+            # iterate marker counter
+            self.clicked += 1
+            # set line empty
+            self.line.set_data([0], [0])
+            self.line.axes.draw_artist(self.line)
+            # draw gimli circle
+            drawMesh(self.plotWidget.axis, self.poly, fitView=False)
+            # set back variables
+            self.line.set_animated(False)
+            self.background = None
+            self.plotWidget.canvas.draw()
+
+        except AttributeError:
+            pass
+
+# TODO: das self.poly zurückgeben an das hauptfenster!!!!!!!!!!
+# BUG: ON... poly machen.. OFF.. ON.. poly machen. beide haben marker 1 logischerweise. also entweder das obige TODO klarmachen, sodass die einzelnen polygone kontrolliert werden oder denk dir was anderes aus! :-)
