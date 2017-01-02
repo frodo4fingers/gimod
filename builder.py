@@ -8,64 +8,81 @@ from pygimli.meshtools import polytools as plc
 import numpy as np
 
 
-class Builder(QtGui.QWidget):
+# class Builder(QtGui.QWidget):
+class Builder():
 
     def __init__(self, plotWidget, parent=None):
         # stuff
-        super(Builder, self).__init__(parent)
+        # super(Builder, self).__init__(parent)
         self.plotWidget = plotWidget
+        # introduce empty line to start with
         line, = self.plotWidget.axis.plot([0], [0])
         self.line = line
         self.background = None
-        self.initLayout()
+        self.onPress = self.onPress
+        # self.initLayout()
 
-        """ connect buttons """
-        self.btn_circle.clicked.connect(self.circleHandler)
+        # """ connect buttons """
+        # self.btn_circle.clicked.connect(self.circleHandler)
 
-    def initLayout(self):
-        """
-            initiate the widget
-        """
-        self.btn_circle = QtGui.QPushButton("C")
-        # self.btn_circle.setToolTip("create a circle")
-        self.btn_circle.setStatusTip("HELP: create a circle and specify parameters by right click")
-        self.btn_circle.setCheckable(True)
-        self.btn_circle.setFixedSize(30, 30)
+    # def initLayout(self):
+    #     """
+    #         initiate the widget
+    #     """
+    #     self.btn_circle = QtGui.QPushButton("C")
+    #     # self.btn_circle.setToolTip("create a circle")
+    #     self.btn_circle.setStatusTip("HELP: create a circle and specify parameters by right click")
+    #     self.btn_circle.setCheckable(True)
+    #     self.btn_circle.setFixedSize(30, 30)
+    #
+    #     buttons_grid = QtGui.QGridLayout()
+    #     buttons_grid.addWidget(self.btn_circle, 1, 0, 1, 1)
+    #
+    #     builder_widget = QtGui.QWidget(self)
+    #     builder_widget.setLayout(buttons_grid)
 
-        buttons_grid = QtGui.QGridLayout()
-        buttons_grid.addWidget(self.btn_circle, 1, 0, 1, 1)
+    # def circleHandler(self):
+    #     """
+    #         draw a gimli circle
+    #         ...you get here by clicking the button "btn_circle"
+    #     """
+    #     if self.btn_circle.isChecked() is True:
+    #         # clicked - iterate over clicks for marker counting
+    #         self.clicked = 1
+    #         self.cid_p = self.plotWidget.canvas.mpl_connect("button_press_event", self.onPress)
+    #         self.cid_m = self.plotWidget.canvas.mpl_connect("motion_notify_event", self.onMotion)
+    #         self.cid_r = self.plotWidget.canvas.mpl_connect("button_release_event", self.onRelease)
+    #         self.plotWidget.axis.set_xlim([-10, 10])
+    #         self.plotWidget.axis.set_ylim([-10, 10])
+    #         self.plotWidget.canvas.draw()
+    #     else:
+    #         self.plotWidget.canvas.mpl_disconnect(self.cid_p)
+    #         self.plotWidget.canvas.mpl_disconnect(self.cid_m)
+    #         self.plotWidget.canvas.mpl_disconnect(self.cid_r)
 
-        builder_widget = QtGui.QWidget(self)
-        builder_widget.setLayout(buttons_grid)
+    def connect(self):
+        print("connect")
+        self.clicked = 1
+        self.cid_p = self.plotWidget.canvas.mpl_connect("button_press_event", self.onPress)
+        self.cid_m = self.plotWidget.canvas.mpl_connect("motion_notify_event", self.onMotion)
+        self.cid_r = self.plotWidget.canvas.mpl_connect("button_release_event", self.onRelease)
+        self.plotWidget.axis.set_xlim([-10, 10])
+        self.plotWidget.axis.set_ylim([-10, 10])
+        self.plotWidget.canvas.draw()
 
-    def circleHandler(self):
-        """
-            draw a gimli circle
-            ...you get here by clicking the button "btn_circle"
-        """
-        if self.btn_circle.isChecked() is True:
-            # clicked - iterate over clicks for marker counting
-            self.clicked = 1
-            self.cid_p = self.plotWidget.canvas.mpl_connect("button_press_event", self.onPress)
-            self.cid_m = self.plotWidget.canvas.mpl_connect("motion_notify_event", self.onMotion)
-            self.cid_r = self.plotWidget.canvas.mpl_connect("button_release_event", self.onRelease)
-            self.plotWidget.axis.set_xlim([-10, 10])
-            self.plotWidget.axis.set_ylim([-10, 10])
-            self.plotWidget.canvas.draw()
-        else:
-            self.plotWidget.canvas.mpl_disconnect(self.cid_p)
-            self.plotWidget.canvas.mpl_disconnect(self.cid_m)
-            self.plotWidget.canvas.mpl_disconnect(self.cid_r)
+    def disconnect(self):
+        self.plotWidget.canvas.mpl_disconnect(self.cid_p)
+        self.plotWidget.canvas.mpl_disconnect(self.cid_m)
+        self.plotWidget.canvas.mpl_disconnect(self.cid_r)
 
-    # def drawPolyStuff(self, poly):
-    #     drawMesh(self.plotWidget.axis, poly, fitView=False)
-    #     self.plotWidget.axis.set_aspect("equal")
-    #     self.plotWidget.canvas.draw()
+    def getPoly(self):
+        return self.poly
 
     def distance(self):
         return round(np.sqrt((self.x_m - self.x_p)**2 + (self.y_m - self.y_p)**2), 2)
 
     def onPress(self, event):
+        print("pressed")
         if event.button is 1:
             self.x_p = event.xdata
             self.y_p = event.ydata
@@ -103,7 +120,7 @@ class Builder(QtGui.QWidget):
                 self.poly = plc.createCircle(pos=(self.x_p, self.y_p), segments=6, radius=self.distance(), marker=self.clicked)
             # iterate marker counter
             self.clicked += 1
-            # set line empty
+            # set line empty to remove from view
             self.line.set_data([0], [0])
             self.line.axes.draw_artist(self.line)
             # draw gimli circle
