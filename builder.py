@@ -11,10 +11,13 @@ import numpy as np
 # class Builder(QtGui.QWidget):
 class Builder():
 
-    def __init__(self, plotWidget, parent=None):
+    # def __init__(self, plotWidget, parent=None):
+    def __init__(self, plotWidget, table, type_):
         # stuff
         # super(Builder, self).__init__(parent)
         self.plotWidget = plotWidget
+        self.table = table
+        self.type = type_
         # introduce empty line to start with
         line, = self.plotWidget.axis.plot([0], [0])
         self.line = line
@@ -61,13 +64,10 @@ class Builder():
     #         self.plotWidget.canvas.mpl_disconnect(self.cid_r)
 
     def connect(self):
-        print("connect")
         self.clicked = 1
         self.cid_p = self.plotWidget.canvas.mpl_connect("button_press_event", self.onPress)
         self.cid_m = self.plotWidget.canvas.mpl_connect("motion_notify_event", self.onMotion)
         self.cid_r = self.plotWidget.canvas.mpl_connect("button_release_event", self.onRelease)
-        self.plotWidget.axis.set_xlim([-10, 10])
-        self.plotWidget.axis.set_ylim([-10, 10])
         self.plotWidget.canvas.draw()
 
     def disconnect(self):
@@ -76,17 +76,15 @@ class Builder():
         self.plotWidget.canvas.mpl_disconnect(self.cid_r)
 
     def getPoly(self):
-        return self.poly
+        return self.poly, self.table
 
     def distance(self):
         return round(np.sqrt((self.x_m - self.x_p)**2 + (self.y_m - self.y_p)**2), 2)
 
     def onPress(self, event):
-        print("pressed")
         if event.button is 1:
             self.x_p = event.xdata
             self.y_p = event.ydata
-            # print("press", self.x_p, self.y_p)
             self.line.set_animated(True)
             self.plotWidget.canvas.draw()
             self.background = self.plotWidget.canvas.copy_from_bbox(self.line.axes.bbox)
@@ -113,13 +111,11 @@ class Builder():
         try:
             self.x_r = event.xdata
             self.y_r = event.ydata
-            # create gimli circle
-            if self.clicked > 1:
-                self.poly = plc.mergePLC([self.poly, plc.createCircle(pos=(self.x_p, self.y_p), segments=6, radius=self.distance(), marker=self.clicked)])
-            else:
-                self.poly = plc.createCircle(pos=(self.x_p, self.y_p), segments=6, radius=self.distance(), marker=self.clicked)
-            # iterate marker counter
-            self.clicked += 1
+
+            if self.type == "circle":
+                self.drawCircle()
+            elif self.type == "rectangle":
+                self.drawRectangle()
             # set line empty to remove from view
             self.line.set_data([0], [0])
             self.line.axes.draw_artist(self.line)
@@ -129,9 +125,112 @@ class Builder():
             self.line.set_animated(False)
             self.background = None
             self.plotWidget.canvas.draw()
+            print(self.type)
+
+            self.fillTable()
 
         except AttributeError:
             pass
+
+    def drawCircle(self):
+        """
+            draw simple circle with polytools
+        """
+        if self.clicked > 1:
+            # FIXME!!!!: der zeichnet alte polys übereinander... zu sehen an der fetter werdenden schrift ---> vllt alles über n dict?
+            self.poly = plc.mergePLC([self.poly, plc.createCircle(pos=(self.x_p, self.y_p), segments=12, radius=self.distance(), marker=self.clicked)])
+        else:
+            self.poly = plc.createCircle(pos=(self.x_p, self.y_p), segments=12, radius=self.distance(), marker=self.clicked)
+
+    def drawRectangle(self):
+        """
+            draw simple rectangle with polytools
+        """
+        if self.clicked > 1:
+            self.poly = plc.mergePLC([self.poly, plc.createRectangle(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.clicked)])
+        else:
+            self.poly = plc.createRectangle(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.clicked)
+
+
+    # TODO: def redrawTable(self):
+
+    def fillTable(self):
+        # update table on release
+        self.table.setColumnCount(self.clicked)
+        col = self.clicked - 1
+        # insert poly type... circle/world/rectangle/hand
+        self.table.setItem(0, col, QtGui.QTableWidgetItem(self.type))
+
+        # if self.type == "circle":
+        # insert position
+        self.table.setItem(1, col, QtGui.QTableWidgetItem(str(round(self.x_p, 2))))
+        self.table.setItem(2, col, QtGui.QTableWidgetItem(str(round(self.y_p, 2))))
+        if self.type == "rectangle" or self.type == "world":
+            self.table.setItem(3, col, QtGui.QTableWidgetItem(str(round(self.x_r, 2))))
+            self.table.setItem(4, col, QtGui.QTableWidgetItem(str(round(self.y_r, 2))))
+
+        if self.type == "circle":
+            # insert radius
+            spx_radius = QtGui.QDoubleSpinBox()
+            spx_radius.setSingleStep(0.01)
+            spx_radius.setValue(self.distance())
+            self.table.setCellWidget(5, col, spx_radius)
+            # insert segments
+            spx_segments = QtGui.QSpinBox()
+            spx_segments.setValue(12)
+            spx_segments.setMinimum(3)
+            self.table.setCellWidget(6, col, spx_segments)
+            # insert start
+            spx_start = QtGui.QDoubleSpinBox()
+            spx_start.setValue(0.00)
+            spx_start.setMinimum(0.00)
+            spx_start.setSingleStep(0.01)
+            spx_start.setMaximum(2*np.pi)
+            self.table.setCellWidget(7, col, spx_start)
+            # insert end
+            spx_end = QtGui.QDoubleSpinBox()
+            spx_end.setValue(2*np.pi)
+            spx_end.setMinimum(0.00)
+            spx_end.setSingleStep(0.01)
+            spx_end.setMaximum(2*np.pi)
+            self.table.setCellWidget(8, col, spx_end)
+        # insert marker
+        for k in range(self.clicked):
+            a = QtGui.QComboBox(self.table)
+            [a.addItem(str(m+1)) for m in range(self.clicked)]
+            a.setCurrentIndex(k)
+            self.table.setCellWidget(9, k, a)
+        # insert area
+        spx_area = QtGui.QDoubleSpinBox()
+        spx_area.setSingleStep(0.01)
+        spx_area.setValue(0.00)
+        spx_area.setMinimum(0.00)
+        self.table.setCellWidget(10, col, spx_area)
+        if self.type != "world":
+            # insert boundary marker
+            self.table.setItem(11, col, QtGui.QTableWidgetItem(str(1)))
+            # insert left direction
+            cbx_isLeft = QtGui.QComboBox()
+            cbx_isLeft.addItem("False")
+            cbx_isLeft.addItem("True")
+            self.table.setCellWidget(12, col, cbx_isLeft)
+            # insert is hole
+            cbx_isHole = QtGui.QComboBox()
+            cbx_isHole.addItem("False")
+            cbx_isHole.addItem("True")
+            self.table.setCellWidget(13, col, cbx_isHole)
+            # insert is closed
+            cbx_isClosed = QtGui.QComboBox()
+            cbx_isClosed.addItem("False")
+            cbx_isClosed.addItem("True")
+            self.table.setCellWidget(14, col, cbx_isClosed)
+
+        self.table.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        self.table.resizeColumnsToContents()
+
+        # iterate marker counter
+        self.clicked += 1
+
 
 # TODO: das self.poly zurückgeben an das hauptfenster!!!!!!!!!!
 # BUG: ON... poly machen.. OFF.. ON.. poly machen. beide haben marker 1 logischerweise. also entweder das obige TODO klarmachen, sodass die einzelnen polygone kontrolliert werden oder denk dir was anderes aus! :-)
