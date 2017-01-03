@@ -192,6 +192,9 @@ class MainWindow(QtGui.QMainWindow):
         # self.btn_rs.clicked.connect(self.triggeredRectangleSelection)
         # self.btn_del.clicked.connect(self.imageDeleteSelected)
         # self.btn_undo.clicked.connect(self.clickedImageDeleteUndo)
+        # BUILDER TAB BUTTONS
+        self.btn_circle.clicked.connect(self.builder)
+        self.btn_rectangle.clicked.connect(self.builder)
         #
         self.btn_region_init.clicked.connect(self.regionTable)
         self.btn_region_refresh.clicked.connect(self.regionRefresh)
@@ -384,7 +387,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.vbox_file.addLayout(hbox_file)
         self.vbox_file.addWidget(self.file_image)
-        #self.file_image.setGeometry(0, 0, 200, 100)
+        # self.file_image.setGeometry(0, 0, 200, 100)
         self.vbox_file.addLayout(vbox_slider)
         # self.vbox_file.addStretch(1)
 
@@ -406,8 +409,107 @@ class MainWindow(QtGui.QMainWindow):
         scratch_widget.setLayout(vbox_scratch)
 
         # ####################################################################################### #
+        #                                      TAB BUILDER                                        #
+
+        self.btn_world = QtGui.QPushButton("W")
+        self.btn_world.setToolTip("create world")
+        self.btn_world.setStatusTip("HELP: create the world where everything will be created")
+        self.btn_world.setCheckable(True)
+        self.btn_world.setFixedSize(30, 30)
+        self.btn_world.setEnabled(False)
+
+        self.btn_circle = QtGui.QPushButton("C")
+        self.btn_circle.setToolTip("create circle")
+        self.btn_circle.setStatusTip("HELP: create a circle by defining its radius")
+        self.btn_circle.setCheckable(True)
+        self.btn_circle.setFixedSize(30, 30)
+
+        self.btn_rectangle = QtGui.QPushButton("R")
+        self.btn_rectangle.setToolTip("create rectangle")
+        self.btn_rectangle.setStatusTip("HELP: create a rectangle and specify parameters")
+        self.btn_rectangle.setCheckable(True)
+        self.btn_rectangle.setFixedSize(30, 30)
+
+        self.btn_line = QtGui.QPushButton("L")
+        self.btn_line.setToolTip("create line")
+        self.btn_line.setStatusTip("HELP: create a line and specify parameters")
+        self.btn_line.setCheckable(True)
+        self.btn_line.setFixedSize(30, 30)
+        self.btn_line.setEnabled(False)
+
+        self.btn_polygon = QtGui.QPushButton()
+        self.btn_polygon.setIcon(QtGui.QIcon("material/ic_gesture_black_24px.svg"))
+        self.btn_polygon.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        self.btn_polygon.setToolTip("create polygon")
+        self.btn_polygon.setStatusTip("HELP: create a polygon by clicking around")
+        self.btn_polygon.setCheckable(True)
+        self.btn_polygon.setFixedSize(30, 30)
+        self.btn_polygon.setEnabled(False)
+
+        self.btn_redraw = QtGui.QPushButton()
+        self.btn_redraw.setIcon(QtGui.QIcon("material/ic_cached_black_24px.svg"))
+        self.btn_redraw.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        self.btn_redraw.setEnabled(False)
+
+        # group together so only one can be clicked at a time
+        btn_group_layout = QtGui.QHBoxLayout()
+        btn_group_widget = QtGui.QWidget(self)
+        btn_group_widget.setLayout(btn_group_layout)
+
+        btn_group = QtGui.QButtonGroup(btn_group_widget)
+        btn_group.addButton(self.btn_world)
+        btn_group.addButton(self.btn_circle)
+        btn_group.addButton(self.btn_rectangle)
+        btn_group.addButton(self.btn_line)
+        btn_group.addButton(self.btn_polygon)
+        btn_groupbox = QtGui.QGroupBox(self)
+        btn_groupbox_layout = QtGui.QHBoxLayout()
+        btn_groupbox.setLayout(btn_groupbox_layout)
+        btn_group_layout.addWidget(self.btn_world)
+        btn_group_layout.addWidget(self.btn_circle)
+        btn_group_layout.addWidget(self.btn_rectangle)
+        btn_group_layout.addWidget(self.btn_line)
+        btn_group_layout.addWidget(self.btn_polygon)
+
+        self.btn_poly_export = QtGui.QPushButton()
+        self.btn_poly_export.setIcon(QtGui.QIcon("material/ic_file_download_black_24px.svg"))
+        self.btn_poly_export.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        self.btn_poly_export.setEnabled(False)
+
+        hbox_builder = QtGui.QHBoxLayout()
+        hbox_builder.addStretch(1)
+        hbox_builder.addWidget(self.btn_redraw)
+        hbox_builder.addWidget(self.btn_poly_export)
+
+        # parameter table for different polygons
+        self.polys_table = QtGui.QTableWidget(self)
+        self.polys_table.setRowCount(15)
+        self.polys_table.setVerticalHeaderLabels(("Type", "x0", "y0", "x1", "y1", "Radius", "Segments", "Start", "End", "Marker", "Area", "Boundary", "Left?", "Hole?", "Closed?"))
+
+        buttons_grid = QtGui.QGridLayout()
+        # # buttons_grid.setSpacing(5)
+        # # widget, row, col, rowSpan, colSpan) #
+        buttons_grid.addWidget(btn_group_widget, 1, 0, 5, 1)
+        # buttons_grid.addWidget(self.btn_world, 1, 0, 1, 1)
+        # buttons_grid.addWidget(self.btn_circle, 1, 1, 1, 1)
+        # buttons_grid.addWidget(self.btn_rectangle, 1, 2, 1, 1)
+        # buttons_grid.addWidget(self.btn_line, 1, 3, 1, 1)
+        # buttons_grid.addWidget(self.btn_polygon, 1, 4, 1, 1)
+
+        vbox_table = QtGui.QVBoxLayout()
+        vbox_table.addLayout(buttons_grid)
+        # vbox_table.addWidget(btn_groupbox)
+        vbox_table.addWidget(self.polys_table)
+        vbox_table.addLayout(hbox_builder)
+
+        builder_widget = QtGui.QWidget(self)
+        # builder_widget.setLayout(buttons_grid)
+        builder_widget.setLayout(vbox_table)
+
+        # ####################################################################################### #
         #                                   TAB REGION MANAGER                                    #
         self.btn_region_init = QtGui.QPushButton("initialize")
+        self.btn_region_init.setEnabled(False)
 
         # attribute table of the model
         self.region_table = QtGui.QTableWidget(self)
@@ -421,8 +523,10 @@ class MainWindow(QtGui.QMainWindow):
         # plotting options... regions
         self.rbtn_region_regions = QtGui.QRadioButton("plot regions")
         self.rbtn_region_regions.setChecked(True)
+        self.rbtn_region_regions.setEnabled(False)
         # plotting options... attributes
         self.rbtn_region_attributes = QtGui.QRadioButton("plot attributes")
+        self.rbtn_region_attributes.setEnabled(False)
         # checkbox to open dialog for moving the marker points
         # self.chbx_region_check = QtGui.QCheckBox("correct marker positions")
         # self.chbx_region_check.setEnabled(False)
@@ -569,12 +673,13 @@ class MainWindow(QtGui.QMainWindow):
         #                                      SET UP TOOLBOX                                     #
         # initialize the plot widget
         self.plotWidget = PlotWidget(self)
+        # FIXME: die ist scheiße. vertikale tabs nehmen weniger platz weg
         tool_box = QtGui.QToolBox()
         tool_box.addItem(file_widget, "start with sketch")
         # tool_box.addItem(scratch_widget, "start from scratch")
-        # self.builder_widget = Builder(parent=self)
-        tool_box.addItem(Builder(self.plotWidget, parent=self), "model builder")
-        tool_box.addItem(region_widget, "region manager")
+        # tool_box.addItem(Builder(self.plotWidget, parent=self), "model builder")
+        tool_box.addItem(region_widget, "sketch regions")
+        tool_box.addItem(builder_widget, "model builder")
         tool_box.addItem(mesh_widget, "mesh options")
         tool_box.setStyleSheet(style_tbx)
         # vertical shit: http://stackoverflow.com/questions/3607709/how-to-change-text-alignment-in-qtabwidget
@@ -629,7 +734,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setCentralWidget(splitter)
         # self.setCentralWidget(central_widget)
 
-        self.setGeometry(500, 100, 1000, 600)
+        self.setGeometry(200, 100, 1000, 600)
         # window name
         self.setWindowTitle("GIMod")
         self.show()
@@ -799,6 +904,9 @@ class MainWindow(QtGui.QMainWindow):
             self.plotWidget.axis.scatter(*zip(*p), alpha=0.5, s=2)
 
         self.plotWidget.canvas.draw()
+        self.btn_region_init.setEnabled(True)
+        self.rbtn_region_regions.setEnabled(True)
+        self.rbtn_region_attributes.setEnabled(True)
 
         # if self.btn_rs.isChecked() is False and len(self.x) != 0:
         #     self.btn_mesh.setEnabled(True)
@@ -953,10 +1061,37 @@ class MainWindow(QtGui.QMainWindow):
         else:
             writePLC(self.mesh, export_mesh + ".bms")
 
+    """ ###############                      BUILDER MANAGER                     ############### """
+    def builder(self):
+        """
+            start creating circles by calling the builder class
+            BUG#1: beim wechsel der tools wird erneut die bis dato leere tabelle übergeben und überschreibt damit bisherige einträge
+            BUG#2: es werden nach dem wechsel momentan circle und rectangle gleichzeitig geplottet weil die klasse zweimal aufgerufen wird
+        """
+        self.plotWidget.axis.set_xlim([-10, 10])
+        self.plotWidget.axis.set_ylim([-10, 10])
+        self.b = None
+        if self.btn_circle.isChecked() is True:
+            # if self.b:
+            #     self.b.disconnect()
+            self.b = Builder(self.plotWidget, self.polys_table, type_="circle")
+            self.b.connect()
+        elif self.btn_rectangle.isChecked() is True:
+            # if self.b:
+            #     self.b.disconnect()
+            self.b = Builder(self.plotWidget, self.polys_table, type_="rectangle")
+            self.b.connect()
+
+        else:
+            self.poly, self.polys_table = self.b.getPoly()
+            self.b.disconnect()
+            print(self.poly)
+
+
     """ ###############                      REGION MANAGER                      ############### """
     def regionRefresh(self, new_markers=False):
         """
-        detect polygons, mark them im order and plot result
+            detect polygons, mark them im order and plot result
         """
         # store the marker positions to check if they are in their respective polygon
         self.marker_positions = []
@@ -1089,7 +1224,7 @@ class MainWindow(QtGui.QMainWindow):
                 else:
                     # or white if its hole and it doesnt matter
                     self.region_table.item(i, 2).setBackground(QtGui.QColor(255, 255, 255, 0.5 * 255))
-        # check if duplicates in attribute column exists. len 0 means different  values for same
+        # check if duplicates in attribute column exists. len 0 means different values for same
         # marker
         if len([k for k, v in Counter(tmp_attr).items() if v>1]) == 0:
             for idx in tmp_idx:
