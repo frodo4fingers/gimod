@@ -118,6 +118,8 @@ class Builder():
                 self.drawRectangle()
             elif self.type == "world":
                 self.drawWorld()
+            elif self.type == "line":
+                self.drawLine()
             # set line empty to remove from view
             self.line.set_data([0], [0])
             self.line.axes.draw_artist(self.line)
@@ -127,7 +129,6 @@ class Builder():
             self.line.set_animated(False)
             self.background = None
             self.plotWidget.canvas.draw()
-            print(self.type)
 
             self.fillTable()
 
@@ -169,6 +170,21 @@ class Builder():
         else:
             self.poly = plc.createWorld(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.clicked)
 
+    def drawLine(self):
+        """
+            draw line.. *duh*
+        """
+        if self.clicked > 1:
+            self.poly = plc.mergePLC([self.poly, plc.createLine(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], segments=3, boundaryMarker=1)])
+        else:
+            self.poly = plc.createLine(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], segments=3, boundaryMarker=1)
+
+    def drawPolygon(self):
+        """
+            function where the clicked polygon is assembled
+        """
+        
+
 
     # TODO: def redrawTable(self):
 
@@ -188,9 +204,23 @@ class Builder():
         self.table.setItem(1, col, QtGui.QTableWidgetItem(str(round(self.x_p, 2))))
         self.table.setItem(2, col, QtGui.QTableWidgetItem(str(round(self.y_p, 2))))
 
-        if self.type == "rectangle" or self.type == "world":
+        if self.type == "rectangle" or self.type == "world" or self.type == "line":
             self.table.setItem(3, col, QtGui.QTableWidgetItem(str(round(self.x_r, 2))))
             self.table.setItem(4, col, QtGui.QTableWidgetItem(str(round(self.y_r, 2))))
+
+        if self.type == "circle":
+            # insert segments
+            spx_segments = QtGui.QSpinBox()
+            spx_segments.setValue(12)
+            spx_segments.setMinimum(3)
+            self.table.setCellWidget(6, col, spx_segments)
+
+        if self.type == "line":
+            # insert segments
+            spx_segments = QtGui.QSpinBox()
+            spx_segments.setValue(3)
+            spx_segments.setMinimum(3)
+            self.table.setCellWidget(6, col, spx_segments)
 
         if self.type == "circle":
             # insert radius
@@ -198,11 +228,6 @@ class Builder():
             spx_radius.setSingleStep(0.01)
             spx_radius.setValue(self.distance())
             self.table.setCellWidget(5, col, spx_radius)
-            # insert segments
-            spx_segments = QtGui.QSpinBox()
-            spx_segments.setValue(12)
-            spx_segments.setMinimum(3)
-            self.table.setCellWidget(6, col, spx_segments)
             # insert start
             spx_start = QtGui.QDoubleSpinBox()
             spx_start.setValue(0.00)
@@ -217,19 +242,22 @@ class Builder():
             spx_end.setSingleStep(0.01)
             spx_end.setMaximum(2*np.pi)
             self.table.setCellWidget(8, col, spx_end)
-        # insert marker
-        for k in range(self.clicked):
-            a = QtGui.QComboBox(self.table)
-            [a.addItem(str(m+1)) for m in range(self.clicked)]
-            a.setCurrentIndex(k)
-            self.table.setCellWidget(9, k, a)
-        # insert area
-        spx_area = QtGui.QDoubleSpinBox()
-        spx_area.setSingleStep(0.01)
-        spx_area.setValue(0.00)
-        spx_area.setMinimum(0.00)
-        self.table.setCellWidget(10, col, spx_area)
-        if self.type != "world":
+
+        if not self.type == "line":
+            # insert marker
+            for k in range(self.clicked):
+                a = QtGui.QComboBox(self.table)
+                [a.addItem(str(m+1)) for m in range(self.clicked)]
+                a.setCurrentIndex(k)
+                self.table.setCellWidget(9, k, a)
+            # insert area
+            spx_area = QtGui.QDoubleSpinBox()
+            spx_area.setSingleStep(0.01)
+            spx_area.setValue(0.00)
+            spx_area.setMinimum(0.00)
+            self.table.setCellWidget(10, col, spx_area)
+
+        if not self.type == "world":
             # insert boundary marker
             self.table.setItem(11, col, QtGui.QTableWidgetItem(str(1)))
             # insert left direction
@@ -237,6 +265,8 @@ class Builder():
             cbx_isLeft.addItem("False")
             cbx_isLeft.addItem("True")
             self.table.setCellWidget(12, col, cbx_isLeft)
+
+        if self.type != "world" and self.type != "line":
             # insert is hole
             cbx_isHole = QtGui.QComboBox()
             cbx_isHole.addItem("False")
