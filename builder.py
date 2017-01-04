@@ -116,6 +116,8 @@ class Builder():
                 self.drawCircle()
             elif self.type == "rectangle":
                 self.drawRectangle()
+            elif self.type == "world":
+                self.drawWorld()
             # set line empty to remove from view
             self.line.set_data([0], [0])
             self.line.axes.draw_artist(self.line)
@@ -131,6 +133,13 @@ class Builder():
 
         except AttributeError:
             pass
+
+    def changeType(self, type_):
+        """
+            called from mainwindow to change type of polygon so the class wont
+            be called a scnd time
+        """
+        self.type = type_
 
     def drawCircle(self):
         """
@@ -151,10 +160,23 @@ class Builder():
         else:
             self.poly = plc.createRectangle(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.clicked)
 
+    def drawWorld(self):
+        """
+            draw world where every other polygon will be in
+        """
+        if self.clicked > 1:
+            self.poly = plc.mergePLC([self.poly, plc.createWorld(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.clicked)])
+        else:
+            self.poly = plc.createWorld(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.clicked)
+
 
     # TODO: def redrawTable(self):
 
     def fillTable(self):
+        """
+            for construction: header labels >>>
+            "Type", "x0", "y0", "x1", "y1", "Radius", "Segments", "Start", "End", "Marker", "Area", "Boundary", "Left?", "Hole?", "Closed?"
+        """
         # update table on release
         self.table.setColumnCount(self.clicked)
         col = self.clicked - 1
@@ -165,6 +187,7 @@ class Builder():
         # insert position
         self.table.setItem(1, col, QtGui.QTableWidgetItem(str(round(self.x_p, 2))))
         self.table.setItem(2, col, QtGui.QTableWidgetItem(str(round(self.y_p, 2))))
+
         if self.type == "rectangle" or self.type == "world":
             self.table.setItem(3, col, QtGui.QTableWidgetItem(str(round(self.x_r, 2))))
             self.table.setItem(4, col, QtGui.QTableWidgetItem(str(round(self.y_r, 2))))
