@@ -198,6 +198,7 @@ class MainWindow(QtGui.QMainWindow):
         self.btn_circle.clicked.connect(self.builder)
         self.btn_rectangle.clicked.connect(self.builder)
         self.btn_world.clicked.connect(self.builder)
+        self.btn_line.clicked.connect(self.builder)
         #
         self.btn_region_init.clicked.connect(self.regionTable)
         self.btn_region_refresh.clicked.connect(self.regionRefresh)
@@ -419,7 +420,6 @@ class MainWindow(QtGui.QMainWindow):
         self.btn_world.setStatusTip("HELP: create the world where everything will be created")
         self.btn_world.setCheckable(True)
         self.btn_world.setFixedSize(30, 30)
-        # self.btn_world.setEnabled(False)
 
         self.btn_circle = QtGui.QPushButton("C")
         self.btn_circle.setToolTip("create circle")
@@ -438,7 +438,6 @@ class MainWindow(QtGui.QMainWindow):
         self.btn_line.setStatusTip("HELP: create a line and specify parameters")
         self.btn_line.setCheckable(True)
         self.btn_line.setFixedSize(30, 30)
-        self.btn_line.setEnabled(False)
 
         self.btn_polygon = QtGui.QPushButton()
         self.btn_polygon.setIcon(QtGui.QIcon("material/ic_gesture_black_24px.svg"))
@@ -448,11 +447,6 @@ class MainWindow(QtGui.QMainWindow):
         self.btn_polygon.setCheckable(True)
         self.btn_polygon.setFixedSize(30, 30)
         self.btn_polygon.setEnabled(False)
-
-        self.btn_redraw = QtGui.QPushButton()
-        self.btn_redraw.setIcon(QtGui.QIcon("material/ic_refresh_black_24px.svg"))
-        self.btn_redraw.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-        self.btn_redraw.setEnabled(False)
 
         # group together so only one can be clicked at a time
         btn_group_layout = QtGui.QHBoxLayout()
@@ -474,12 +468,26 @@ class MainWindow(QtGui.QMainWindow):
         btn_group_layout.addWidget(self.btn_line)
         btn_group_layout.addWidget(self.btn_polygon)
 
+        self.btn_redraw = QtGui.QPushButton()
+        self.btn_redraw.setToolTip("redraw the hole table")
+        self.btn_redraw.setIcon(QtGui.QIcon("material/ic_refresh_black_24px.svg"))
+        self.btn_redraw.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        self.btn_redraw.setEnabled(False)
+
         self.btn_poly_export = QtGui.QPushButton()
+        self.btn_poly_export.setToolTip("export poly figure")
         self.btn_poly_export.setIcon(QtGui.QIcon("material/ic_save_black_24px.svg"))
         self.btn_poly_export.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         self.btn_poly_export.setEnabled(False)
 
+        self.btn_undo = QtGui.QPushButton()
+        self.btn_undo.setToolTip("undo last figure")
+        self.btn_undo.setIcon(QtGui.QIcon("material/ic_undo_black_24px.svg"))
+        self.btn_undo.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        self.btn_undo.setEnabled(False)
+
         hbox_builder = QtGui.QHBoxLayout()
+        hbox_builder.addWidget(self.btn_undo)
         hbox_builder.addStretch(1)
         hbox_builder.addWidget(self.btn_redraw)
         hbox_builder.addWidget(self.btn_poly_export)
@@ -1092,6 +1100,13 @@ class MainWindow(QtGui.QMainWindow):
                 self.b.connect()
             else:
                 self.b.changeType("world")
+        elif self.btn_line.isChecked() is True:
+            if not self.called:
+                self.called = True
+                self.b = Builder(self.plotWidget, self.polys_table, type_="line")
+                self.b.connect()
+            else:
+                self.b.changeType("line")
 
         else:
             self.poly, self.polys_table = self.b.getPoly()
