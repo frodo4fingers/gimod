@@ -49,6 +49,7 @@ class PlotWidget(QtGui.QWidget):
 
         # this is the Navigation widget
         # it takes the Canvas widget and a parent
+        # TODO: add zoom buttons for in and out!! >>> https://dalelane.co.uk/blog/?p=778
         self.toolbar = NavigationToolbar(self.canvas, self)
 
         # set the layout
@@ -193,8 +194,10 @@ class MainWindow(QtGui.QMainWindow):
         # self.btn_del.clicked.connect(self.imageDeleteSelected)
         # self.btn_undo.clicked.connect(self.clickedImageDeleteUndo)
         # BUILDER TAB BUTTONS
+        self.called = False
         self.btn_circle.clicked.connect(self.builder)
         self.btn_rectangle.clicked.connect(self.builder)
+        self.btn_world.clicked.connect(self.builder)
         #
         self.btn_region_init.clicked.connect(self.regionTable)
         self.btn_region_refresh.clicked.connect(self.regionRefresh)
@@ -416,7 +419,7 @@ class MainWindow(QtGui.QMainWindow):
         self.btn_world.setStatusTip("HELP: create the world where everything will be created")
         self.btn_world.setCheckable(True)
         self.btn_world.setFixedSize(30, 30)
-        self.btn_world.setEnabled(False)
+        # self.btn_world.setEnabled(False)
 
         self.btn_circle = QtGui.QPushButton("C")
         self.btn_circle.setToolTip("create circle")
@@ -447,7 +450,7 @@ class MainWindow(QtGui.QMainWindow):
         self.btn_polygon.setEnabled(False)
 
         self.btn_redraw = QtGui.QPushButton()
-        self.btn_redraw.setIcon(QtGui.QIcon("material/ic_cached_black_24px.svg"))
+        self.btn_redraw.setIcon(QtGui.QIcon("material/ic_refresh_black_24px.svg"))
         self.btn_redraw.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         self.btn_redraw.setEnabled(False)
 
@@ -472,7 +475,7 @@ class MainWindow(QtGui.QMainWindow):
         btn_group_layout.addWidget(self.btn_polygon)
 
         self.btn_poly_export = QtGui.QPushButton()
-        self.btn_poly_export.setIcon(QtGui.QIcon("material/ic_file_download_black_24px.svg"))
+        self.btn_poly_export.setIcon(QtGui.QIcon("material/ic_save_black_24px.svg"))
         self.btn_poly_export.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         self.btn_poly_export.setEnabled(False)
 
@@ -542,7 +545,7 @@ class MainWindow(QtGui.QMainWindow):
         self.btn_region_check.setEnabled(False)
         self.btn_region_export = QtGui.QPushButton()
         self.btn_region_export.setToolTip("save as *.poly")
-        self.btn_region_export.setIcon(QtGui.QIcon("icons/Devices-volumes-Floppy.svg"))
+        self.btn_region_export.setIcon(QtGui.QIcon("material/ic_save_black_24px.svg"))
         self.btn_region_export.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         # self.btn_region_export.setIconSize(QtCore.QSize(30, 30))
         self.btn_region_export.setEnabled(False)
@@ -619,7 +622,7 @@ class MainWindow(QtGui.QMainWindow):
         self.btn_mesh.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.btn_mesh_export = QtGui.QPushButton()
         self.btn_mesh_export.setToolTip("save as *.bms")
-        self.btn_mesh_export.setIcon(QtGui.QIcon("icons/Devices-volumes-Floppy.svg"))
+        self.btn_mesh_export.setIcon(QtGui.QIcon("material/ic_save_black_24px.svg"))
         self.btn_mesh_export.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         self.btn_mesh_export.setEnabled(False)
         # labels stacked in vbox
@@ -674,19 +677,18 @@ class MainWindow(QtGui.QMainWindow):
         # initialize the plot widget
         self.plotWidget = PlotWidget(self)
         # FIXME: die ist scheiße. vertikale tabs nehmen weniger platz weg
-        tool_box = QtGui.QToolBox()
-        tool_box.addItem(file_widget, "start with sketch")
-        # tool_box.addItem(scratch_widget, "start from scratch")
-        # tool_box.addItem(Builder(self.plotWidget, parent=self), "model builder")
-        tool_box.addItem(region_widget, "sketch regions")
-        tool_box.addItem(builder_widget, "model builder")
-        tool_box.addItem(mesh_widget, "mesh options")
-        tool_box.setStyleSheet(style_tbx)
-        # vertical shit: http://stackoverflow.com/questions/3607709/how-to-change-text-alignment-in-qtabwidget
-        # tool_box = QtGui.QTabWidget(self)
-        # tool_box.addTab(file_widget, "start with sketch")
-        # tool_box.addTab(region_widget, "region manager")
-        # tool_box.addTab(mesh_widget, "mesh options")
+        # tool_box = QtGui.QToolBox()
+        # tool_box.addItem(file_widget, "start with sketch")
+        # tool_box.addItem(region_widget, "sketch regions")
+        # tool_box.addItem(builder_widget, "model builder")
+        # tool_box.addItem(mesh_widget, "mesh options")
+        # tool_box.setStyleSheet(style_tbx)
+        tool_box = QtGui.QTabWidget(self)
+        tool_box.setTabPosition(QtGui.QTabWidget.West)
+        tool_box.addTab(file_widget, "start with sketch")
+        tool_box.addTab(region_widget, "region manager")
+        tool_box.addTab(builder_widget, "model builder")
+        tool_box.addTab(mesh_widget, "mesh options")
         # make the toolbox frame ready... since this needs a QLayout
         v_tool_box = QtGui.QVBoxLayout()
         v_tool_box.addWidget(tool_box)
@@ -1065,22 +1067,31 @@ class MainWindow(QtGui.QMainWindow):
     def builder(self):
         """
             start creating circles by calling the builder class
-            BUG#1: beim wechsel der tools wird erneut die bis dato leere tabelle übergeben und überschreibt damit bisherige einträge
-            BUG#2: es werden nach dem wechsel momentan circle und rectangle gleichzeitig geplottet weil die klasse zweimal aufgerufen wird
         """
-        self.plotWidget.axis.set_xlim([-10, 10])
-        self.plotWidget.axis.set_ylim([-10, 10])
-        self.b = None
+        # self.plotWidget.axis.set_xlim([-10, 10])
+        # self.plotWidget.axis.set_ylim([-10, 10])
+        # self.b = None
         if self.btn_circle.isChecked() is True:
-            # if self.b:
-            #     self.b.disconnect()
-            self.b = Builder(self.plotWidget, self.polys_table, type_="circle")
-            self.b.connect()
+            if not self.called:
+                self.called = True
+                self.b = Builder(self.plotWidget, self.polys_table, type_="circle")
+                self.b.connect()
+            else:
+                self.b.changeType("circle")
         elif self.btn_rectangle.isChecked() is True:
-            # if self.b:
-            #     self.b.disconnect()
-            self.b = Builder(self.plotWidget, self.polys_table, type_="rectangle")
-            self.b.connect()
+            if not self.called:
+                self.called = True
+                self.b = Builder(self.plotWidget, self.polys_table, type_="rectangle")
+                self.b.connect()
+            else:
+                self.b.changeType("rectangle")
+        elif self.btn_world.isChecked() is True:
+            if not self.called:
+                self.called = True
+                self.b = Builder(self.plotWidget, self.polys_table, type_="world")
+                self.b.connect()
+            else:
+                self.b.changeType("world")
 
         else:
             self.poly, self.polys_table = self.b.getPoly()
