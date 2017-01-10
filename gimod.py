@@ -28,7 +28,8 @@ from shapely.geometry import Polygon, Point
 import matplotlib.pyplot as plt
 
 from collections import defaultdict, Counter
-from builder import Builder
+# from builder import Builder
+from builder2 import Builder
 
 
 class PlotWidget(QtGui.QWidget):
@@ -1076,42 +1077,81 @@ class MainWindow(QtGui.QMainWindow):
         """
             start creating circles by calling the builder class
         """
-        # self.plotWidget.axis.set_xlim([-10, 10])
-        # self.plotWidget.axis.set_ylim([-10, 10])
-        # self.b = None
-        if self.btn_circle.isChecked() is True:
-            if not self.called:
-                self.called = True
-                self.b = Builder(self.plotWidget, self.polys_table, type_="circle")
-                self.b.connect()
-            else:
-                self.b.changeType("circle")
-        elif self.btn_rectangle.isChecked() is True:
-            if not self.called:
-                self.called = True
-                self.b = Builder(self.plotWidget, self.polys_table, type_="rectangle")
-                self.b.connect()
-            else:
-                self.b.changeType("rectangle")
-        elif self.btn_world.isChecked() is True:
-            if not self.called:
-                self.called = True
-                self.b = Builder(self.plotWidget, self.polys_table, type_="world")
-                self.b.connect()
-            else:
-                self.b.changeType("world")
-        elif self.btn_line.isChecked() is True:
-            if not self.called:
-                self.called = True
-                self.b = Builder(self.plotWidget, self.polys_table, type_="line")
-                self.b.connect()
-            else:
-                self.b.changeType("line")
+        ######## builder.py:
+        # if self.btn_circle.isChecked() is True:
+        #     if not self.called:
+        #         self.called = True
+        #         self.b = Builder(self.plotWidget, self.polys_table, type_="circle")
+        #         self.b.connect()
+        #     else:
+        #         self.b.changeType("circle")
+        # elif self.btn_rectangle.isChecked() is True:
+        #     if not self.called:
+        #         self.called = True
+        #         self.b = Builder(self.plotWidget, self.polys_table, type_="rectangle")
+        #         self.b.connect()
+        #     else:
+        #         self.b.changeType("rectangle")
+        # elif self.btn_world.isChecked() is True:
+        #     if not self.called:
+        #         self.called = True
+        #         self.b = Builder(self.plotWidget, self.polys_table, type_="world")
+        #         self.b.connect()
+        #     else:
+        #         self.b.changeType("world")
+        # elif self.btn_line.isChecked() is True:
+        #     if not self.called:
+        #         self.called = True
+        #         self.b = Builder(self.plotWidget, self.polys_table, type_="line")
+        #         self.b.connect()
+        #     else:
+        #         self.b.changeType("line")
+        #
+        # else:
+        #     self.poly, self.polys_table = self.b.getPoly()
+        #     self.b.disconnect()
+        #     print(self.poly)
 
-        else:
-            self.poly, self.polys_table = self.b.getPoly()
-            self.b.disconnect()
-            print(self.poly)
+        ######## builder2.py:
+        if not self.called:
+            self.called = True
+            self.iterMarker = 1
+            self.b = Builder(self.plotWidget, self.polys_table, self.iterMarker)
+
+        if self.btn_circle.isChecked() is True:
+            try:
+                # check if something has already been drawn
+                clicked = self.b.disconnect()
+                self.iterMarker = clicked
+                print("try circle", self.iterMarker)
+            except AttributeError:
+                self.iterMarker = 1
+                print("except circle", self.iterMarker)
+                pass
+
+            self.b.buildCircle(self.iterMarker)
+
+        elif self.btn_rectangle.isChecked() is True:
+            try:
+                self.iterMarker = self.b.disconnect()
+                print("try rectangle", self.iterMarker)
+            except AttributeError:
+                self.iterMarker = 1
+                print("except rectangle", self.iterMarker)
+                pass
+
+            self.b.buildRectangle(self.iterMarker)
+
+        elif self.btn_line.isChecked() is True:
+            try:
+                self.iterMarker = self.b.disconnect()
+                print("try", self.iterMarker)
+            except AttributeError:
+                self.iterMarker = 1
+                print("except", self.iterMarker)
+                pass
+
+            self.b.buildLine(self.iterMarker)
 
 
     """ ###############                      REGION MANAGER                      ############### """
