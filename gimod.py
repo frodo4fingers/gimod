@@ -32,6 +32,16 @@ from collections import defaultdict, Counter
 from builder2 import Builder
 
 
+class PlotToolbar(NavigationToolbar):
+    # only display the buttons we need
+    toolitems = [t for t in NavigationToolbar.toolitems if
+                 t[0] in ("Home", "Pan", "Zoom", "Save")]
+
+    def __init__(self, *args, **kwargs):
+        super(PlotToolbar, self).__init__(*args, **kwargs)
+        self.layout().takeAt(1)  # or more than 1 if you have more buttons
+
+
 class PlotWidget(QtGui.QWidget):
     def __init__(self, parent=None):
         super(PlotWidget, self).__init__(parent)
@@ -51,7 +61,19 @@ class PlotWidget(QtGui.QWidget):
         # this is the Navigation widget
         # it takes the Canvas widget and a parent
         # TODO: add zoom buttons for in and out!! >>> https://dalelane.co.uk/blog/?p=778
-        self.toolbar = NavigationToolbar(self.canvas, self)
+        self.toolbar = PlotToolbar(self.canvas, self)
+
+        # add button
+        self.btn_zoom_in = QtGui.QToolButton()
+        self.btn_zoom_in.setIcon(QtGui.QIcon("material/ic_zoom_in_black_24px.svg"))
+        self.btn_zoom_in.setToolTip("zoom in")
+        self.btn_zoom_in.clicked.connect(self.zoomIn)
+        self.btn_zoom_out = QtGui.QToolButton()
+        self.btn_zoom_out.setIcon(QtGui.QIcon("material/ic_zoom_out_black_24px.svg"))
+        self.btn_zoom_out.setToolTip("zoom in")
+        self.btn_zoom_out.clicked.connect(self.zoomOut)
+        self.toolbar.addWidget(self.btn_zoom_in)
+        self.toolbar.addWidget(self.btn_zoom_out)
 
         # set the layout
         layout = QtGui.QVBoxLayout()
@@ -59,6 +81,22 @@ class PlotWidget(QtGui.QWidget):
         layout.addWidget(self.canvas)
         # layout.addWidget(self.button)
         self.setLayout(layout)
+
+    def zoomOut(self):
+        x_dim = self.axis.get_xlim()
+        y_dim = self.axis.get_ylim()
+
+        self.axis.set_xlim(x_dim[0] - 0.1*x_dim[0], x_dim[1] + 0.1*x_dim[1])
+        self.axis.set_ylim(y_dim[0] - 0.1*y_dim[0], y_dim[1] + 0.1*y_dim[1])
+        self.canvas.draw()
+
+    def zoomIn(self):
+        x_dim = self.axis.get_xlim()
+        y_dim = self.axis.get_ylim()
+
+        self.axis.set_xlim(x_dim[0] + 0.1*x_dim[0], x_dim[1] - 0.1*x_dim[1])
+        self.axis.set_ylim(y_dim[0] + 0.1*y_dim[0], y_dim[1] - 0.1*y_dim[1])
+        self.canvas.draw()
 
 
 class DraggablePoint():
