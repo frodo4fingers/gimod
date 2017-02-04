@@ -18,6 +18,10 @@ class Builder(QtGui.QWidget):
     def __init__(self, plotWidget, parent=None):
         super(Builder, self).__init__(parent)
         self.figure = plotWidget
+        self.x1 = None
+        self.y1 = None
+        self.x2 = None
+        self.y2 = None
 
         self.setupUI()
 
@@ -70,13 +74,17 @@ class Builder(QtGui.QWidget):
         self.setLayout(vbox)
 
     def createPolyCircle(self):
-        c = SpanCircle(self.figure)
+        c = SpanCircle(self)
         c.connect()
         try:
             x, y, r = c.getValues()
             print(x, y, r)
         except AttributeError:
             pass
+
+    def printCoordinates(self):
+        print(self.x1, self.y1)
+        print(self.x2, self.y2)
 
 
 if __name__ == "__main__":

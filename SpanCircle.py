@@ -5,11 +5,17 @@ from matplotlib.patches import Circle
 import numpy as np
 
 
-class SpanCircle():
+class SpanCircle(object):
 
-    def __init__(self, plot):
+    def __init__(self, parent=None):
         # super(SpanCircle, self).__init__()
-        self.figure = plot
+        self.figure = parent.figure
+        self.x_p = parent.x1
+        self.y_p = parent.y1
+        self.x_r = parent.x2
+        self.y_r = parent.y2
+        self.p = parent.printCoordinates()
+        print(parent)
         # introduce empty circle to start with
         self.circle = Circle((0, 0), 0, fc="none", ec="black")
         self.background = None
@@ -73,6 +79,7 @@ class SpanCircle():
             self.background = None
             self.figure.canvas.draw()
             # self.getValues()
+            self.p()
 
         except AttributeError:
             pass
