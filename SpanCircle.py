@@ -9,18 +9,12 @@ class SpanCircle(object):
 
     def __init__(self, parent=None):
         # super(SpanCircle, self).__init__()
-        self.figure = parent.figure
-        self.x_p = parent.x1
-        self.y_p = parent.y1
-        self.x_r = parent.x2
-        self.y_r = parent.y2
-        self.p = parent.printCoordinates()
-        print(parent)
+        self.parent = parent
+        self.figure = self.parent.figure
         # introduce empty circle to start with
         self.circle = Circle((0, 0), 0, fc="none", ec="black")
         self.background = None
         self.figure.axis.add_patch(self.circle)
-        self.released = False
         self.onPress = self.onPress
 
     def distance(self):
@@ -37,7 +31,6 @@ class SpanCircle(object):
         self.figure.canvas.mpl_disconnect(self.cid_r)
 
     def onPress(self, event):
-        self.released = False
         if event.button is 1:
             self.x_p = event.xdata
             self.y_p = event.ydata
@@ -66,7 +59,6 @@ class SpanCircle(object):
             pass
 
     def onRelease(self, event):
-        self.released = True
         try:
             self.x_r = event.xdata
             self.y_r = event.ydata
@@ -78,17 +70,10 @@ class SpanCircle(object):
             self.circle.set_animated(False)
             self.background = None
             self.figure.canvas.draw()
-            # self.getValues()
-            self.p()
+            self.parent.printCoordinates(self.x_p, self.y_p, self.distance(), None, form="circle")
 
         except AttributeError:
             pass
-
-    def getValues(self):
-        return self.x_p, self.y_p, self.distance()
-
-    def state(self):
-        return self.released
 
 
 if __name__ == "__main__":
