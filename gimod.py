@@ -29,17 +29,18 @@ import matplotlib.pyplot as plt
 
 from collections import defaultdict, Counter
 # from builder import Builder
-from builder2 import Builder
+from builder3 import Builder
 
 
 class PlotToolbar(NavigationToolbar):
     # only display the buttons we need
+    # TODO change order of appearance for zoom buttons
     toolitems = [t for t in NavigationToolbar.toolitems if
                  t[0] in ("Home", "Pan", "Zoom", "Save")]
 
     def __init__(self, *args, **kwargs):
         super(PlotToolbar, self).__init__(*args, **kwargs)
-        self.layout().takeAt(1)  # or more than 1 if you have more buttons
+        self.layout().takeAt(6)
 
 
 class PlotWidget(QtGui.QWidget):
@@ -63,14 +64,14 @@ class PlotWidget(QtGui.QWidget):
         # TODO: add zoom buttons for in and out!! >>> https://dalelane.co.uk/blog/?p=778
         self.toolbar = PlotToolbar(self.canvas, self)
 
-        # add button
+        # add buttons
         self.btn_zoom_in = QtGui.QToolButton()
         self.btn_zoom_in.setIcon(QtGui.QIcon("material/ic_zoom_in_black_24px.svg"))
         self.btn_zoom_in.setToolTip("zoom in")
         self.btn_zoom_in.clicked.connect(self.zoomIn)
         self.btn_zoom_out = QtGui.QToolButton()
         self.btn_zoom_out.setIcon(QtGui.QIcon("material/ic_zoom_out_black_24px.svg"))
-        self.btn_zoom_out.setToolTip("zoom in")
+        self.btn_zoom_out.setToolTip("zoom out")
         self.btn_zoom_out.clicked.connect(self.zoomOut)
         self.toolbar.addWidget(self.btn_zoom_in)
         self.toolbar.addWidget(self.btn_zoom_out)
@@ -83,19 +84,29 @@ class PlotWidget(QtGui.QWidget):
         self.setLayout(layout)
 
     def zoomOut(self):
+        """
+            zoom Out of the current dimension
+        """
         x_dim = self.axis.get_xlim()
+        x_dist = abs(x_dim[1] - x_dim[0])
         y_dim = self.axis.get_ylim()
+        y_dist = abs(y_dim[1] - y_dim[0])
 
-        self.axis.set_xlim(x_dim[0] - 0.1*x_dim[0], x_dim[1] + 0.1*x_dim[1])
-        self.axis.set_ylim(y_dim[0] - 0.1*y_dim[0], y_dim[1] + 0.1*y_dim[1])
+        self.axis.set_xlim(x_dim[0] - 0.1*x_dist, x_dim[1] + 0.1*x_dist)
+        self.axis.set_ylim(y_dim[0] - 0.1*y_dist, y_dim[1] + 0.1*y_dist)
         self.canvas.draw()
 
     def zoomIn(self):
+        """
+            zoom In of the current dimension
+        """
         x_dim = self.axis.get_xlim()
+        x_dist = abs(x_dim[1] - x_dim[0])
         y_dim = self.axis.get_ylim()
+        y_dist = abs(y_dim[1] - y_dim[0])
 
-        self.axis.set_xlim(x_dim[0] + 0.1*x_dim[0], x_dim[1] - 0.1*x_dim[1])
-        self.axis.set_ylim(y_dim[0] + 0.1*y_dim[0], y_dim[1] - 0.1*y_dim[1])
+        self.axis.set_xlim(x_dim[0] + 0.1*x_dist, x_dim[1] - 0.1*x_dist)
+        self.axis.set_ylim(y_dim[0] + 0.1*y_dist, y_dim[1] - 0.1*y_dist)
         self.canvas.draw()
 
 
@@ -234,10 +245,10 @@ class MainWindow(QtGui.QMainWindow):
         # self.btn_undo.clicked.connect(self.clickedImageDeleteUndo)
         # BUILDER TAB BUTTONS
         self.called = False
-        self.btn_circle.clicked.connect(self.builder)
-        self.btn_rectangle.clicked.connect(self.builder)
-        self.btn_world.clicked.connect(self.builder)
-        self.btn_line.clicked.connect(self.builder)
+        # self.btn_circle.clicked.connect(self.builder)
+        # self.btn_rectangle.clicked.connect(self.builder)
+        # self.btn_world.clicked.connect(self.builder)
+        # self.btn_line.clicked.connect(self.builder)
         #
         self.btn_region_init.clicked.connect(self.regionTable)
         self.btn_region_refresh.clicked.connect(self.regionRefresh)
@@ -454,107 +465,107 @@ class MainWindow(QtGui.QMainWindow):
         # ####################################################################################### #
         #                                      TAB BUILDER                                        #
 
-        self.btn_world = QtGui.QPushButton("W")
-        self.btn_world.setToolTip("create world")
-        self.btn_world.setStatusTip("HELP: create the world where everything will be created")
-        self.btn_world.setCheckable(True)
-        self.btn_world.setFixedSize(30, 30)
-
-        self.btn_circle = QtGui.QPushButton("C")
-        self.btn_circle.setToolTip("create circle")
-        self.btn_circle.setStatusTip("HELP: create a circle by defining its radius")
-        self.btn_circle.setCheckable(True)
-        self.btn_circle.setFixedSize(30, 30)
-
-        self.btn_rectangle = QtGui.QPushButton("R")
-        self.btn_rectangle.setToolTip("create rectangle")
-        self.btn_rectangle.setStatusTip("HELP: create a rectangle and specify parameters")
-        self.btn_rectangle.setCheckable(True)
-        self.btn_rectangle.setFixedSize(30, 30)
-
-        self.btn_line = QtGui.QPushButton("L")
-        self.btn_line.setToolTip("create line")
-        self.btn_line.setStatusTip("HELP: create a line and specify parameters")
-        self.btn_line.setCheckable(True)
-        self.btn_line.setFixedSize(30, 30)
-
-        self.btn_polygon = QtGui.QPushButton()
-        self.btn_polygon.setIcon(QtGui.QIcon("material/ic_gesture_black_24px.svg"))
-        self.btn_polygon.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-        self.btn_polygon.setToolTip("create polygon")
-        self.btn_polygon.setStatusTip("HELP: create a polygon by clicking around")
-        self.btn_polygon.setCheckable(True)
-        self.btn_polygon.setFixedSize(30, 30)
-        self.btn_polygon.setEnabled(False)
-
-        # group together so only one can be clicked at a time
-        btn_group_layout = QtGui.QHBoxLayout()
-        btn_group_widget = QtGui.QWidget(self)
-        btn_group_widget.setLayout(btn_group_layout)
-
-        btn_group = QtGui.QButtonGroup(btn_group_widget)
-        btn_group.addButton(self.btn_world)
-        btn_group.addButton(self.btn_circle)
-        btn_group.addButton(self.btn_rectangle)
-        btn_group.addButton(self.btn_line)
-        btn_group.addButton(self.btn_polygon)
-        btn_groupbox = QtGui.QGroupBox(self)
-        btn_groupbox_layout = QtGui.QHBoxLayout()
-        btn_groupbox.setLayout(btn_groupbox_layout)
-        btn_group_layout.addWidget(self.btn_world)
-        btn_group_layout.addWidget(self.btn_circle)
-        btn_group_layout.addWidget(self.btn_rectangle)
-        btn_group_layout.addWidget(self.btn_line)
-        btn_group_layout.addWidget(self.btn_polygon)
-
-        self.btn_redraw = QtGui.QPushButton()
-        self.btn_redraw.setToolTip("redraw the hole table")
-        self.btn_redraw.setIcon(QtGui.QIcon("material/ic_refresh_black_24px.svg"))
-        self.btn_redraw.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-        self.btn_redraw.setEnabled(False)
-
-        self.btn_poly_export = QtGui.QPushButton()
-        self.btn_poly_export.setToolTip("export poly figure")
-        self.btn_poly_export.setIcon(QtGui.QIcon("material/ic_save_black_24px.svg"))
-        self.btn_poly_export.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-        self.btn_poly_export.setEnabled(False)
-
-        self.btn_undo = QtGui.QPushButton()
-        self.btn_undo.setToolTip("undo last figure")
-        self.btn_undo.setIcon(QtGui.QIcon("material/ic_undo_black_24px.svg"))
-        self.btn_undo.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-        self.btn_undo.setEnabled(False)
-
-        hbox_builder = QtGui.QHBoxLayout()
-        hbox_builder.addWidget(self.btn_undo)
-        hbox_builder.addStretch(1)
-        hbox_builder.addWidget(self.btn_redraw)
-        hbox_builder.addWidget(self.btn_poly_export)
-
-        # parameter table for different polygons
-        self.polys_table = QtGui.QTableWidget(self)
-        self.polys_table.setRowCount(15)
-        self.polys_table.setVerticalHeaderLabels(("Type", "x0", "y0", "x1", "y1", "Radius", "Segments", "Start", "End", "Marker", "Area", "Boundary", "Left?", "Hole?", "Closed?"))
-
-        buttons_grid = QtGui.QGridLayout()
-        # # buttons_grid.setSpacing(5)
-        # # widget, row, col, rowSpan, colSpan) #
-        buttons_grid.addWidget(btn_group_widget, 1, 0, 5, 1)
-        # buttons_grid.addWidget(self.btn_world, 1, 0, 1, 1)
-        # buttons_grid.addWidget(self.btn_circle, 1, 1, 1, 1)
-        # buttons_grid.addWidget(self.btn_rectangle, 1, 2, 1, 1)
-        # buttons_grid.addWidget(self.btn_line, 1, 3, 1, 1)
-        # buttons_grid.addWidget(self.btn_polygon, 1, 4, 1, 1)
-
-        vbox_table = QtGui.QVBoxLayout()
-        vbox_table.addLayout(buttons_grid)
-        # vbox_table.addWidget(btn_groupbox)
-        vbox_table.addWidget(self.polys_table)
-        vbox_table.addLayout(hbox_builder)
-
-        builder_widget = QtGui.QWidget(self)
-        # builder_widget.setLayout(buttons_grid)
-        builder_widget.setLayout(vbox_table)
+        # self.btn_world = QtGui.QPushButton("W")
+        # self.btn_world.setToolTip("create world")
+        # self.btn_world.setStatusTip("HELP: create the world where everything will be created")
+        # self.btn_world.setCheckable(True)
+        # self.btn_world.setFixedSize(30, 30)
+        #
+        # self.btn_circle = QtGui.QPushButton("C")
+        # self.btn_circle.setToolTip("create circle")
+        # self.btn_circle.setStatusTip("HELP: create a circle by defining its radius")
+        # self.btn_circle.setCheckable(True)
+        # self.btn_circle.setFixedSize(30, 30)
+        #
+        # self.btn_rectangle = QtGui.QPushButton("R")
+        # self.btn_rectangle.setToolTip("create rectangle")
+        # self.btn_rectangle.setStatusTip("HELP: create a rectangle and specify parameters")
+        # self.btn_rectangle.setCheckable(True)
+        # self.btn_rectangle.setFixedSize(30, 30)
+        #
+        # self.btn_line = QtGui.QPushButton("L")
+        # self.btn_line.setToolTip("create line")
+        # self.btn_line.setStatusTip("HELP: create a line and specify parameters")
+        # self.btn_line.setCheckable(True)
+        # self.btn_line.setFixedSize(30, 30)
+        #
+        # self.btn_polygon = QtGui.QPushButton()
+        # self.btn_polygon.setIcon(QtGui.QIcon("material/ic_gesture_black_24px.svg"))
+        # self.btn_polygon.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        # self.btn_polygon.setToolTip("create polygon")
+        # self.btn_polygon.setStatusTip("HELP: create a polygon by clicking around")
+        # self.btn_polygon.setCheckable(True)
+        # self.btn_polygon.setFixedSize(30, 30)
+        # self.btn_polygon.setEnabled(False)
+        #
+        # # group together so only one can be clicked at a time
+        # btn_group_layout = QtGui.QHBoxLayout()
+        # btn_group_widget = QtGui.QWidget(self)
+        # btn_group_widget.setLayout(btn_group_layout)
+        #
+        # btn_group = QtGui.QButtonGroup(btn_group_widget)
+        # btn_group.addButton(self.btn_world)
+        # btn_group.addButton(self.btn_circle)
+        # btn_group.addButton(self.btn_rectangle)
+        # btn_group.addButton(self.btn_line)
+        # btn_group.addButton(self.btn_polygon)
+        # btn_groupbox = QtGui.QGroupBox(self)
+        # btn_groupbox_layout = QtGui.QHBoxLayout()
+        # btn_groupbox.setLayout(btn_groupbox_layout)
+        # btn_group_layout.addWidget(self.btn_world)
+        # btn_group_layout.addWidget(self.btn_circle)
+        # btn_group_layout.addWidget(self.btn_rectangle)
+        # btn_group_layout.addWidget(self.btn_line)
+        # btn_group_layout.addWidget(self.btn_polygon)
+        #
+        # self.btn_redraw = QtGui.QPushButton()
+        # self.btn_redraw.setToolTip("redraw the hole table")
+        # self.btn_redraw.setIcon(QtGui.QIcon("material/ic_refresh_black_24px.svg"))
+        # self.btn_redraw.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        # self.btn_redraw.setEnabled(False)
+        #
+        # self.btn_poly_export = QtGui.QPushButton()
+        # self.btn_poly_export.setToolTip("export poly figure")
+        # self.btn_poly_export.setIcon(QtGui.QIcon("material/ic_save_black_24px.svg"))
+        # self.btn_poly_export.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        # self.btn_poly_export.setEnabled(False)
+        #
+        # self.btn_undo = QtGui.QPushButton()
+        # self.btn_undo.setToolTip("undo last figure")
+        # self.btn_undo.setIcon(QtGui.QIcon("material/ic_undo_black_24px.svg"))
+        # self.btn_undo.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        # self.btn_undo.setEnabled(False)
+        #
+        # hbox_builder = QtGui.QHBoxLayout()
+        # hbox_builder.addWidget(self.btn_undo)
+        # hbox_builder.addStretch(1)
+        # hbox_builder.addWidget(self.btn_redraw)
+        # hbox_builder.addWidget(self.btn_poly_export)
+        #
+        # # parameter table for different polygons
+        # self.polys_table = QtGui.QTableWidget(self)
+        # self.polys_table.setRowCount(15)
+        # self.polys_table.setVerticalHeaderLabels(("Type", "x0", "y0", "x1", "y1", "Radius", "Segments", "Start", "End", "Marker", "Area", "Boundary", "Left?", "Hole?", "Closed?"))
+        #
+        # buttons_grid = QtGui.QGridLayout()
+        # # # buttons_grid.setSpacing(5)
+        # # # widget, row, col, rowSpan, colSpan) #
+        # buttons_grid.addWidget(btn_group_widget, 1, 0, 5, 1)
+        # # buttons_grid.addWidget(self.btn_world, 1, 0, 1, 1)
+        # # buttons_grid.addWidget(self.btn_circle, 1, 1, 1, 1)
+        # # buttons_grid.addWidget(self.btn_rectangle, 1, 2, 1, 1)
+        # # buttons_grid.addWidget(self.btn_line, 1, 3, 1, 1)
+        # # buttons_grid.addWidget(self.btn_polygon, 1, 4, 1, 1)
+        #
+        # vbox_table = QtGui.QVBoxLayout()
+        # vbox_table.addLayout(buttons_grid)
+        # # vbox_table.addWidget(btn_groupbox)
+        # vbox_table.addWidget(self.polys_table)
+        # vbox_table.addLayout(hbox_builder)
+        #
+        # builder_widget = QtGui.QWidget(self)
+        # # builder_widget.setLayout(buttons_grid)
+        # builder_widget.setLayout(vbox_table)
 
         # ####################################################################################### #
         #                                   TAB REGION MANAGER                                    #
@@ -723,7 +734,7 @@ class MainWindow(QtGui.QMainWindow):
         #                                      SET UP TOOLBOX                                     #
         # initialize the plot widget
         self.plotWidget = PlotWidget(self)
-        # FIXME: die ist scheiße. vertikale tabs nehmen weniger platz weg
+        builder = Builder(self.plotWidget)
         # tool_box = QtGui.QToolBox()
         # tool_box.addItem(file_widget, "start with sketch")
         # tool_box.addItem(region_widget, "sketch regions")
@@ -733,8 +744,8 @@ class MainWindow(QtGui.QMainWindow):
         tool_box = QtGui.QTabWidget(self)
         tool_box.setTabPosition(QtGui.QTabWidget.West)
         tool_box.addTab(file_widget, "start with sketch")
+        tool_box.addTab(builder, "model builder")
         tool_box.addTab(region_widget, "region manager")
-        tool_box.addTab(builder_widget, "model builder")
         tool_box.addTab(mesh_widget, "mesh options")
         # make the toolbox frame ready... since this needs a QLayout
         v_tool_box = QtGui.QVBoxLayout()
@@ -1153,43 +1164,16 @@ class MainWindow(QtGui.QMainWindow):
         ######## builder2.py:
         if not self.called:
             self.called = True
-            self.iterMarker = 1
-            self.b = Builder(self.plotWidget, self.polys_table, self.iterMarker)
+            self.b = Builder(self.plotWidget, self.polys_table)
 
         if self.btn_circle.isChecked() is True:
-            try:
-                # check if something has already been drawn
-                clicked = self.b.disconnect()
-                self.iterMarker = clicked
-                print("try circle", self.iterMarker)
-            except AttributeError:
-                self.iterMarker = 1
-                print("except circle", self.iterMarker)
-                pass
-
-            self.b.buildCircle(self.iterMarker)
+            self.b.buildCircle()
 
         elif self.btn_rectangle.isChecked() is True:
-            try:
-                self.iterMarker = self.b.disconnect()
-                print("try rectangle", self.iterMarker)
-            except AttributeError:
-                self.iterMarker = 1
-                print("except rectangle", self.iterMarker)
-                pass
-
-            self.b.buildRectangle(self.iterMarker)
+            self.b.buildRectangle()
 
         elif self.btn_line.isChecked() is True:
-            try:
-                self.iterMarker = self.b.disconnect()
-                print("try", self.iterMarker)
-            except AttributeError:
-                self.iterMarker = 1
-                print("except", self.iterMarker)
-                pass
-
-            self.b.buildLine(self.iterMarker)
+            self.b.buildLine()
 
 
     """ ###############                      REGION MANAGER                      ############### """
