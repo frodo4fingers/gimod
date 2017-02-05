@@ -11,40 +11,67 @@ from matplotlib.patches import Rectangle, Circle
 
 class Builder(object):
     """
-        implementing visual sugar for polytool contruction
+        sprinkle some visual sugar for polytool contruction :-)
     """
 
+    clicker = 0
+
     # def __init__(self, plotWidget, parent=None):
-    def __init__(self, plotWidget, table, iterMarker):
+    def __init__(self, plotWidget, table):
         # stuff
         super(Builder, self).__init__()
         self.figure = plotWidget
         self.table = table
-        self.clicked = iterMarker
+        print("FUCKING INIT")
+        # try:
+        #     self.marker = self.marker
+        #     print("try")
+        # except AttributeError:
+        #     print("except")
+        self.marker = 1
+        self.polys = []
 
-    def buildCircle(self, iterMarker):
+    """
+    @classmethod
+    def marker(cls, n=0):
+        clicked = cls(cls.clicker)
+        clicked += n
+        print(clicked)
+        return clicked
+    """
+
+    def buildCircle(self):
         print("now a circle")
-        self.clicked = iterMarker
-        self.object = SpanCircle(self.figure, self.table, self.clicked)
+        # try:
+        #     self.object.disconnect()
+        # except AttributeError:
+        #     pass
+        self.object = SpanCircle(self.figure, self.table)
         self.object.connect()
 
-    def buildRectangle(self, iterMarker):
+    def buildRectangle(self):
         print("now a rectangle")
-        self.clicked = iterMarker
-        self.object = SpanRectangle(self.figure, self.table, self.clicked)
+        # try:
+        #     self.object.disconnect()
+        # except AttributeError:
+        #     pass
+        self.object = SpanRectangle(self.figure, self.table)
         self.object.connect()
 
-    def buildLine(self, iterMarker):
+    def buildLine(self):
         print("now a line")
-        self.clicked = iterMarker
-        self.object = SpanLine(self.figure, self.table, self.clicked)
+        # try:
+        #     self.object.disconnect()
+        # except AttributeError:
+        #     pass
+        self.object = SpanLine(self.figure, self.table)
         self.object.connect()
 
-    def disconnect(self):
-        # print("disconnect", self.clicked)
-        clicker =  self.object.disconnect()
-        # print("def disconnect", self.clicked)
-        return clicker
+    # def disconnect(self):
+    #     # print("disconnect", self.marker)
+    #     self.marker = self.object.disconnect()
+    #     print("def disconnect", self.marker)
+    #     # return clicker
 
     def getPoly(self):
         return self.poly, self.table
@@ -56,7 +83,12 @@ class Builder(object):
         """
             zeug
         """
-        print("draw", self.clicked)
+        print("draw", self.marker)
+        if len(self.polys) > 1:
+            self.poly = plc.mergePLC(self.polys)
+        else:
+            self.poly = self.polys[0]
+        self.figure.axis.cla()
         drawMesh(self.figure.axis, self.poly, fitView=False)
         self.figure.canvas.draw()
         self.fillTable(form)
@@ -65,14 +97,8 @@ class Builder(object):
         """
             draw simple circle with polytools
         """
-        if self.clicked > 1:
-            self.poly = plc.mergePLC([self.poly, plc.createCircle(pos=(self.x_p, self.y_p), segments=12, radius=self.distance(), marker=self.clicked)])
-            print("second circle", self.clicked)
-            # FIXME!!!!: der zeichnet alte polys übereinander... zu sehen an der fetter werdenden schrift --> vllt alles über n dict?
-            print(self.poly)
-        else:
-            print("first circle", self.clicked)
-            self.poly = plc.createCircle(pos=(self.x_p, self.y_p), segments=12, radius=self.distance(), marker=self.clicked)
+        self.polys.append(plc.createCircle(pos=(self.x_p, self.y_p), segments=12, radius=self.distance(), marker=self.marker))
+        print("circle", self.marker, len(self.polys))
 
         self.draw(form="circle")
 
@@ -81,12 +107,8 @@ class Builder(object):
             draw simple rectangle with polytools
             >>> kannweg5/8
         """
-        if self.clicked > 1:
-            print("rectangle", self.clicked)
-            self.poly = plc.mergePLC([self.poly, plc.createRectangle(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.clicked)])
-        else:
-            print("rectangle", self.clicked)
-            self.poly = plc.createRectangle(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.clicked)
+        self.polys.append(plc.createRectangle(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.marker))
+        print("rectangle", self.marker, len(self.polys))
 
         self.draw(form="rectangle")
 
@@ -94,10 +116,8 @@ class Builder(object):
         """
             draw world where every other polygon will be stored in
         """
-        if self.clicked > 1:
-            self.poly = plc.mergePLC([self.poly, plc.createWorld(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.clicked)])
-        else:
-            self.poly = plc.createWorld(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.clicked)
+        self.polys.append(plc.createWorld(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.marker))
+        print("world", self.marker, len(self.polys))
 
         self.draw(form="world")
 
@@ -105,10 +125,8 @@ class Builder(object):
         """
             draw line.. *duh*
         """
-        if self.clicked > 1:
-            self.poly = plc.mergePLC([self.poly, plc.createLine(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], segments=3, boundaryMarker=1)])
-        else:
-            self.poly = plc.createLine(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], segments=3, boundaryMarker=1)
+        self.polys.append(plc.createLine(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], segments=3, boundaryMarker=1))
+        print("line", self.marker, len(self.polys))
 
         self.draw(form="line")
 
@@ -125,10 +143,10 @@ class Builder(object):
             for construction: header labels >>>
             "Type", "x0", "y0", "x1", "y1", "Radius", "Segments", "Start", "End", "Marker", "Area", "Boundary", "Left?", "Hole?", "Closed?"
         """
-        print("table", self.clicked)
+        print("table", self.marker)
         # update table on release
-        self.table.setColumnCount(self.clicked)
-        col = self.clicked - 1
+        self.table.setColumnCount(self.marker)
+        col = self.marker - 1
         # insert poly type... circle/world/rectangle/hand
         self.table.setItem(0, col, QtGui.QTableWidgetItem(form))
 
@@ -178,9 +196,9 @@ class Builder(object):
 
         if not form == "line":
             # insert marker
-            for k in range(self.clicked):
+            for k in range(self.marker):
                 a = QtGui.QComboBox(self.table)
-                [a.addItem(str(m+1)) for m in range(self.clicked)]
+                [a.addItem(str(m+1)) for m in range(self.marker)]
                 a.setCurrentIndex(k)
                 self.table.setCellWidget(9, k, a)
             # insert area
@@ -215,8 +233,8 @@ class Builder(object):
         self.table.resizeColumnsToContents()
 
         # iterate marker counter
-        self.clicked += 1
-        print("table", self.clicked)
+        self.marker += 1
+        print("table", self.marker)
 
 
 class SpanLine(Builder):
@@ -224,7 +242,7 @@ class SpanLine(Builder):
     def __init__(self, *args):
         super(SpanLine, self).__init__(*args)
         # introduce empty line to start with
-        line, = self.figure.axis.plot([0], [0])
+        line, = self.figure.axis.plot([0], [0], c="black")
         self.line = line
         self.background = None
         # self.onPress = self.onPress
@@ -291,7 +309,7 @@ class SpanRectangle(Builder):
     def __init__(self, *args):
         super(SpanRectangle, self).__init__(*args)
         # empty rectangle
-        self.rect = Rectangle((0, 0), 0, 0, fc="g", alpha=0.5, ec="none")
+        self.rect = Rectangle((0, 0), 0, 0, fc="none", alpha=0.5, ec="black")
         self.background = None
         self.figure.axis.add_patch(self.rect)
 
@@ -304,8 +322,8 @@ class SpanRectangle(Builder):
         self.figure.canvas.mpl_disconnect(self.cid_p)
         self.figure.canvas.mpl_disconnect(self.cid_m)
         self.figure.canvas.mpl_disconnect(self.cid_r)
-        print("rectangle disconnect", self.clicked)
-        return self.clicked
+        print("rectangle disconnect", self.marker)
+        return self.marker
 
     def onPress(self, event):
         if event.button is 1:
@@ -354,14 +372,14 @@ class SpanCircle(Builder):
     def __init__(self, *args):
         super(SpanCircle, self).__init__(*args)
         # introduce empty circle to start with
-        self.circle = Circle((0, 0), 0, fc="r", alpha=0.5, ec="none")
+        self.circle = Circle((0, 0), 0, fc="none", ec="black")
         self.background = None
         self.figure.axis.add_patch(self.circle)
         # WTF!!!!
         self.onPress = self.onPress
 
     def connect(self):
-        # self.clicked = 1
+        # self.marker = 1
         self.cid_p = self.figure.canvas.mpl_connect("button_press_event", self.onPress)
         self.cid_m = self.figure.canvas.mpl_connect("motion_notify_event", self.onMotion)
         self.cid_r = self.figure.canvas.mpl_connect("button_release_event", self.onRelease)
@@ -370,8 +388,8 @@ class SpanCircle(Builder):
         self.figure.canvas.mpl_disconnect(self.cid_p)
         self.figure.canvas.mpl_disconnect(self.cid_m)
         self.figure.canvas.mpl_disconnect(self.cid_r)
-        print("circle disconnect", self.clicked)
-        return self.clicked
+        print("circle disconnect", self.marker)
+        # return self.marker
 
     def onPress(self, event):
         if event.button is 1:
@@ -388,6 +406,7 @@ class SpanCircle(Builder):
         try:
             self.x_m = event.xdata
             self.y_m = event.ydata
+            # inconsistent mpl crap
             self.circle.center = (self.x_p, self.y_p)
             self.circle.set_radius(self.distance())
             # TODO: den radius am ansatzpunkt anzeigen
@@ -404,7 +423,7 @@ class SpanCircle(Builder):
         try:
             self.x_r = event.xdata
             self.y_r = event.ydata
-            # set line empty to remove from view
+            # inconsistent mpl crap
             self.circle.center = (0, 0)
             self.circle.set_radius(0)
             self.circle.axes.draw_artist(self.circle)

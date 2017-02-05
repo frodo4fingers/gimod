@@ -8,7 +8,6 @@ from pygimli.meshtools import polytools as plc
 import numpy as np
 
 
-# class Builder(QtGui.QWidget):
 class Builder():
 
     # def __init__(self, plotWidget, parent=None):
@@ -68,7 +67,7 @@ class Builder():
         self.cid_p = self.plotWidget.canvas.mpl_connect("button_press_event", self.onPress)
         self.cid_m = self.plotWidget.canvas.mpl_connect("motion_notify_event", self.onMotion)
         self.cid_r = self.plotWidget.canvas.mpl_connect("button_release_event", self.onRelease)
-        self.plotWidget.canvas.draw()
+        # self.plotWidget.canvas.draw()
 
     def disconnect(self):
         self.plotWidget.canvas.mpl_disconnect(self.cid_p)
@@ -155,6 +154,7 @@ class Builder():
     def drawRectangle(self):
         """
             draw simple rectangle with polytools
+            >>> kannweg5/8
         """
         if self.clicked > 1:
             self.poly = plc.mergePLC([self.poly, plc.createRectangle(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.clicked)])
@@ -182,9 +182,8 @@ class Builder():
     def drawPolygon(self):
         """
             function where the clicked polygon is assembled
+            >>> kannweg2
         """
-        
-
 
     # TODO: def redrawTable(self):
 
@@ -283,7 +282,3 @@ class Builder():
 
         # iterate marker counter
         self.clicked += 1
-
-
-# TODO: das self.poly zurückgeben an das hauptfenster!!!!!!!!!!
-# BUG: ON... poly machen.. OFF.. ON.. poly machen. beide haben marker 1 logischerweise. also entweder das obige TODO klarmachen, sodass die einzelnen polygone kontrolliert werden oder denk dir was anderes aus! :-)
