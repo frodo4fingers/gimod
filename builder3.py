@@ -9,6 +9,7 @@ import numpy as np
 from PyQt4 import QtGui
 
 from SpanRectangle import SpanRectangle
+from SpanWorld import SpanWorld
 from SpanLine import SpanLine
 from SpanCircle import SpanCircle
 
@@ -27,7 +28,7 @@ class Builder(QtGui.QWidget):
         """ connect signals """
         self.acn_circle.triggered.connect(self.createPolyCircle)
         self.acn_rectangle.triggered.connect(self.createPolyRectangle)
-        self.acn_world.triggered.connect(self.createPolyRectangle)
+        self.acn_world.triggered.connect(self.createPolyWorld)
         self.acn_line.triggered.connect(self.createPolyLine)
 
         self.btn_redraw.clicked.connect(self.redrawTable)
@@ -69,11 +70,13 @@ class Builder(QtGui.QWidget):
         # parameter table for different polygons
         self.polys_table = QtGui.QTableWidget(self)
         self.polys_table.setRowCount(15)
-        self.polys_table.setVerticalHeaderLabels(("Type", "x0", "y0", "x1", "y1", "Radius", "Segments", "Start", "End", "Marker", "Area", "Boundary", "Left?", "Hole?", "Closed?"))
+        self.polys_table.setVerticalHeaderLabels(
+            ("Type", "x0", "y0", "x1", "y1", "Radius", "Segments", "Start", "End", "Marker", "Area", "Boundary", "Left?", "Hole?", "Closed?"))
 
         # redraw table button
         self.btn_redraw = QtGui.QPushButton()
-        self.btn_redraw.setIcon(QtGui.QIcon("material/ic_refresh_black_24px.svg"))
+        self.btn_redraw.setIcon(QtGui.QIcon(
+            "material/ic_refresh_black_24px.svg"))
 
         hbox = QtGui.QHBoxLayout()
         hbox.addStretch(1)
@@ -103,6 +106,14 @@ class Builder(QtGui.QWidget):
         self.span = SpanRectangle(self)
         self.span.connect()
 
+    def createPolyWorld(self):
+        try:
+            self.span.disconnect()
+        except AttributeError:
+            pass
+        self.span = SpanWorld(self)
+        self.span.connect()
+
     def createPolyLine(self):
         try:
             self.span.disconnect()
@@ -120,29 +131,34 @@ class Builder(QtGui.QWidget):
         self.form = form
 
         print(self.form)
-        self.drawPoly()
+        self.constructPoly()
 
-    def drawPoly(self):
+    def constructPoly(self):
 
         if self.form == "Circle":
-            self.polys.append(plc.createCircle(pos=(self.x_p, self.y_p), segments=12, radius=self.x_r, marker=self.marker))
+            self.polys.append(plc.createCircle(
+                pos=(self.x_p, self.y_p), segments=12, radius=self.x_r, marker=self.marker))
 
         elif self.form == "Rectangle":
             self.polys.append(plc.createRectangle(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.marker))
 
         elif self.form == "Line":
-            self.polys.append(plc.createLine(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], segments=1))
+            self.polys.append(plc.createLine(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], segments=2))
 
         elif self.form == "World":
             self.polys.append(plc.createWorld(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.marker))
 
+        self.drawPoly()
+
+    def drawPoly(self, fillTable=True):
         self.poly = plc.mergePLC(self.polys)
         self.figure.axis.cla()
 
         drawMesh(self.figure.axis, self.poly, fitView=False)
         self.figure.canvas.draw()
 
-        self.fillTable()
+        if fillTable:
+            self.fillTable()
 
     def fillTable(self):
         """
@@ -158,12 +174,16 @@ class Builder(QtGui.QWidget):
 
         # if self.form == "circle":
         # insert position
-        self.polys_table.setItem(1, col, QtGui.QTableWidgetItem(str(round(self.x_p, 2))))
-        self.polys_table.setItem(2, col, QtGui.QTableWidgetItem(str(round(self.y_p, 2))))
+        self.polys_table.setItem(
+            1, col, QtGui.QTableWidgetItem(str(round(self.x_p, 2))))
+        self.polys_table.setItem(
+            2, col, QtGui.QTableWidgetItem(str(round(self.y_p, 2))))
 
-        if self.form == "rectangle" or self.form == "world" or self.form == "line":
-            self.polys_table.setItem(3, col, QtGui.QTableWidgetItem(str(round(self.x_r, 2))))
-            self.polys_table.setItem(4, col, QtGui.QTableWidgetItem(str(round(self.y_r, 2))))
+        if self.form == "Rectangle" or self.form == "World" or self.form == "Line":
+            self.polys_table.setItem(
+                3, col, QtGui.QTableWidgetItem(str(round(self.x_r, 2))))
+            self.polys_table.setItem(
+                4, col, QtGui.QTableWidgetItem(str(round(self.y_r, 2))))
 
         if self.form == "Circle":
             # insert segments
@@ -171,15 +191,6 @@ class Builder(QtGui.QWidget):
             spx_segments.setValue(12)
             spx_segments.setMinimum(3)
             self.polys_table.setCellWidget(6, col, spx_segments)
-
-        if self.form == "Line":
-            # insert segments
-            spx_segments = QtGui.QSpinBox()
-            spx_segments.setValue(1)
-            spx_segments.setMinimum(1)
-            self.polys_table.setCellWidget(6, col, spx_segments)
-
-        if self.form == "Circle":
             # insert radius
             spx_radius = QtGui.QDoubleSpinBox()
             spx_radius.setSingleStep(0.01)
@@ -190,21 +201,28 @@ class Builder(QtGui.QWidget):
             spx_start.setValue(0.00)
             spx_start.setMinimum(0.00)
             spx_start.setSingleStep(0.01)
-            spx_start.setMaximum(2*np.pi)
+            spx_start.setMaximum(2 * np.pi)
             self.polys_table.setCellWidget(7, col, spx_start)
             # insert end
             spx_end = QtGui.QDoubleSpinBox()
-            spx_end.setValue(2*np.pi)
+            spx_end.setValue(2 * np.pi)
             spx_end.setMinimum(0.00)
             spx_end.setSingleStep(0.01)
-            spx_end.setMaximum(2*np.pi)
+            spx_end.setMaximum(2 * np.pi)
             self.polys_table.setCellWidget(8, col, spx_end)
+
+        if self.form == "Line":
+            # insert segments
+            spx_segments = QtGui.QSpinBox()
+            spx_segments.setValue(2)
+            spx_segments.setMinimum(2)
+            self.polys_table.setCellWidget(6, col, spx_segments)
 
         if not self.form == "Line":
             # insert marker
             for k in range(self.marker):
                 a = QtGui.QComboBox(self.polys_table)
-                [a.addItem(str(m+1)) for m in range(self.marker)]
+                [a.addItem(str(m + 1)) for m in range(self.marker)]
                 a.setCurrentIndex(k)
                 self.polys_table.setCellWidget(9, k, a)
             # insert area
@@ -218,13 +236,15 @@ class Builder(QtGui.QWidget):
             print("world")
             # insert boundary marker
             self.polys_table.setItem(11, col, QtGui.QTableWidgetItem(str(1)))
+
+        if self.form == "Circle" or self.form == "line":
             # insert left direction
             cbx_isLeft = QtGui.QComboBox()
             cbx_isLeft.addItem("False")
             cbx_isLeft.addItem("True")
             self.polys_table.setCellWidget(12, col, cbx_isLeft)
 
-        if self.form != "World" and self.form != "Line":
+        if self.form == "Rectangle" or self.form == "Circle":
             # insert is hole
             cbx_isHole = QtGui.QComboBox()
             cbx_isHole.addItem("False")
@@ -234,9 +254,11 @@ class Builder(QtGui.QWidget):
             cbx_isClosed = QtGui.QComboBox()
             cbx_isClosed.addItem("False")
             cbx_isClosed.addItem("True")
+            cbx_isClosed.setCurrentIndex(1)
             self.polys_table.setCellWidget(14, col, cbx_isClosed)
 
-        self.polys_table.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        self.polys_table.setSizePolicy(
+            QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         self.polys_table.resizeColumnsToContents()
 
         # iterate marker counter
@@ -247,8 +269,82 @@ class Builder(QtGui.QWidget):
         """
             read the table after editing figures and redraw all polys
         """
+        # empty the list of polygon figures
+        del self.polys[:]
         print(self.polys_table.columnCount())
+        print(self.polys_table.rowCount())
 
+        for col in range(self.polys_table.columnCount()):
+
+            item = self.polys_table.item(0, col).text()
+            try:
+                position1 = [float(self.polys_table.item(1, col).text()), float(self.polys_table.item(2, col).text())]
+            except AttributeError:
+                pass
+            try:  # Rectangle & World
+                position2 = [float(self.polys_table.item(3, col).text()), float(self.polys_table.item(4, col).text())]
+            except AttributeError:
+                pass
+            try:  # Circle
+                radius = self.polys_table.cellWidget(5, col).value()
+            except AttributeError:
+                pass
+            try:  # Circle & Line
+                segments = self.polys_table.cellWidget(6, col).value()
+            except AttributeError:
+                pass
+            try:
+                start = self.polys_table.cellWidget(7, col).value()
+            except AttributeError:
+                pass
+            try:
+                end = self.polys_table.cellWidget(8, col).value()
+            except AttributeError:
+                pass
+            try:
+                marker = int(self.polys_table.cellWidget(9, col).currentText())
+            except AttributeError:
+                pass
+            try:
+                area = self.polys_table.cellWidget(10, col).value()
+            except AttributeError:
+                pass
+            try:
+                boundaryMarker = int(self.polys_table.item(11, col).text())
+            except AttributeError:
+                pass
+            try:
+                leftDirection = int(self.polys_table.cellWidget(12, col).currentIndex())
+            except AttributeError:
+                pass
+            # isHole = self.polys_table.cellWidget(13, col).currentText()
+            try:
+                isHole = int(self.polys_table.cellWidget(13, col).currentIndex())
+            except AttributeError:
+                pass
+            try:
+                isClosed = int(self.polys_table.cellWidget(14, col).currentIndex())
+            except AttributeError:
+                pass
+
+            if item == "Circle":
+                self.polys.append(plc.createCircle(
+                    pos=position1, radius=radius, segments=segments, start=start, end=end, marker=marker, area=area, boundaryMarker=boundaryMarker, leftDirection=leftDirection, isHole=isHole, isClosed=isClosed
+                ))
+            elif item == "Rectangle":
+                self.polys.append(plc.createRectangle(
+                    start=position1, end=position2, marker=marker, area=area, boundaryMarker=boundaryMarker, isHole=isHole, isClosed=isClosed
+                ))  # leftDirection=leftDirection
+            elif item == "World":
+                self.polys.append(plc.createWorld(
+                    start=position1, end=position2, marker=marker, area=area
+                ))
+            elif item == "Line":
+                self.polys.append(plc.createLine(
+                start=start, end=end, segments=segments, boundaryMarker=boundaryMarker, leftDirection=leftDirection
+                ))
+
+        self.drawPoly(fillTable=False)
 
 
 if __name__ == "__main__":
