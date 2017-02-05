@@ -33,14 +33,27 @@ from builder3 import Builder
 
 
 class PlotToolbar(NavigationToolbar):
-    # only display the buttons we need
-    # TODO change order of appearance for zoom buttons
-    toolitems = [t for t in NavigationToolbar.toolitems if
-                 t[0] in ("Home", "Pan", "Zoom", "Save")]
+    # # only display the buttons we need
+    # # TODO change order of appearance for zoom buttons
+    # toolitems = [t for t in NavigationToolbar.toolitems if
+    #              t[0] in ("Home", "Pan", "Zoom", "Save")]
+    #
+    # def __init__(self, *args, **kwargs):
+    #     super(PlotToolbar, self).__init__(*args, **kwargs)
+    #     self.layout().takeAt(6)
 
-    def __init__(self, *args, **kwargs):
-        super(PlotToolbar, self).__init__(*args, **kwargs)
-        self.layout().takeAt(6)
+    def __init__(self, plot, parent=None):
+        # https://github.com/matplotlib/matplotlib/blob/master/lib/matplotlib/backends/backend_qt5.py
+        self.toolitems = (
+            ('Home', 'Reset original view', 'home', 'home'),
+            # (None, None, None, None),
+            ('Pan', 'Pan axes with left mouse, zoom with right', 'move', 'pan'),
+            ('Zoom', 'Zoom to rectangle', 'zoom_to_rect', 'zoom'),
+            # (None, None, None, None),
+            ('Save', 'Save the figure', 'filesave', 'save_figure'),
+            )
+
+        NavigationToolbar.__init__(self, plot, parent=None, coordinates=False)
 
 
 class PlotWidget(QtGui.QWidget):
@@ -80,6 +93,7 @@ class PlotWidget(QtGui.QWidget):
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
+        layout.setMargin(0)
         # layout.addWidget(self.button)
         self.setLayout(layout)
 
@@ -775,8 +789,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # ### split this
         splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
-        splitter.addWidget(frame_left)
-        splitter.addWidget(frame_right)
+        splitter.addWidget(tool_box)
+        splitter.addWidget(self.plotWidget)
 
         self.statusBar = QtGui.QStatusBar()
         self.setStatusBar(self.statusBar)

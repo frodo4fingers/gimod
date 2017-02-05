@@ -70,7 +70,7 @@ class SpanCircle(object):
             self.circle.set_animated(False)
             self.background = None
             self.figure.canvas.draw()
-            self.parent.printCoordinates(self.x_p, self.y_p, self.distance(), None, form="circle")
+            self.parent.printCoordinates(self.x_p, self.y_p, self.distance(), None, form="Circle")
 
         except AttributeError:
             pass

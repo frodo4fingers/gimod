@@ -9,7 +9,7 @@ import numpy as np
 from PyQt4 import QtGui
 
 from SpanRectangle import SpanRectangle
-import SpanLine
+from SpanLine import SpanLine
 from SpanCircle import SpanCircle
 
 
@@ -27,6 +27,10 @@ class Builder(QtGui.QWidget):
         """ connect signals """
         self.acn_circle.triggered.connect(self.createPolyCircle)
         self.acn_rectangle.triggered.connect(self.createPolyRectangle)
+        self.acn_world.triggered.connect(self.createPolyRectangle)
+        self.acn_line.triggered.connect(self.createPolyLine)
+
+        self.btn_redraw.clicked.connect(self.redrawTable)
 
     def setupUI(self):
         """
@@ -67,10 +71,20 @@ class Builder(QtGui.QWidget):
         self.polys_table.setRowCount(15)
         self.polys_table.setVerticalHeaderLabels(("Type", "x0", "y0", "x1", "y1", "Radius", "Segments", "Start", "End", "Marker", "Area", "Boundary", "Left?", "Hole?", "Closed?"))
 
+        # redraw table button
+        self.btn_redraw = QtGui.QPushButton()
+        self.btn_redraw.setIcon(QtGui.QIcon("material/ic_refresh_black_24px.svg"))
+
+        hbox = QtGui.QHBoxLayout()
+        hbox.addStretch(1)
+        hbox.addWidget(self.btn_redraw)
+        hbox.setMargin(0)
+
         # form the layout
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(tb)
         vbox.addWidget(self.polys_table)
+        vbox.addLayout(hbox)
         self.setLayout(vbox)
 
     def createPolyCircle(self):
@@ -89,6 +103,14 @@ class Builder(QtGui.QWidget):
         self.span = SpanRectangle(self)
         self.span.connect()
 
+    def createPolyLine(self):
+        try:
+            self.span.disconnect()
+        except AttributeError:
+            pass
+        self.span = SpanLine(self)
+        self.span.connect()
+
     def printCoordinates(self, x1, y1, x2, y2, form):
 
         self.x_p = x1
@@ -102,11 +124,17 @@ class Builder(QtGui.QWidget):
 
     def drawPoly(self):
 
-        if self.form == "circle":
+        if self.form == "Circle":
             self.polys.append(plc.createCircle(pos=(self.x_p, self.y_p), segments=12, radius=self.x_r, marker=self.marker))
 
-        elif self.form == "rectangle":
+        elif self.form == "Rectangle":
             self.polys.append(plc.createRectangle(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.marker))
+
+        elif self.form == "Line":
+            self.polys.append(plc.createLine(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], segments=1))
+
+        elif self.form == "World":
+            self.polys.append(plc.createWorld(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.marker))
 
         self.poly = plc.mergePLC(self.polys)
         self.figure.axis.cla()
@@ -137,21 +165,21 @@ class Builder(QtGui.QWidget):
             self.polys_table.setItem(3, col, QtGui.QTableWidgetItem(str(round(self.x_r, 2))))
             self.polys_table.setItem(4, col, QtGui.QTableWidgetItem(str(round(self.y_r, 2))))
 
-        if self.form == "circle":
+        if self.form == "Circle":
             # insert segments
             spx_segments = QtGui.QSpinBox()
             spx_segments.setValue(12)
             spx_segments.setMinimum(3)
             self.polys_table.setCellWidget(6, col, spx_segments)
 
-        if self.form == "line":
+        if self.form == "Line":
             # insert segments
             spx_segments = QtGui.QSpinBox()
-            spx_segments.setValue(3)
-            spx_segments.setMinimum(3)
+            spx_segments.setValue(1)
+            spx_segments.setMinimum(1)
             self.polys_table.setCellWidget(6, col, spx_segments)
 
-        if self.form == "circle":
+        if self.form == "Circle":
             # insert radius
             spx_radius = QtGui.QDoubleSpinBox()
             spx_radius.setSingleStep(0.01)
@@ -172,7 +200,7 @@ class Builder(QtGui.QWidget):
             spx_end.setMaximum(2*np.pi)
             self.polys_table.setCellWidget(8, col, spx_end)
 
-        if not self.form == "line":
+        if not self.form == "Line":
             # insert marker
             for k in range(self.marker):
                 a = QtGui.QComboBox(self.polys_table)
@@ -186,7 +214,7 @@ class Builder(QtGui.QWidget):
             spx_area.setMinimum(0.00)
             self.polys_table.setCellWidget(10, col, spx_area)
 
-        if not self.form == "world":
+        if not self.form == "World":
             # insert boundary marker
             self.polys_table.setItem(11, col, QtGui.QTableWidgetItem(str(1)))
             # insert left direction
@@ -195,7 +223,7 @@ class Builder(QtGui.QWidget):
             cbx_isLeft.addItem("True")
             self.polys_table.setCellWidget(12, col, cbx_isLeft)
 
-        if self.form != "world" and self.form != "line":
+        if self.form != "World" and self.form != "Line":
             # insert is hole
             cbx_isHole = QtGui.QComboBox()
             cbx_isHole.addItem("False")
@@ -213,6 +241,12 @@ class Builder(QtGui.QWidget):
         # iterate marker counter
         self.marker += 1
         print("table", self.marker)
+
+    def redrawTable(self):
+        """
+            read the table after editing figures and redraw all polys
+        """
+        
 
 
 if __name__ == "__main__":

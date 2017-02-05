@@ -12,7 +12,7 @@ class SpanRectangle(object):
         self.parent = parent
         self.figure = self.parent.figure
         # empty rectangle
-        self.rect = Rectangle((0, 0), 0, 0, fc="g", alpha=0.5, ec="none")
+        self.rect = Rectangle((0, 0), 0, 0, fc="none", alpha=0.5, ec="black")
         self.background = None
         self.figure.axis.add_patch(self.rect)
         self.onPress = self.onPress
@@ -64,7 +64,7 @@ class SpanRectangle(object):
             self.rect.set_animated(False)
             self.background = None
             self.figure.canvas.draw()
-            self.parent.printCoordinates(self.x_p, self.y_p, self.x_r, self.y_r, form="rectangle")
+            self.parent.printCoordinates(self.x_p, self.y_p, self.x_r, self.y_r, form="Rectangle")
 
         except AttributeError:
             pass
