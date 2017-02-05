@@ -247,6 +247,7 @@ class Builder(QtGui.QWidget):
         """
             read the table after editing figures and redraw all polys
         """
+        print(self.polys_table.columnCount())
 
 
 
