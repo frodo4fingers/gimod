@@ -215,6 +215,7 @@ class Builder(QtGui.QWidget):
             self.polys_table.setCellWidget(10, col, spx_area)
 
         if not self.form == "World":
+            print("world")
             # insert boundary marker
             self.polys_table.setItem(11, col, QtGui.QTableWidgetItem(str(1)))
             # insert left direction
@@ -246,7 +247,7 @@ class Builder(QtGui.QWidget):
         """
             read the table after editing figures and redraw all polys
         """
-        
+
 
 
 if __name__ == "__main__":
