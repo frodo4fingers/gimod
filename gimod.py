@@ -279,6 +279,8 @@ class MainWindow(QtGui.QMainWindow):
         self.chbx_mesh_attr.stateChanged.connect(self.showMesh)
         self.btn_mesh.clicked.connect(self.clickedBtnMesh)
         self.btn_mesh_export.clicked.connect(self.meshExport)
+        # menu actions
+        self.acn_aboutVerison.triggered.connect(self.aboutVersion)
 
     def initUI(self):
         # ### icons from https://icons8.com/web-app/category/all/Very-Basic ### #
@@ -761,9 +763,10 @@ class MainWindow(QtGui.QMainWindow):
         tool_box.addTab(builder, "model builder")
         tool_box.addTab(region_widget, "region manager")
         tool_box.addTab(mesh_widget, "mesh options")
+        # tool_box.setContentsMargins(1, 1, 1, 1)
         # make the toolbox frame ready... since this needs a QLayout
-        v_tool_box = QtGui.QVBoxLayout()
-        v_tool_box.addWidget(tool_box)
+        # v_tool_box = QtGui.QVBoxLayout()
+        # v_tool_box.addWidget(tool_box)
 
         # tabBar = QtGui.QTabBar()
         # tabBar.addTab("Threshold")
@@ -775,17 +778,17 @@ class MainWindow(QtGui.QMainWindow):
         v_plotWidget.addWidget(self.plotWidget)
 
         # ### initiate frames
-        frame_left = QtGui.QFrame()
-        frame_left.setFrameShape(QtGui.QFrame.StyledPanel)
-        frame_left.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Sunken)
-        # frame_left.setStyleSheet("background-color: lightgray")
-        frame_right = QtGui.QFrame()
-        frame_right.setFrameShape(QtGui.QFrame.StyledPanel)
-        frame_right.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Sunken)
+        # frame_left = QtGui.QFrame()
+        # frame_left.setFrameShape(QtGui.QFrame.StyledPanel)
+        # frame_left.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Sunken)
+        # # frame_left.setStyleSheet("background-color: lightgray")
+        # frame_right = QtGui.QFrame()
+        # frame_right.setFrameShape(QtGui.QFrame.StyledPanel)
+        # frame_right.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Sunken)
 
         # ### add content
-        frame_left.setLayout(v_tool_box)
-        frame_right.setLayout(v_plotWidget)
+        # frame_left.setLayout(v_tool_box)
+        # frame_right.setLayout(v_plotWidget)
 
         # ### split this
         splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
@@ -805,6 +808,12 @@ class MainWindow(QtGui.QMainWindow):
         # groupbox_central = QtGui.QGroupBox()
         # groupbox_central.setLayout(vbox_central)
 
+        self.acn_aboutVerison = QtGui.QAction("Version", self)
+
+        menubar = self.menuBar()
+        menu_file = menubar.addMenu("&About")
+        menu_file.addAction(self.acn_aboutVerison)
+
         self.setCentralWidget(splitter)
         # self.setCentralWidget(central_widget)
 
@@ -812,6 +821,11 @@ class MainWindow(QtGui.QMainWindow):
         # window name
         self.setWindowTitle("GIMod")
         self.show()
+
+    def aboutVersion(self):
+        with open('version.json') as v:
+            content = v.read()
+        QtGui.QMessageBox.information(self, "About", content)
 
     def movedSldMin(self):
         self.spb_sld_min.setValue(self.sld_min.sliderPosition())
