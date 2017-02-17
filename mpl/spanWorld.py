@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # encoding: UTF-8
 
-# import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 
 

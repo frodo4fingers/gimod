@@ -29,18 +29,11 @@ import matplotlib.pyplot as plt
 
 from collections import defaultdict, Counter
 # from builder import Builder
-from builder3 import Builder
+from builder import Builder
+from mpl import DraggablePoint
 
 
 class PlotToolbar(NavigationToolbar):
-    # # only display the buttons we need
-    # # TODO change order of appearance for zoom buttons
-    # toolitems = [t for t in NavigationToolbar.toolitems if
-    #              t[0] in ("Home", "Pan", "Zoom", "Save")]
-    #
-    # def __init__(self, *args, **kwargs):
-    #     super(PlotToolbar, self).__init__(*args, **kwargs)
-    #     self.layout().takeAt(6)
 
     def __init__(self, plot, parent=None):
         # https://github.com/matplotlib/matplotlib/blob/master/lib/matplotlib/backends/backend_qt5.py
@@ -68,14 +61,11 @@ class PlotWidget(QtGui.QWidget):
         self.axis.set_xlabel("x")
         self.axis.set_ylabel("z")
         self.axis.set_ylim(self.axis.get_ylim()[::-1])
-        # this is the Canvas Widget that displays the `figure`
-        # it takes the `figure` instance as a parameter to __init__
         self.canvas = FigureCanvas(self.figure)
 
-        # this is the Navigation widget
-        # it takes the Canvas widget and a parent
-        # TODO: add zoom buttons for in and out!! >>> https://dalelane.co.uk/blog/?p=778
         self.toolbar = PlotToolbar(self.canvas, self)
+        self.toolbar.setIconSize(QtCore.QSize(18, 18))
+        self.toolbar.setContentsMargins(0, 0, 0, 0)
 
         # add buttons
         self.btn_zoom_in = QtGui.QToolButton()
@@ -94,7 +84,6 @@ class PlotWidget(QtGui.QWidget):
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
         layout.setMargin(0)
-        # layout.addWidget(self.button)
         self.setLayout(layout)
 
     def zoomOut(self):
@@ -122,108 +111,6 @@ class PlotWidget(QtGui.QWidget):
         self.axis.set_xlim(x_dim[0] + 0.1*x_dist, x_dim[1] - 0.1*x_dist)
         self.axis.set_ylim(y_dim[0] + 0.1*y_dist, y_dim[1] - 0.1*y_dist)
         self.canvas.draw()
-
-
-class DraggablePoint():
-    """
-    thank you very much:
-    http://stackoverflow.com/questions/21654008/matplotlib-drag-overlapping-points-interactively
-    """
-    lock = None  # only one can be animated at a time
-
-    def __init__(self, point=None, marker=None, center=None):
-        # print("dp init")
-        self.point = point
-        self.press = None
-        self.background = None
-        self.center = center
-        self.marker = marker
-        self.params = (self.marker, self.center)
-        self.dict = {}
-        # FIXME: WTF!!!! die initialisierung SCHEINT hier notwendig, da die funktionen on_press/release/motion andernfalls nicht aufgerufen werden. WARUM AUCH IMMER. unnötig bei python 3.4.3 und mpl 1.4.3 @nico
-        self.on_press = self.on_press
-
-    def connect(self):
-        """
-            connect to all the events we need
-        """
-        self.cidpress = self.point.figure.canvas.mpl_connect('button_press_event', self.on_press)
-        self.cidrelease = self.point.figure.canvas.mpl_connect('button_release_event', self.on_release)
-        self.cidmotion = self.point.figure.canvas.mpl_connect('motion_notify_event', self.on_motion)
-
-    def on_press(self, event):
-        # if press out ouf point boundary
-        if event.inaxes != self.point.axes:
-            return
-        # if more than one object oculd be moved
-        if DraggablePoint.lock is not None:
-            return
-        contains, attrd = self.point.contains(event)
-        if not contains:
-            return
-        self.press = (self.point.center), event.xdata, event.ydata
-        DraggablePoint.lock = self
-        # draw everything but the selected rectangle and store the pixel buffer
-        canvas = self.point.figure.canvas
-        axes = self.point.axes
-        self.point.set_animated(True)
-        canvas.draw()
-        self.background = canvas.copy_from_bbox(self.point.axes.bbox)
-        # now redraw just the rectangle
-        axes.draw_artist(self.point)
-        # and blit just the redrawn area
-        canvas.blit(axes.bbox)
-
-    def on_motion(self, event):
-        if DraggablePoint.lock is not self:
-            return
-        if event.inaxes != self.point.axes:
-            return
-        self.point.center, xpress, ypress = self.press
-        dx = event.xdata - xpress
-        dy = event.ydata - ypress
-        self.point.center = (self.point.center[0]+dx, self.point.center[1]+dy)
-
-        canvas = self.point.figure.canvas
-        axes = self.point.axes
-        # restore the background region
-        canvas.restore_region(self.background)
-        # redraw just the current rectangle
-        axes.draw_artist(self.point)
-        # blit just the redrawn area
-        canvas.blit(axes.bbox)
-
-    def on_release(self, event):
-        """
-            on release we reset the press data
-        """
-        if DraggablePoint.lock is not self:
-            return
-        self.press = None
-        DraggablePoint.lock = None
-        # turn off the rect animation property and reset the background
-        self.point.set_animated(False)
-        self.background = None
-        # redraw the full figure
-        self.point.figure.canvas.draw()
-        self.center = event.xdata, event.ydata
-        # return self.marker, self.center
-        self.returnValue()
-
-    def returnValue(self):
-        """
-            added by myself to get the final marker position after movement out of the class objects
-        """
-        self.dict[self.marker] = self.point.center
-        return self.dict
-
-    def disconnect(self):
-        """
-            disconnect all the stored connection ids
-        """
-        self.point.figure.canvas.mpl_disconnect(self.cidpress)
-        self.point.figure.canvas.mpl_disconnect(self.cidrelease)
-        self.point.figure.canvas.mpl_disconnect(self.cidmotion)
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -254,22 +141,8 @@ class MainWindow(QtGui.QMainWindow):
         self.spb_paths.valueChanged.connect(self.changedSpbSldPaths)
         self.spb_paths.valueChanged.connect(self.changedSldPaths)
 
-        # self.btn_rs.clicked.connect(self.triggeredRectangleSelection)
-        # self.btn_del.clicked.connect(self.imageDeleteSelected)
-        # self.btn_undo.clicked.connect(self.clickedImageDeleteUndo)
-        # BUILDER TAB BUTTONS
-        self.called = False
-        # self.btn_circle.clicked.connect(self.builder)
-        # self.btn_rectangle.clicked.connect(self.builder)
-        # self.btn_world.clicked.connect(self.builder)
-        # self.btn_line.clicked.connect(self.builder)
-        #
         self.btn_region_init.clicked.connect(self.regionTable)
         self.btn_region_refresh.clicked.connect(self.regionRefresh)
-        # self.chbx_region_check.stateChanged.connect(self.regionCheckMarkerPosition)
-        # self.chbx_region_check_finished.stateChanged.connect(self.regionMoveMarkersFinished)
-        # self.rbtn_region_regions.stateChanged.connect(self.toggledRegionCheckBoxes)
-        # self.rbtn_region_attributes.stateChanged.connect(self.toggledRegionCheckBoxes)
         self.btn_region_check.toggled.connect(self.regionCheckMarkerPosition)
         self.btn_region_export.clicked.connect(self.regionExportPoly)
         #
@@ -330,26 +203,7 @@ class MainWindow(QtGui.QMainWindow):
                 color: black;
                 }
             """
-        #
-        # # ## menu bar
-        # openfile_action = QtGui.QAction("&Open Sketch", self)
-        # openfile_action.setShortcut("Ctrl+O")
-        # openfile_action.setStatusTip("load sketch to use as model")
-        # openfile_action.triggered.connect(self.chooseOpenSketch)
-        # exit_action = QtGui.QAction("&Exit", self)
-        # exit_action.setShortcut("Ctrl+Q")
-        # exit_action.triggered.connect(self.close)
-        # exit_action.setStatusTip("exit application")
-        #
-        # # self.statusBar = QtGui.QStatusBar()
-        # menubar = self.menuBar()
-        # # '&' makes short key accessible via 'alt + f'
-        # fileMenu = menubar.addMenu("&File")
-        # fileMenu.addAction(openfile_action)
-        # fileMenu.addSeparator()
-        # fileMenu.addAction(exit_action)
 
-        # ## first tab of tool_box
         file_widget = QtGui.QWidget()
         self.vbox_file = QtGui.QVBoxLayout()
         self.le_file = QtGui.QLineEdit()
@@ -409,34 +263,6 @@ class MainWindow(QtGui.QMainWindow):
         vbox_sld_paths = QtGui.QVBoxLayout()
         vbox_sld_paths.addLayout(hbox_sld_paths)
 
-        # # ## rectangle selection button
-        # self.btn_rs = QtGui.QPushButton(self)
-        # self.btn_rs.setToolTip("activate point selection")
-        # self.btn_rs.setCheckable(True)
-        # self.btn_rs.setStyleSheet(style_btn_rs)
-        # self.btn_rs.setIcon(QtGui.QIcon("icons2/External-Link.svg"))
-        # # self.btn_rs.setIconSize(QtCore.QSize(30, 30))
-        # self.btn_del = QtGui.QPushButton(self)
-        # self.btn_del.setToolTip("delete selected points")
-        # self.btn_del.setIcon(
-        #     self.style().standardIcon(QtGui.QStyle.SP_TrashIcon))
-        # # self.btn_del.setIconSize(QtCore.QSize(30, 30))
-        # self.btn_del.setEnabled(False)
-        # self.btn_del.setStyleSheet(style_btn)
-        # self.btn_undo = QtGui.QPushButton(self)
-        # # self.btn_undo.setIcon(QtGui.QIcon("icons2/Delete.svg"))
-        # # self.btn_undo.setIcon(QtGui.QIcon.fromTheme(QtCore.QString.fromUtf8("document-open")))
-        # self.btn_undo.setIcon(
-        #         self.style().standardIcon(QtGui.QStyle.SP_ArrowBack))
-        # self.btn_undo.setToolTip("undo deletions")
-        # # self.btn_undo.setIconSize(QtCore.QSize(30, 30))
-        # self.btn_undo.setEnabled(False)
-        # self.btn_undo.setStyleSheet(style_btn)
-        # hbox_dot_options = QtGui.QHBoxLayout()
-        # hbox_dot_options.addWidget(self.btn_rs)
-        # hbox_dot_options.addWidget(self.btn_del)
-        # hbox_dot_options.addWidget(self.btn_undo)
-
         le_slds = QtGui.QLabel("Threshold")
         le_sld_dens = QtGui.QLabel("Point density")
         le_sld_paths = QtGui.QLabel("Number of Polys")
@@ -448,12 +274,6 @@ class MainWindow(QtGui.QMainWindow):
         vbox_slider.addLayout(vbox_sld_dens)
         vbox_slider.addWidget(le_sld_paths)
         vbox_slider.addLayout(vbox_sld_paths)
-        # vbox_slider.addWidget(le_dot_opts)
-        # vbox_slider.addLayout(hbox_dot_options)
-        # grp_dot_options = QtGui.QGroupBox("dot options")
-        # grp_dot_options.setLayout(hbox_dot_options)
-        # slider_widget = QtGui.QWidget()
-        # slider_widget.setLayout(vbox_slider)
 
         self.vbox_file.addLayout(hbox_file)
         self.vbox_file.addWidget(self.file_image)
@@ -462,126 +282,12 @@ class MainWindow(QtGui.QMainWindow):
         # self.vbox_file.addStretch(1)
 
         file_widget.setLayout(self.vbox_file)
-        # ## END first tab of tool_box
-
-        # hbox_btns = QtGui.QHBoxLayout()
-        # self.btn1 = QtGui.QPushButton("Polygone mergen?", self)
-        # self.btn2 = QtGui.QPushButton("Punkte löschen?", self)
-        # self.btn3 = QtGui.QPushButton("3", self)
-        # hbox_btns.addWidget(self.btn1)
-        # hbox_btns.addWidget(self.btn2)
-        # hbox_btns.addWidget(self.btn3)
 
         # ## scratch tab of tool_box
         scratch_widget = QtGui.QWidget()
         vbox_scratch = QtGui.QVBoxLayout()
         vbox_scratch.addWidget(QtGui.QPlainTextEdit("2 b continued"))
         scratch_widget.setLayout(vbox_scratch)
-
-        # ####################################################################################### #
-        #                                      TAB BUILDER                                        #
-
-        # self.btn_world = QtGui.QPushButton("W")
-        # self.btn_world.setToolTip("create world")
-        # self.btn_world.setStatusTip("HELP: create the world where everything will be created")
-        # self.btn_world.setCheckable(True)
-        # self.btn_world.setFixedSize(30, 30)
-        #
-        # self.btn_circle = QtGui.QPushButton("C")
-        # self.btn_circle.setToolTip("create circle")
-        # self.btn_circle.setStatusTip("HELP: create a circle by defining its radius")
-        # self.btn_circle.setCheckable(True)
-        # self.btn_circle.setFixedSize(30, 30)
-        #
-        # self.btn_rectangle = QtGui.QPushButton("R")
-        # self.btn_rectangle.setToolTip("create rectangle")
-        # self.btn_rectangle.setStatusTip("HELP: create a rectangle and specify parameters")
-        # self.btn_rectangle.setCheckable(True)
-        # self.btn_rectangle.setFixedSize(30, 30)
-        #
-        # self.btn_line = QtGui.QPushButton("L")
-        # self.btn_line.setToolTip("create line")
-        # self.btn_line.setStatusTip("HELP: create a line and specify parameters")
-        # self.btn_line.setCheckable(True)
-        # self.btn_line.setFixedSize(30, 30)
-        #
-        # self.btn_polygon = QtGui.QPushButton()
-        # self.btn_polygon.setIcon(QtGui.QIcon("material/ic_gesture_black_24px.svg"))
-        # self.btn_polygon.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-        # self.btn_polygon.setToolTip("create polygon")
-        # self.btn_polygon.setStatusTip("HELP: create a polygon by clicking around")
-        # self.btn_polygon.setCheckable(True)
-        # self.btn_polygon.setFixedSize(30, 30)
-        # self.btn_polygon.setEnabled(False)
-        #
-        # # group together so only one can be clicked at a time
-        # btn_group_layout = QtGui.QHBoxLayout()
-        # btn_group_widget = QtGui.QWidget(self)
-        # btn_group_widget.setLayout(btn_group_layout)
-        #
-        # btn_group = QtGui.QButtonGroup(btn_group_widget)
-        # btn_group.addButton(self.btn_world)
-        # btn_group.addButton(self.btn_circle)
-        # btn_group.addButton(self.btn_rectangle)
-        # btn_group.addButton(self.btn_line)
-        # btn_group.addButton(self.btn_polygon)
-        # btn_groupbox = QtGui.QGroupBox(self)
-        # btn_groupbox_layout = QtGui.QHBoxLayout()
-        # btn_groupbox.setLayout(btn_groupbox_layout)
-        # btn_group_layout.addWidget(self.btn_world)
-        # btn_group_layout.addWidget(self.btn_circle)
-        # btn_group_layout.addWidget(self.btn_rectangle)
-        # btn_group_layout.addWidget(self.btn_line)
-        # btn_group_layout.addWidget(self.btn_polygon)
-        #
-        # self.btn_redraw = QtGui.QPushButton()
-        # self.btn_redraw.setToolTip("redraw the hole table")
-        # self.btn_redraw.setIcon(QtGui.QIcon("material/ic_refresh_black_24px.svg"))
-        # self.btn_redraw.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-        # self.btn_redraw.setEnabled(False)
-        #
-        # self.btn_poly_export = QtGui.QPushButton()
-        # self.btn_poly_export.setToolTip("export poly figure")
-        # self.btn_poly_export.setIcon(QtGui.QIcon("material/ic_save_black_24px.svg"))
-        # self.btn_poly_export.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-        # self.btn_poly_export.setEnabled(False)
-        #
-        # self.btn_undo = QtGui.QPushButton()
-        # self.btn_undo.setToolTip("undo last figure")
-        # self.btn_undo.setIcon(QtGui.QIcon("material/ic_undo_black_24px.svg"))
-        # self.btn_undo.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-        # self.btn_undo.setEnabled(False)
-        #
-        # hbox_builder = QtGui.QHBoxLayout()
-        # hbox_builder.addWidget(self.btn_undo)
-        # hbox_builder.addStretch(1)
-        # hbox_builder.addWidget(self.btn_redraw)
-        # hbox_builder.addWidget(self.btn_poly_export)
-        #
-        # # parameter table for different polygons
-        # self.polys_table = QtGui.QTableWidget(self)
-        # self.polys_table.setRowCount(15)
-        # self.polys_table.setVerticalHeaderLabels(("Type", "x0", "y0", "x1", "y1", "Radius", "Segments", "Start", "End", "Marker", "Area", "Boundary", "Left?", "Hole?", "Closed?"))
-        #
-        # buttons_grid = QtGui.QGridLayout()
-        # # # buttons_grid.setSpacing(5)
-        # # # widget, row, col, rowSpan, colSpan) #
-        # buttons_grid.addWidget(btn_group_widget, 1, 0, 5, 1)
-        # # buttons_grid.addWidget(self.btn_world, 1, 0, 1, 1)
-        # # buttons_grid.addWidget(self.btn_circle, 1, 1, 1, 1)
-        # # buttons_grid.addWidget(self.btn_rectangle, 1, 2, 1, 1)
-        # # buttons_grid.addWidget(self.btn_line, 1, 3, 1, 1)
-        # # buttons_grid.addWidget(self.btn_polygon, 1, 4, 1, 1)
-        #
-        # vbox_table = QtGui.QVBoxLayout()
-        # vbox_table.addLayout(buttons_grid)
-        # # vbox_table.addWidget(btn_groupbox)
-        # vbox_table.addWidget(self.polys_table)
-        # vbox_table.addLayout(hbox_builder)
-        #
-        # builder_widget = QtGui.QWidget(self)
-        # # builder_widget.setLayout(buttons_grid)
-        # builder_widget.setLayout(vbox_table)
 
         # ####################################################################################### #
         #                                   TAB REGION MANAGER                                    #
@@ -604,13 +310,6 @@ class MainWindow(QtGui.QMainWindow):
         # plotting options... attributes
         self.rbtn_region_attributes = QtGui.QRadioButton("plot attributes")
         self.rbtn_region_attributes.setEnabled(False)
-        # checkbox to open dialog for moving the marker points
-        # self.chbx_region_check = QtGui.QCheckBox("correct marker positions")
-        # self.chbx_region_check.setEnabled(False)
-        # self.chbx_region_check_finished = QtGui.QCheckBox("finished")
-        # hbox_region_check = QtGui.QHBoxLayout()
-        # hbox_region_check.addWidget(self.chbx_region_check)
-        # hbox_region_check.addWidget(self.chbx_region_check_finished)
 
         # check regions
         self.btn_region_check = QtGui.QPushButton("check region markers")
@@ -751,44 +450,14 @@ class MainWindow(QtGui.QMainWindow):
         # initialize the plot widget
         self.plotWidget = PlotWidget(self)
         builder = Builder(self.plotWidget)
-        # tool_box = QtGui.QToolBox()
-        # tool_box.addItem(file_widget, "start with sketch")
-        # tool_box.addItem(region_widget, "sketch regions")
-        # tool_box.addItem(builder_widget, "model builder")
-        # tool_box.addItem(mesh_widget, "mesh options")
-        # tool_box.setStyleSheet(style_tbx)
         tool_box = QtGui.QTabWidget(self)
         tool_box.setTabPosition(QtGui.QTabWidget.West)
         tool_box.addTab(file_widget, "start with sketch")
         tool_box.addTab(builder, "model builder")
         tool_box.addTab(region_widget, "region manager")
         tool_box.addTab(mesh_widget, "mesh options")
-        # tool_box.setContentsMargins(1, 1, 1, 1)
-        # make the toolbox frame ready... since this needs a QLayout
-        # v_tool_box = QtGui.QVBoxLayout()
-        # v_tool_box.addWidget(tool_box)
-
-        # tabBar = QtGui.QTabBar()
-        # tabBar.addTab("Threshold")
-        # hbox_grps = QtGui.QHBoxLayout()
-        # hbox_grps.addWidget(groupbox_slds)
-        # hbox_grps.addWidget(groupbox_sld_dens)
-        # self.plotWidget.setStatusTip("model area")
         v_plotWidget = QtGui.QVBoxLayout()
         v_plotWidget.addWidget(self.plotWidget)
-
-        # ### initiate frames
-        # frame_left = QtGui.QFrame()
-        # frame_left.setFrameShape(QtGui.QFrame.StyledPanel)
-        # frame_left.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Sunken)
-        # # frame_left.setStyleSheet("background-color: lightgray")
-        # frame_right = QtGui.QFrame()
-        # frame_right.setFrameShape(QtGui.QFrame.StyledPanel)
-        # frame_right.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Sunken)
-
-        # ### add content
-        # frame_left.setLayout(v_tool_box)
-        # frame_right.setLayout(v_plotWidget)
 
         # ### split this
         splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
@@ -797,16 +466,6 @@ class MainWindow(QtGui.QMainWindow):
 
         self.statusBar = QtGui.QStatusBar()
         self.setStatusBar(self.statusBar)
-        # self.statusBar()
-        # ## vbox_widget
-        # vbox_central = QtGui.QVBoxLayout()
-        # vbox_central.addWidget(splitter)
-        # vbox_central.addWidget(self.statusBar)
-        # # von hinten durch die brust ins auge
-        # central_widget = QtGui.QWidget()
-        # central_widget.setLayout(vbox_central)
-        # groupbox_central = QtGui.QGroupBox()
-        # groupbox_central.setLayout(vbox_central)
 
         self.acn_aboutVerison = QtGui.QAction("Version", self)
 
@@ -815,7 +474,6 @@ class MainWindow(QtGui.QMainWindow):
         menu_file.addAction(self.acn_aboutVerison)
 
         self.setCentralWidget(splitter)
-        # self.setCentralWidget(central_widget)
 
         self.setGeometry(200, 100, 1000, 600)
         # window name
@@ -970,10 +628,6 @@ class MainWindow(QtGui.QMainWindow):
 
     def imageDensity(self):
         """ take every n-th tuple given from the slider 'density' to reduce number of points """
-        # self.x_dens = [self.x[i]
-        #           for i in range(0, len(self.x), self.spb_sld_dens.value())]
-        # self.y_dens = [self.y[i]
-        #           for i in range(0, len(self.y), self.spb_sld_dens.value())]
         self.polygons_dens = []
         for p in self.polygons:
             self.polygons_dens.append([p[i] for i in range(0, len(p), self.spb_sld_dens.value())])
@@ -982,10 +636,6 @@ class MainWindow(QtGui.QMainWindow):
 
     def imagePlot(self):
         self.plotWidget.axis.cla()
-        # self.plotWidget.axis.set_xlim(self.min_x - 50, self.max_x + 50)
-        # self.plotWidget.axis.set_ylim(self.max_y + 50, self.min_y - 50)
-        # self.plotWidget.axis.set_aspect("equal")
-        # self.plotWidget.axis.scatter(self.x_dens, self.y_dens, alpha=0.5, s=2)
         for p in self.polygons_dens:
             # print(path)
             # print(path.shape)
@@ -998,97 +648,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # if self.btn_rs.isChecked() is False and len(self.x) != 0:
         #     self.btn_mesh.setEnabled(True)
-
-    # def imagePlotSelected(self):
-    #     # self.x_del = np.empty(1, dtype=int)
-    #     # self.y_del = np.empty(1, dtype=int)
-    #     x_ = np.where((self.x_dens >= self.x1) & (self.x_dens <= self.x2))[0]
-    #     y_ = np.where((self.y_dens >= self.y1) & (self.y_dens <= self.y2))[0]
-    #     self.common = np.intersect1d(x_, y_)
-    #
-    #     self.x_del = [self.x_dens[i] for i in self.common]
-    #     self.y_del = [self.y_dens[i] for i in self.common]
-    #
-    #     if len(self.x_del) == 0 and len(self.y_del) == 0:
-    #         self.imagePlot()
-    #     else:
-    #         self.plotWidget.axis.scatter(
-    #             self.x_del, self.y_del, s=10, c="red", edgecolor="none")
-    #         self.plotWidget.canvas.draw()
-
-    # def imageDeleteSelected(self):
-    #     if len(self.x_del) != 0 and len(self.y_del) != 0:
-    #         # construct new x, y arrays so deleting is reversible
-    #         self.x_dens = np.delete(self.x_dens, self.common).tolist()
-    #         self.y_dens = np.delete(self.y_dens, self.common).tolist()
-    #         # save them for possible undoing and reverse so the last change is the first to undo
-    #         # safer packing [] so the array will be contained even if its only
-    #         # one
-    #         self.x_safe.append(self.x_del)
-    #         self.y_safe.append(self.y_del)
-    #         # empty the deletion lists so nothing weird happens...
-    #         self.x_del = []
-    #         self.y_del = []
-    #         self.imagePlot()
-
-    # def clickedImageDeleteUndo(self):
-    #     try:
-    #         self.x_dens = self.x_dens + self.x_safe[-1]
-    #         self.y_dens = self.y_dens + self.y_safe[-1]
-    #         # since it will be plottet again, there is no need to save it.. so
-    #         # delete
-    #         del self.x_safe[-1]
-    #         del self.y_safe[-1]
-    #
-    #         self.imagePlot()
-    #     except IndexError:
-    #         # self.statusBar.showMessage("nothing to undo")
-    #         pass
-
-    # def rectSelectCallback(self, eclick, erelease):
-    #     'eclick and erelease are the press and release events'
-    #     # ## sort x and y
-    #     self.x1, self.x2 = min(eclick.xdata, erelease.xdata), max(
-    #         eclick.xdata, erelease.xdata)
-    #     self.y1, self.y2 = min(eclick.ydata, erelease.ydata), max(
-    #         eclick.ydata, erelease.ydata)
-    #     self.imagePlotSelected()
-    #
-    # def toggleSelector(self, event):
-    #     # print(' Key pressed.')
-    #     if event.key in ['Q', 'q'] and self.toggleSelector.active:
-    #         # print(' RectangleSelector deactivated.')
-    #         self.toggleSelector.set_active(False)
-    #     if event.key in ['A', 'a'] and not self.toggleSelector.active:
-    #         # print(' RectangleSelector activated.')
-    #         self.toggleSelector.set_active(True)
-
-    # def triggeredRectangleSelection(self):
-    #     if self.btn_rs.isChecked() is True:
-    #         self.btn_del.setEnabled(True)
-    #         self.btn_undo.setEnabled(True)
-    #
-    #         self.toggleSelector = RectangleSelector(self.plotWidget.axis,
-    #                                                  self.rectSelectCallback,
-    #                                                  drawtype='box', useblit=True,
-    #                                                  # only use left click
-    #                                                  button=[1],
-    #                                                  minspanx=5, minspany=5,
-    #                                                  spancoords='pixels',
-    #                                                  interactive=False)
-    #         self.plotWidget.canvas.draw()
-    #
-    #     else:
-    #         self.toggleSelector.set_active(False)
-    #         self.btn_del.setEnabled(False)
-    #         self.btn_undo.setEnabled(False)
-
-    # def toggledRegionCheckBoxes(self):
-    #     """ just turn off the other """
-    #     if self.rbtn_region_attributes.isChecked() is True:
-    #         self.rbtn_region_regions.setChecked(False)
-    #     elif self.rbtn_region_regions.isChecked() is True:
-    #         self.rbtn_region_attributes.setChecked(False)
 
     def clickedBtnMesh(self):
         if self.mesh_refine is False:
@@ -1148,61 +707,6 @@ class MainWindow(QtGui.QMainWindow):
             writePLC(self.mesh, export_mesh)
         else:
             writePLC(self.mesh, export_mesh + ".bms")
-
-    """ ###############                      BUILDER MANAGER                     ############### """
-    def builder(self):
-        """
-            start creating circles by calling the builder class
-        """
-        ######## builder.py:
-        # if self.btn_circle.isChecked() is True:
-        #     if not self.called:
-        #         self.called = True
-        #         self.b = Builder(self.plotWidget, self.polys_table, type_="circle")
-        #         self.b.connect()
-        #     else:
-        #         self.b.changeType("circle")
-        # elif self.btn_rectangle.isChecked() is True:
-        #     if not self.called:
-        #         self.called = True
-        #         self.b = Builder(self.plotWidget, self.polys_table, type_="rectangle")
-        #         self.b.connect()
-        #     else:
-        #         self.b.changeType("rectangle")
-        # elif self.btn_world.isChecked() is True:
-        #     if not self.called:
-        #         self.called = True
-        #         self.b = Builder(self.plotWidget, self.polys_table, type_="world")
-        #         self.b.connect()
-        #     else:
-        #         self.b.changeType("world")
-        # elif self.btn_line.isChecked() is True:
-        #     if not self.called:
-        #         self.called = True
-        #         self.b = Builder(self.plotWidget, self.polys_table, type_="line")
-        #         self.b.connect()
-        #     else:
-        #         self.b.changeType("line")
-        #
-        # else:
-        #     self.poly, self.polys_table = self.b.getPoly()
-        #     self.b.disconnect()
-        #     print(self.poly)
-
-        ######## builder2.py:
-        if not self.called:
-            self.called = True
-            self.b = Builder(self.plotWidget, self.polys_table)
-
-        if self.btn_circle.isChecked() is True:
-            self.b.buildCircle()
-
-        elif self.btn_rectangle.isChecked() is True:
-            self.b.buildRectangle()
-
-        elif self.btn_line.isChecked() is True:
-            self.b.buildLine()
-
 
     """ ###############                      REGION MANAGER                      ############### """
     def regionRefresh(self, new_markers=False):
