@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: UTF-8
 
-""" class for tab with main model builder components """
+""" model builder components """
 from PyQt4 import QtGui
 from pygimli.mplviewer import drawMesh
 from pygimli.meshtools import polytools as plc
@@ -52,7 +52,7 @@ class Builder(QtGui.QWidget):
         self.acn_circle.setToolTip("Create a circle body")
         self.acn_circle.setCheckable(True)
 
-        self.acn_line = QtGui.QAction(QtGui.QIcon("material/ic_spanLine.svg"), "line", self.grp_polyTools)
+        self.acn_line = QtGui.QAction(QtGui.QIcon("material/ic_spanPoly.svg"), "line", self.grp_polyTools)
         self.acn_line.setToolTip("Create a line by clicking")
         self.acn_line.setCheckable(True)
 
@@ -357,6 +357,9 @@ class Builder(QtGui.QWidget):
         self.polys.append(self.undone.pop())
         self.marker += 1
         self.drawPoly()
+
+    def getPoly(self):
+        return self.polys
 
 
 if __name__ == "__main__":
