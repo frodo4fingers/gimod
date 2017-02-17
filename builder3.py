@@ -21,7 +21,6 @@ class Builder(QtGui.QWidget):
         self.figure = plotWidget
         self.marker = 1
         self.polys = []
-        print("IIIIIINNNNNIIIIIIIT")
 
         self.setupUI()
 
@@ -130,7 +129,6 @@ class Builder(QtGui.QWidget):
         self.y_r = y2
         self.form = form
 
-        print(self.form)
         self.constructPoly()
 
     def constructPoly(self):
@@ -165,7 +163,6 @@ class Builder(QtGui.QWidget):
             for construction: header labels >>>
             "Type", "x0", "y0", "x1", "y1", "Radius", "Segments", "Start", "End", "Marker", "Area", "Boundary", "Left?", "Hole?", "Closed?"
         """
-        print("table", self.marker, self.form)
         # update table on release
         self.polys_table.setColumnCount(self.marker)
         col = self.marker - 1
@@ -233,7 +230,6 @@ class Builder(QtGui.QWidget):
             self.polys_table.setCellWidget(10, col, spx_area)
 
         if not self.form == "World":
-            print("world")
             # insert boundary marker
             self.polys_table.setItem(11, col, QtGui.QTableWidgetItem(str(1)))
 
@@ -263,7 +259,6 @@ class Builder(QtGui.QWidget):
 
         # iterate marker counter
         self.marker += 1
-        print("table", self.marker)
 
     def redrawTable(self):
         """
@@ -271,8 +266,6 @@ class Builder(QtGui.QWidget):
         """
         # empty the list of polygon figures
         del self.polys[:]
-        print(self.polys_table.columnCount())
-        print(self.polys_table.rowCount())
 
         for col in range(self.polys_table.columnCount()):
 
