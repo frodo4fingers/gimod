@@ -28,8 +28,8 @@ from shapely.geometry import Polygon, Point
 import matplotlib.pyplot as plt
 
 from collections import defaultdict, Counter
-# from builder import Builder
 from builder import Builder
+from regions import RegionQuickCheck
 from mpl import DraggablePoint
 
 
@@ -41,7 +41,7 @@ class PlotToolbar(NavigationToolbar):
             ('Home', 'Reset original view', 'home', 'home'),
             # (None, None, None, None),
             ('Pan', 'Pan axes with left mouse, zoom with right', 'move', 'pan'),
-            ('Zoom', 'Zoom to rectangle', 'zoom_to_rect', 'zoom'),
+            ('Zoom', 'Zoom to recta ngle', 'zoom_to_rect', 'zoom'),
             # (None, None, None, None),
             ('Save', 'Save the figure', 'filesave', 'save_figure'),
             )
@@ -55,7 +55,7 @@ class PlotWidget(QtGui.QWidget):
 
         # a figure instance to plot on
         self.figure = Figure()
-        self.figure.subplots_adjust(left=0.1, right=0.95, bottom=0.1, top=0.95, hspace=0.4, wspace=0.1)
+        self.figure.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95)
         self.axis = self.figure.add_subplot(111)
 
         self.axis.set_xlabel("x")
@@ -141,10 +141,10 @@ class MainWindow(QtGui.QMainWindow):
         self.spb_paths.valueChanged.connect(self.changedSpbSldPaths)
         self.spb_paths.valueChanged.connect(self.changedSldPaths)
 
-        self.btn_region_init.clicked.connect(self.regionTable)
-        self.btn_region_refresh.clicked.connect(self.regionRefresh)
-        self.btn_region_check.toggled.connect(self.regionCheckMarkerPosition)
-        self.btn_region_export.clicked.connect(self.regionExportPoly)
+        # self.btn_region_init.clicked.connect(self.regionTable)
+        # self.btn_region_refresh.clicked.connect(self.regionRefresh)
+        # self.btn_region_check.toggled.connect(self.regionCheckMarkerPosition)
+        # self.btn_region_export.clicked.connect(self.regionExportPoly)
         #
         self.chbx_mesh_refine.stateChanged.connect(self.changedChbxMeshRefine)
         self.chbx_smooth.stateChanged.connect(self.changedChbxSmooth)
@@ -291,58 +291,58 @@ class MainWindow(QtGui.QMainWindow):
 
         # ####################################################################################### #
         #                                   TAB REGION MANAGER                                    #
-        self.btn_region_init = QtGui.QPushButton("initialize")
-        self.btn_region_init.setEnabled(False)
-
-        # attribute table of the model
-        self.region_table = QtGui.QTableWidget(self)
-        self.region_table.setColumnCount(3)
-        self.region_table.setHorizontalHeaderLabels(("Marker #", "Hole?", "Attribute"))
-
-        # button refresh to plot the model again after configurations in the table have been made
-        self.btn_region_refresh = QtGui.QPushButton("refresh")
-        self.btn_region_refresh.setEnabled(False)
-
-        # plotting options... regions
-        self.rbtn_region_regions = QtGui.QRadioButton("plot regions")
-        self.rbtn_region_regions.setChecked(True)
-        self.rbtn_region_regions.setEnabled(False)
-        # plotting options... attributes
-        self.rbtn_region_attributes = QtGui.QRadioButton("plot attributes")
-        self.rbtn_region_attributes.setEnabled(False)
-
-        # check regions
-        self.btn_region_check = QtGui.QPushButton("check region markers")
-        self.btn_region_check.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.btn_region_check.setCheckable(True)
-        self.btn_region_check.setEnabled(False)
-        self.btn_region_export = QtGui.QPushButton()
-        self.btn_region_export.setToolTip("save as *.poly")
-        self.btn_region_export.setIcon(QtGui.QIcon("material/ic_save_black_24px.svg"))
-        self.btn_region_export.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-        # self.btn_region_export.setIconSize(QtCore.QSize(30, 30))
-        self.btn_region_export.setEnabled(False)
-
-        hbox_1 = QtGui.QHBoxLayout()
-        hbox_1.addWidget(self.rbtn_region_regions)
-        hbox_1.addWidget(self.btn_region_refresh)
-        hbox_2 = QtGui.QHBoxLayout()
-        hbox_2.addWidget(self.rbtn_region_attributes)
-        hbox_2.addStretch(1)
-        hbox_3 = QtGui.QHBoxLayout()
-        hbox_3.addWidget(self.btn_region_check)
-        hbox_3.addWidget(self.btn_region_export)
-
-        vbox_region2 = QtGui.QVBoxLayout()
-        vbox_region2.addWidget(self.btn_region_init)
-        # vbox_region2.addLayout(vbox_region1)
-        vbox_region2.addLayout(hbox_1)
-        vbox_region2.addLayout(hbox_2)
-        vbox_region2.addWidget(self.region_table)
-        vbox_region2.addLayout(hbox_3)
-
-        region_widget = QtGui.QWidget()
-        region_widget.setLayout(vbox_region2)
+        # self.btn_region_init = QtGui.QPushButton("initialize")
+        # # self.btn_region_init.setEnabled(False)
+        #
+        # # attribute table of the model
+        # self.region_table = QtGui.QTableWidget(self)
+        # self.region_table.setColumnCount(3)
+        # self.region_table.setHorizontalHeaderLabels(("Marker #", "Hole?", "Attribute"))
+        #
+        # # button refresh to plot the model again after configurations in the table have been made
+        # self.btn_region_refresh = QtGui.QPushButton("refresh")
+        # self.btn_region_refresh.setEnabled(False)
+        #
+        # # plotting options... regions
+        # self.rbtn_region_regions = QtGui.QRadioButton("plot regions")
+        # self.rbtn_region_regions.setChecked(True)
+        # self.rbtn_region_regions.setEnabled(False)
+        # # plotting options... attributes
+        # self.rbtn_region_attributes = QtGui.QRadioButton("plot attributes")
+        # self.rbtn_region_attributes.setEnabled(False)
+        #
+        # # check regions
+        # self.btn_region_check = QtGui.QPushButton("check region markers")
+        # self.btn_region_check.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        # self.btn_region_check.setCheckable(True)
+        # self.btn_region_check.setEnabled(False)
+        # self.btn_region_export = QtGui.QPushButton()
+        # self.btn_region_export.setToolTip("save as *.poly")
+        # self.btn_region_export.setIcon(QtGui.QIcon("material/ic_save_black_24px.svg"))
+        # self.btn_region_export.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        # # self.btn_region_export.setIconSize(QtCore.QSize(30, 30))
+        # self.btn_region_export.setEnabled(False)
+        #
+        # hbox_1 = QtGui.QHBoxLayout()
+        # hbox_1.addWidget(self.rbtn_region_regions)
+        # hbox_1.addWidget(self.btn_region_refresh)
+        # hbox_2 = QtGui.QHBoxLayout()
+        # hbox_2.addWidget(self.rbtn_region_attributes)
+        # hbox_2.addStretch(1)
+        # hbox_3 = QtGui.QHBoxLayout()
+        # hbox_3.addWidget(self.btn_region_check)
+        # hbox_3.addWidget(self.btn_region_export)
+        #
+        # vbox_region2 = QtGui.QVBoxLayout()
+        # vbox_region2.addWidget(self.btn_region_init)
+        # # vbox_region2.addLayout(vbox_region1)
+        # vbox_region2.addLayout(hbox_1)
+        # vbox_region2.addLayout(hbox_2)
+        # vbox_region2.addWidget(self.region_table)
+        # vbox_region2.addLayout(hbox_3)
+        #
+        # region_widget = QtGui.QWidget()
+        # region_widget.setLayout(vbox_region2)
 
         # ####################################################################################### #
         #                                    TAB MESH OPTIONS                                     #
@@ -449,12 +449,14 @@ class MainWindow(QtGui.QMainWindow):
         #                                      SET UP TOOLBOX                                     #
         # initialize the plot widget
         self.plotWidget = PlotWidget(self)
-        builder = Builder(self.plotWidget)
+        self.builder = Builder(self.plotWidget)
+        self.regions = RegionQuickCheck(self)
         tool_box = QtGui.QTabWidget(self)
         tool_box.setTabPosition(QtGui.QTabWidget.West)
         tool_box.addTab(file_widget, "start with sketch")
-        tool_box.addTab(builder, "model builder")
-        tool_box.addTab(region_widget, "region manager")
+        tool_box.addTab(self.builder, "model builder")
+        # tool_box.addTab(region_widget, "region manager")
+        tool_box.addTab(self.regions, "region manager")
         tool_box.addTab(mesh_widget, "mesh options")
         v_plotWidget = QtGui.QVBoxLayout()
         v_plotWidget.addWidget(self.plotWidget)
@@ -642,9 +644,9 @@ class MainWindow(QtGui.QMainWindow):
             self.plotWidget.axis.scatter(*zip(*p), alpha=0.5, s=2)
 
         self.plotWidget.canvas.draw()
-        self.btn_region_init.setEnabled(True)
-        self.rbtn_region_regions.setEnabled(True)
-        self.rbtn_region_attributes.setEnabled(True)
+        # self.btn_region_init.setEnabled(True)
+        # self.rbtn_region_regions.setEnabled(True)
+        # self.rbtn_region_attributes.setEnabled(True)
 
         # if self.btn_rs.isChecked() is False and len(self.x) != 0:
         #     self.btn_mesh.setEnabled(True)
@@ -740,74 +742,74 @@ class MainWindow(QtGui.QMainWindow):
         self.statusBar.showMessage(str(self.poly))
         self.regionShow()
 
-    def regionCentroid(self, poly):
-        """
-            find centroid as marker position
-            # FIXME ...potentially dangerous method... since the center could be overlayed by another polygon
-        """
-        ref_polygon = Polygon(poly)
-        # get the x and y coordinate of the centroid
-        pnts = ref_polygon.centroid.wkt.split(" ")[1:]
+    # def regionCentroid(self, poly):
+    #     """
+    #         find centroid as marker position
+    #         # FIXME ...potentially dangerous method... since the center could be overlayed by another polygon
+    #     """
+    #     ref_polygon = Polygon(poly)
+    #     # get the x and y coordinate of the centroid
+    #     pnts = ref_polygon.centroid.wkt.split(" ")[1:]
+    #
+    #     return (float(pnts[0][1:]), float(pnts[1][:-1]))
+    #
+    # def regionShow(self):
+    #     """
+    #         plot regions (or attribute table)
+    #     """
+    #     self.plotWidget.axis.cla()
+    #     if self.rbtn_region_regions.isChecked() is True:
+    #         drawPLC(self.plotWidget.axis, self.poly)
+    #
+    #     elif self.rbtn_region_attributes.isChecked() is True:
+    #         self.regionGetAttributes()
+    #         mesh_tmp = createMesh(self.poly)
+    #         try:
+    #             attr_map = pg.solver.parseMapToCellArray(self.attr_map, mesh_tmp)
+    #             drawMeshBoundaries(self.plotWidget.axis, mesh_tmp, hideMesh=True)
+    #             drawModel(self.plotWidget.axis, mesh_tmp, tri=True, alpha=0.65, data=attr_map)
+    #
+    #         except (AttributeError, IndexError):
+    #             # self.statusBar.showMessage("unsufficient data in attribute table")
+    #             self.statusBar.showMessage("ERROR: wrong or missing values in attribute table")
+    #             pass
+    #
+    #     self.plotWidget.axis.set_ylim(self.plotWidget.axis.get_ylim()[::-1])
+    #     self.plotWidget.canvas.draw()
 
-        return (float(pnts[0][1:]), float(pnts[1][:-1]))
-
-    def regionShow(self):
-        """
-            plot regions (or attribute table)
-        """
-        self.plotWidget.axis.cla()
-        if self.rbtn_region_regions.isChecked() is True:
-            drawPLC(self.plotWidget.axis, self.poly)
-
-        elif self.rbtn_region_attributes.isChecked() is True:
-            self.regionGetAttributes()
-            mesh_tmp = createMesh(self.poly)
-            try:
-                attr_map = pg.solver.parseMapToCellArray(self.attr_map, mesh_tmp)
-                drawMeshBoundaries(self.plotWidget.axis, mesh_tmp, hideMesh=True)
-                drawModel(self.plotWidget.axis, mesh_tmp, tri=True, alpha=0.65, data=attr_map)
-
-            except (AttributeError, IndexError):
-                # self.statusBar.showMessage("unsufficient data in attribute table")
-                self.statusBar.showMessage("ERROR: wrong or missing values in attribute table")
-                pass
-
-        self.plotWidget.axis.set_ylim(self.plotWidget.axis.get_ylim()[::-1])
-        self.plotWidget.canvas.draw()
-
-    def regionTable(self):
-        """
-            - overview the regions of the model
-            - see marker and assign attributes
-        """
-        # self.region_table.clear()
-        self.region_table.setRowCount(len(self.polygons_dens) + 1)  # +1 for world around model
-
-        for i in range(len(self.polygons_dens) + 1):  # row
-            # column 1 - region marker no.
-            cbx_marker = QtGui.QComboBox(self.region_table)
-            [cbx_marker.addItem(str(m+1)) for m in range(len(self.polygons_dens) + 1)]
-            cbx_marker.setCurrentIndex(i)
-            self.region_table.setCellWidget(i, 0, cbx_marker)
-
-            # column 2 - isHoleMarker
-            cbx_isHole = QtGui.QComboBox(self.region_table)
-            cbx_isHole.addItem("False")
-            cbx_isHole.addItem("True")
-            self.region_table.setCellWidget(i, 1, cbx_isHole)
-
-            # column 3 - attributes
-            self.region_table.setItem(i, 2, QtGui.QTableWidgetItem("None"))
-
-        self.region_table.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-        self.region_table.resizeColumnsToContents()
-
-        # allow new options now since the poly exists now
-        self.btn_region_refresh.setEnabled(True)
-        self.btn_region_check.setEnabled(True)
-        self.btn_region_export.setEnabled(True)
-        # self.chbx_region_check.setEnabled(True)
-        self.regionRefresh()
+    # def regionTable(self):
+    #     """
+    #         - overview the regions of the model
+    #         - see marker and assign attributes
+    #     """
+    #     # self.region_table.clear()
+    #     self.region_table.setRowCount(len(self.polygons_dens) + 1)  # +1 for world around model
+    #
+    #     for i in range(len(self.polygons_dens) + 1):  # row
+    #         # column 1 - region marker no.
+    #         cbx_marker = QtGui.QComboBox(self.region_table)
+    #         [cbx_marker.addItem(str(m+1)) for m in range(len(self.polygons_dens) + 1)]
+    #         cbx_marker.setCurrentIndex(i)
+    #         self.region_table.setCellWidget(i, 0, cbx_marker)
+    #
+    #         # column 2 - isHoleMarker
+    #         cbx_isHole = QtGui.QComboBox(self.region_table)
+    #         cbx_isHole.addItem("False")
+    #         cbx_isHole.addItem("True")
+    #         self.region_table.setCellWidget(i, 1, cbx_isHole)
+    #
+    #         # column 3 - attributes
+    #         self.region_table.setItem(i, 2, QtGui.QTableWidgetItem("None"))
+    #
+    #     self.region_table.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    #     self.region_table.resizeColumnsToContents()
+    #
+    #     # allow new options now since the poly exists now
+    #     self.btn_region_refresh.setEnabled(True)
+    #     self.btn_region_check.setEnabled(True)
+    #     self.btn_region_export.setEnabled(True)
+    #     # self.chbx_region_check.setEnabled(True)
+    #     self.regionRefresh()
 
     def regionGetAttributes(self):
         """
@@ -854,63 +856,63 @@ class MainWindow(QtGui.QMainWindow):
         if key_attr:
             self.statusBar.showMessage("WARNING: duplicate or wrong data in attribute table")
 
-    def regionCheckMarkerPosition(self):
-        """
-            check if every marker position is in its respective polygon. the distance between
-            marker position and polygon border should be shortest if its the own polygon!
-        """
-        warning = False
-        if self.btn_region_check.isChecked() is True:
-            for i, mark in enumerate(self.marker_positions):
-                point = Point(mark)
-                for k, poly in enumerate(self.polygons_dens):
-                    dist = point.distance(Polygon(poly))
-                    # print(i+2, k+2, dist)
-                    if i != k and dist == 0.:
-                        warning = True
+    # def regionCheckMarkerPosition(self):
+    #     """
+    #         check if every marker position is in its respective polygon. the distance between
+    #         marker position and polygon border should be shortest if its the own polygon!
+    #     """
+    #     warning = False
+    #     if self.btn_region_check.isChecked() is True:
+    #         for i, mark in enumerate(self.marker_positions):
+    #             point = Point(mark)
+    #             for k, poly in enumerate(self.polygons_dens):
+    #                 dist = point.distance(Polygon(poly))
+    #                 # print(i+2, k+2, dist)
+    #                 if i != k and dist == 0.:
+    #                     warning = True
+    #
+    #         if warning:
+    #             self.statusBar.showMessage("WARNING: possible multiple markers in a polygon... continue at own risk")
+    #             self.regionMoveMarkers()
+    #         else:
+    #             self.statusBar.showMessage("regions and markers seem to be fine", 3000)
+    #
+    #     else:
+    #         new_markers = []
+    #         for p in self.dps:
+    #             val = p.returnValue()
+    #             new_markers.append(list(val.values()))
+    #             p.disconnect()
+    #         self.statusBar.showMessage("updating...")
+    #
+    #         self.regionRefresh(new_markers=new_markers)
 
-            if warning:
-                self.statusBar.showMessage("WARNING: possible multiple markers in a polygon... continue at own risk")
-                self.regionMoveMarkers()
-            else:
-                self.statusBar.showMessage("regions and markers seem to be fine", 3000)
-
-        else:
-            new_markers = []
-            for p in self.dps:
-                val = p.returnValue()
-                new_markers.append(list(val.values()))
-                p.disconnect()
-            self.statusBar.showMessage("updating...")
-
-            self.regionRefresh(new_markers=new_markers)
-
-    def regionMoveMarkers(self):
-        """
-            plots dots as marker positions which can be moved
-        """
-        self.dps = []
-
-        for i, m in enumerate(self.marker_positions):
-            mark = patches.Circle(m, radius=8, fc="r")
-            self.plotWidget.axis.add_patch(mark)
-            dp = DraggablePoint(mark, i+2, m)
-            dp.connect()
-            self.dps.append(dp)
-        self.plotWidget.canvas.draw()
-
-    def regionExportPoly(self):
-        """
-            export the poly figure
-        """
-        export_poly = QtGui.QFileDialog.getSaveFileName(
-            self, caption="Save Poly Figure")
-
-        # if export_poly:
-        if export_poly.endswith(".poly"):
-            writePLC(self.poly, export_poly)
-        else:
-            writePLC(self.poly, export_poly + ".poly")
+    # def regionMoveMarkers(self):
+    #     """
+    #         plots dots as marker positions which can be moved
+    #     """
+    #     self.dps = []
+    #
+    #     for i, m in enumerate(self.marker_positions):
+    #         mark = patches.Circle(m, radius=8, fc="r")
+    #         self.plotWidget.axis.add_patch(mark)
+    #         dp = DraggablePoint(mark, i+2, m)
+    #         dp.connect()
+    #         self.dps.append(dp)
+    #     self.plotWidget.canvas.draw()
+    #
+    # def regionExportPoly(self):
+    #     """
+    #         export the poly figure
+    #     """
+    #     export_poly = QtGui.QFileDialog.getSaveFileName(
+    #         self, caption="Save Poly Figure")
+    #
+    #     # if export_poly:
+    #     if export_poly.endswith(".poly"):
+    #         writePLC(self.poly, export_poly)
+    #     else:
+    #         writePLC(self.poly, export_poly + ".poly")
 
 
 if __name__ == "__main__":
