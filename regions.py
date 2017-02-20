@@ -2,7 +2,7 @@
 # encoding: UTF-8
 
 """ model builder components """
-from PyQt4 import QtGui
+from PyQt4 import QtCore, QtGui
 from pygimli.mplviewer import drawMeshBoundaries, drawMesh, drawPLC, drawModel
 from pygimli.meshtools import polytools as plc
 from pygimli.meshtools import createMesh, writePLC
@@ -26,7 +26,7 @@ class RegionQuickCheck(QtGui.QWidget):
 
         """ connect signals """
         self.btn_init.clicked.connect(self.retrievePolygon)
-        self.btn_refresh.clicked.connect(self.regionShow)
+        self.btn_refresh.clicked.connect(self.refreshPolygon)
         self.btn_check.toggled.connect(self.regionCheckMarkerPosition)
         self.btn_export.clicked.connect(self.regionExportPoly)
         # self.btn_init.clicked.connect(self.fillTableFromFigure)
@@ -78,48 +78,85 @@ class RegionQuickCheck(QtGui.QWidget):
 
     def retrievePolygon(self):
 
-        self.polys = self.builder.getPoly()
-        # if empty there must be a 'figure'
-        if len(self.polys) == 0:
-            self.polyTuples = self.parent.polygons_dens
-            self.polys = []
-            # marker positions for possible repositioning
-            self.markers = []
+        try:  # get tuples of polys from image
+            self.polyFigure = self.parent.polygons_dens
+        except AttributeError:
+            self.polyFigure = None
+            pass
+
+        try:  # get polys from model builder
+            self.polyBuilder = self.builder.getPoly()
+        except AttributeError:
+            self.polyBuilder = None
+            pass
+
+        self.buildPolygon()
+
+    def buildPolygon(self):
+        if self.polyFigure and self.polyBuilder:
+            if len(self.polyBuilder) >= len(self.polyFigure):
+                self.fillTableFromBuilder()
+            else:
+                # TODO: that is just dumb...
+                self.parent.statusBar.showMessage("ERROR: could not decide which figure to take")
+        elif self.polyFigure:
             self.fillTableFromFigure()
-            # print(self.polys)
-            # self.polys = [plc.createPolygon(p, isClosed=True) for p in self.polys]
-            for i, p in enumerate(self.polyTuples):
-                self.polys.append(plc.createPolygon(p, isClosed=True))
+            self.buildPolyFromFigure()
+        else:  # take polys from builder
+            self.fillTableFromBuilder()
+            self.buildPolyFromBuilder()
 
-                # if marker psotions have been moved manually, take these
-                if self.newMarkerPositions:
-                    markerPosition = tuple(self.newMarkerPositions[i])
-                else:
-                    markerPosition = self.regionCenter(p)
+    def refreshPolygon(self):
+        """
+            rebuild Polygon after editing the table
+        """
+        if self.polyFigure:
+            self.buildPolyFromFigure()
+        else:
+            self.buildPolyFromBuilder()
 
-                if self.table_regions.cellWidget(i+1, 1).currentText() == 'False':  # not hole
-                    pg.Mesh.addRegionMarker(self.polys[i], markerPosition, marker=int(self.table_regions.cellWidget(i+1, 0).currentText()))
-                else:  # hole
-                    pg.Mesh.addHoleMarker(self.polys[i], markerPosition)
+    def buildPolyFromFigure(self):
+        self.polys = []
+        # marker positions for possible repositioning
+        self.markers = []
+        for i, p in enumerate(self.polyFigure):
+            self.polys.append(plc.createPolygon(p, isClosed=True))
 
-                self.markers.append(markerPosition)
+            # if marker positions have been moved manually, take these
+            if self.newMarkerPositions:
+                markerPosition = tuple(self.newMarkerPositions[i])
+            else:
+                markerPosition = self.regionCenter(p)
 
-            self.poly = plc.mergePLC(self.polys)
+            if self.table_regions.cellWidget(i+1, 1).currentText() == 'False':  # not hole
+                pg.Mesh.addRegionMarker(self.polys[i], markerPosition, marker=int(self.table_regions.cellWidget(i+1, 0).currentText()))
+            else:  # hole
+                pg.Mesh.addHoleMarker(self.polys[i], markerPosition)
 
-        self.parent.statusBar.showMessage("got {} polygons".format(len(self.polys)))
+            self.markers.append(markerPosition)
+        self.poly = plc.mergePLC(self.polys)
+        self.parent.statusBar.showMessage("got {} polygons".format(len(self.polyFigure)))
+        self.enableButtons()
+        self.regionShow()
 
-        # print(len(self.polys))
+    def buildPolyFromBuilder(self):
+        # TODO: einfacher wenn das von diesem tab aus geht? bisher disabled fr den builder und muss daher im tab builder passieren!
+        self.poly = plc.mergePLC(self.polyBuilder)
+        self.parent.statusBar.showMessage("got {} polygons".format(len(self.polyBuilder)))
+        self.enableButtons()
+        self.btn_check.setEnabled(False)
+        self.regionShow()
+
+    def enableButtons(self):
         self.btn_refresh.setEnabled(True)
         self.btn_check.setEnabled(True)
         self.btn_export.setEnabled(True)
         self.rbtn_plotRegions.setEnabled(True)
         self.rbtn_plotAttributes.setEnabled(True)
 
-        self.regionShow()
-
     def regionShow(self):
         """
-            plot regions (or attribute table)
+            plot regions or attribute table of poly figure
         """
         self.figure.axis.cla()
         if self.rbtn_plotRegions.isChecked() is True:
@@ -139,7 +176,7 @@ class RegionQuickCheck(QtGui.QWidget):
                 self.parent.statusBar.showMessage("ERROR: wrong or missing values in attribute column", 3000)
                 pass
 
-        self.figure.axis.set_ylim(self.figure.axis.get_ylim()[::-1])
+        # self.figure.axis.set_ylim(self.figure.axis.get_ylim()[::-1])
         self.figure.canvas.draw()
 
     def regionCenter(self, poly):
@@ -162,9 +199,8 @@ class RegionQuickCheck(QtGui.QWidget):
         if self.btn_check.isChecked() is True:
             for i, mark in enumerate(self.markers):
                 point = Point(mark)
-                for k, poly in enumerate(self.polyTuples):
+                for k, poly in enumerate(self.polyFigure):
                     dist = point.distance(Polygon(poly))
-                    # print(i+2, k+2, dist)
                     if i != k and dist == 0.:
                         warning = True
 
@@ -177,9 +213,7 @@ class RegionQuickCheck(QtGui.QWidget):
             self.newMarkerPositions = []
             for p in self.dps:
                 val = p.returnValue()
-                # print(val.values())
                 self.newMarkerPositions.append(list(val.values())[0])
-                # TODO: marker positions wont vanish. why!
                 p.disconnect()
             self.parent.statusBar.showMessage("updating...")
 
@@ -220,20 +254,26 @@ class RegionQuickCheck(QtGui.QWidget):
                     tmp_idx.append(i)
                     tmp_attr.append(attr)
                 self.attr_map.append([mark, attr])
-                if self.table_regions.cellWidget(i, 1).currentText() == 'False':
-                    # fill green if successfull
+                try:
+                    if self.table_regions.cellWidget(i, 1).currentText() == 'False':
+                        # fill green if successfull
+                        self.table_regions.item(i, 2).setBackground(QtGui.QColor(2, 164, 6, 0.5 * 255))
+                    else:
+                        # or white if its hole and it doesnt matter
+                        self.table_regions.item(i, 2).setBackground(QtGui.QColor(255, 255, 255, 0.5 * 255))
+                except AttributeError:
                     self.table_regions.item(i, 2).setBackground(QtGui.QColor(2, 164, 6, 0.5 * 255))
-                else:
-                    # or white if its hole and it doesnt matter
-                    self.table_regions.item(i, 2).setBackground(QtGui.QColor(255, 255, 255, 0.5 * 255))
             except ValueError:
-                if self.table_regions.cellWidget(i, 1).currentText() == 'False':
-                    # fill red if error
+                try:
+                    if self.table_regions.cellWidget(i, 1).currentText() == 'False':
+                        # fill red if error
+                        self.table_regions.item(i, 2).setBackground(QtGui.QColor(172, 7, 0, 0.5 * 255))
+                        key_attr = True
+                    else:
+                        # or white if its hole and it doesnt matter
+                        self.table_regions.item(i, 2).setBackground(QtGui.QColor(255, 255, 255, 0.5 * 255))
+                except AttributeError:
                     self.table_regions.item(i, 2).setBackground(QtGui.QColor(172, 7, 0, 0.5 * 255))
-                    key_attr = True
-                else:
-                    # or white if its hole and it doesnt matter
-                    self.table_regions.item(i, 2).setBackground(QtGui.QColor(255, 255, 255, 0.5 * 255))
         # check if duplicates in attribute column exists. len 0 means different values for same
         # marker
         if len([k for k, v in Counter(tmp_attr).items() if v>1]) == 0:
@@ -245,10 +285,11 @@ class RegionQuickCheck(QtGui.QWidget):
             self.parent.statusBar.showMessage("WARNING: duplicate or wrong data in attribute table")
 
     def fillTableFromFigure(self):
-        self.rows = len(self.polyTuples) + 1
-        self.table_regions.setRowCount(self.rows)  # +1 for world around model
+        # self.polyFigure = self.parent.polygons_dens
+        self.rows = len(self.polyFigure) + 1  # +1 for world around model
+        self.table_regions.setRowCount(self.rows)
 
-        for i in range(self.rows):  # row
+        for i in range(self.rows):
             # column 1 - region marker no.
             cbx_marker = QtGui.QComboBox(self.table_regions)
             [cbx_marker.addItem(str(m+1)) for m in range(self.rows)]
@@ -257,12 +298,59 @@ class RegionQuickCheck(QtGui.QWidget):
 
             # column 2 - isHoleMarker
             cbx_isHole = QtGui.QComboBox(self.table_regions)
-            cbx_isHole.addItem("False")
-            cbx_isHole.addItem("True")
+            cbx_isHole.addItem('False')
+            cbx_isHole.addItem('True')
             self.table_regions.setCellWidget(i, 1, cbx_isHole)
 
             # column 3 - attributes
-            self.table_regions.setItem(i, 2, QtGui.QTableWidgetItem("None"))
+            self.table_regions.setItem(i, 2, QtGui.QTableWidgetItem('None'))
+
+        self.table_regions.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        self.table_regions.resizeColumnsToContents()
+
+    def fillTableFromBuilder(self):
+        builderTable = self.builder.polys_table
+        self.rows = builderTable.columnCount()
+        self.table_regions.setRowCount(self.rows)
+
+        for i in range(self.rows):
+            if builderTable.item(0, i).text() != 'Line':
+                # column1 - region marker no.
+                cbx_marker = QtGui.QComboBox(self.table_regions)
+                [cbx_marker.addItem(str(m+1)) for m in range(self.rows)]
+                try:
+                    cbx_marker.setCurrentIndex(int(builderTable.cellWidget(9, i).currentIndex()))
+                    cbx_marker.setEnabled(False)
+                    self.table_regions.setCellWidget(i, 0, cbx_marker)
+                except AttributeError:
+                    item = QtGui.QTableWidgetItem()
+                    item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+                    # item.setBackground(QtCore.Qt.gray)
+                    self.table_regions.setItem(i, 0, item)
+
+                # column 2 - isHoleMarker
+                cbx_isHole = QtGui.QComboBox(self.table_regions)
+                cbx_isHole.addItem('False')
+                cbx_isHole.addItem('True')
+                try:
+                    cbx_isHole.setCurrentIndex(int(builderTable.cellWidget(13, i).currentIndex()))
+                    cbx_isHole.setEnabled(False)
+                    self.table_regions.setCellWidget(i, 1, cbx_isHole)
+                except AttributeError:
+                    item = QtGui.QTableWidgetItem()
+                    # item.setBackground(QtCore.Qt.gray)
+                    item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+                    self.table_regions.setItem(i, 1, item)
+
+                # column 3 - attributes
+                self.table_regions.setItem(i, 2, QtGui.QTableWidgetItem('None'))
+            else:
+                item = QtGui.QTableWidgetItem()
+                # item.setBackground(QtCore.Qt.gray)
+                item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+                self.table_regions.setItem(i, 0, item)
+                self.table_regions.setItem(i, 1, item)
+                self.table_regions.setItem(i, 2, item)
 
         self.table_regions.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         self.table_regions.resizeColumnsToContents()
@@ -272,13 +360,16 @@ class RegionQuickCheck(QtGui.QWidget):
             export the poly figure
         """
         export_poly = QtGui.QFileDialog.getSaveFileName(
-            self, caption="Save Poly Figure")
+            self, caption='Save Poly Figure')
 
         # if export_poly:
-        if export_poly.endswith(".poly"):
+        if export_poly.endswith('.poly'):
             writePLC(self.poly, export_poly)
         else:
-            writePLC(self.poly, export_poly + ".poly")
+            writePLC(self.poly, export_poly + '.poly')
+
+    def getPoly(self):
+        return self.poly
 
 
 if __name__ == '__main__':

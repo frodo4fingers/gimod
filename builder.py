@@ -10,6 +10,13 @@ from PyQt4 import QtGui
 
 from mpl import SpanRectangle, SpanWorld, SpanLine, SpanCircle
 
+# TODO: DIE BUTTONS NUR ENABLEN WENN DER TAB AKTIV IST!!!!!!!!!AAAAARGH
+# TODO: skizze laden und verändern können im model builder
+# TODO: beliebiges polygon erstellen durch rumklicken
+# TODO: tabelle mit qlistwidget ersetzen
+# TODO: bild als hintergrund einstellen zum nachmalen
+# TODO: disable world after creation
+
 
 class Builder(QtGui.QWidget):
 
@@ -31,7 +38,7 @@ class Builder(QtGui.QWidget):
         self.btn_redraw.clicked.connect(self.redrawTable)
 
         self.btn_undo.clicked.connect(self.undoPoly)
-        self.btn_redo.clicked.connect(self.redoPoly)
+        # self.btn_redo.clicked.connect(self.redoPoly)
 
     def setupUI(self):
         """
@@ -52,7 +59,7 @@ class Builder(QtGui.QWidget):
         self.acn_circle.setToolTip("Create a circle body")
         self.acn_circle.setCheckable(True)
 
-        self.acn_line = QtGui.QAction(QtGui.QIcon("material/ic_spanPoly.svg"), "line", self.grp_polyTools)
+        self.acn_line = QtGui.QAction(QtGui.QIcon("material/ic_timeline_black_18dp.png"), "line", self.grp_polyTools)
         self.acn_line.setToolTip("Create a line by clicking")
         self.acn_line.setCheckable(True)
 
@@ -64,6 +71,7 @@ class Builder(QtGui.QWidget):
         tb.addAction(self.acn_line)
 
         # parameter table for different polygons
+        # TODO: gegen gescheites qlistwidget ersetzen! tabelle ist scheiße
         self.polys_table = QtGui.QTableWidget(self)
         self.polys_table.setRowCount(15)
         self.polys_table.setVerticalHeaderLabels(
@@ -177,7 +185,6 @@ class Builder(QtGui.QWidget):
         # insert poly type... circle/world/rectangle/hand
         self.polys_table.setItem(0, col, QtGui.QTableWidgetItem(self.form))
 
-        # if self.form == "circle":
         # insert position
         self.polys_table.setItem(
             1, col, QtGui.QTableWidgetItem(str(round(self.x_p, 2))))
