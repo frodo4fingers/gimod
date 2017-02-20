@@ -33,12 +33,8 @@ class SpanLine(object):
             self.clicker += 1
 
     def onRelease(self, event):
-        print("release")
-        # try:
         if self.clicker > 0:
             self.line.set_data([0], [0])
-            print(self.clicker)
-            print(len(self.x_p))
             self.parent.printCoordinates(self.x_p[self.clicker - 1], self.y_p[self.clicker - 1], self.x_p[self.clicker], self.y_p[self.clicker], form="Line")
 
 
