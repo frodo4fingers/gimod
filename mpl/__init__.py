@@ -2,9 +2,10 @@
 
 """ contains the classes responsible for moving matplotlib stuff """
 
+from .spanWorld import SpanWorld
+from .spanRectangle import SpanRectangle
 from .spanCircle import SpanCircle
 from .spanLine import SpanLine
-from .spanRectangle import SpanRectangle
-from .spanWorld import SpanWorld
+from .spanPoly import SpanPoly
 
 from .draggablePoint import DraggablePoint

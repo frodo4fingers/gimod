@@ -1,26 +1,24 @@
 #!/usr/bin/env python
 # encoding: UTF-8
 
-# import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 
 
 class SpanRectangle(object):
 
     def __init__(self, parent=None):
-        # self.ax = plt.gca()
         self.parent = parent
         self.figure = self.parent.figure
         # empty rectangle
-        self.rect = Rectangle((0, 0), 0, 0, fc="none", alpha=0.5, ec="black")
+        self.rect = Rectangle((0, 0), 0, 0, fc='none', alpha=0.5, ec='blue')
         self.background = None
         self.figure.axis.add_patch(self.rect)
         self.onPress = self.onPress
 
     def connect(self):
-        self.cid_p = self.figure.canvas.mpl_connect("button_press_event", self.onPress)
-        self.cid_m = self.figure.canvas.mpl_connect("motion_notify_event", self.onMotion)
-        self.cid_r = self.figure.canvas.mpl_connect("button_release_event", self.onRelease)
+        self.cid_p = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
+        self.cid_m = self.figure.canvas.mpl_connect('motion_notify_event', self.onMotion)
+        self.cid_r = self.figure.canvas.mpl_connect('button_release_event', self.onRelease)
 
     def disconnect(self):
         self.figure.canvas.mpl_disconnect(self.cid_p)
@@ -49,7 +47,6 @@ class SpanRectangle(object):
             self.figure.canvas.restore_region(self.background)
             self.rect.axes.draw_artist(self.rect)
             self.figure.canvas.blit(self.rect.axes.bbox)
-
         except (AttributeError, TypeError):
             pass
 
@@ -64,11 +61,11 @@ class SpanRectangle(object):
             self.rect.set_animated(False)
             self.background = None
             self.figure.canvas.draw()
-            self.parent.printCoordinates(self.x_p, self.y_p, self.x_r, self.y_r, form="Rectangle")
+            self.parent.printCoordinates(self.x_p, self.y_p, self.x_r, self.y_r, form='Rectangle')
 
         except AttributeError:
             pass
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     pass

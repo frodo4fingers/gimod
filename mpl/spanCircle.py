@@ -12,7 +12,7 @@ class SpanCircle(object):
         self.parent = parent
         self.figure = self.parent.figure
         # introduce empty circle to start with
-        self.circle = Circle((0, 0), 0, fc="none", ec="black")
+        self.circle = Circle((0, 0), 0, fc='none', ec='blue')
         self.background = None
         self.figure.axis.add_patch(self.circle)
         self.onPress = self.onPress
@@ -21,9 +21,9 @@ class SpanCircle(object):
         return round(np.sqrt((self.x_m - self.x_p)**2 + (self.y_m - self.y_p)**2), 2)
 
     def connect(self):
-        self.cid_p = self.figure.canvas.mpl_connect("button_press_event", self.onPress)
-        self.cid_m = self.figure.canvas.mpl_connect("motion_notify_event", self.onMotion)
-        self.cid_r = self.figure.canvas.mpl_connect("button_release_event", self.onRelease)
+        self.cid_p = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
+        self.cid_m = self.figure.canvas.mpl_connect('motion_notify_event', self.onMotion)
+        self.cid_r = self.figure.canvas.mpl_connect('button_release_event', self.onRelease)
 
     def disconnect(self):
         self.figure.canvas.mpl_disconnect(self.cid_p)
@@ -70,11 +70,11 @@ class SpanCircle(object):
             self.circle.set_animated(False)
             self.background = None
             self.figure.canvas.draw()
-            self.parent.printCoordinates(self.x_p, self.y_p, self.distance(), None, form="Circle")
+            self.parent.printCoordinates(self.x_p, self.y_p, self.distance(), None, form='Circle')
 
         except AttributeError:
             pass
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     pass

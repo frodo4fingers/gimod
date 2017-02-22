@@ -9,7 +9,7 @@ class SpanLine(object):
         self.parent = parent
         self.figure = self.parent.figure
         # introduce empty line to start with
-        line, = self.figure.axis.plot([0], [0], c="black")
+        line, = self.figure.axis.plot([0], [0], c='blue')
         self.x_p = []
         self.y_p = []
         self.line = line
@@ -17,8 +17,8 @@ class SpanLine(object):
         self.onPress = self.onPress
 
     def connect(self):
-        self.cid_p = self.figure.canvas.mpl_connect("button_press_event", self.onPress)
-        self.cid_r = self.figure.canvas.mpl_connect("button_release_event", self.onRelease)
+        self.cid_p = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
+        self.cid_r = self.figure.canvas.mpl_connect('button_release_event', self.onRelease)
 
     def disconnect(self):
         self.figure.canvas.mpl_disconnect(self.cid_p)
@@ -38,5 +38,5 @@ class SpanLine(object):
             self.parent.printCoordinates(self.x_p[self.clicker - 1], self.y_p[self.clicker - 1], self.x_p[self.clicker], self.y_p[self.clicker], form="Line")
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     pass

@@ -11,7 +11,7 @@ class SpanWorld(object):
         self.parent = parent
         self.figure = self.parent.figure
         # empty rectangle
-        self.rect = Rectangle((0, 0), 0, 0, fc="none", alpha=0.5, ec="black")
+        self.rect = Rectangle((0, 0), 0, 0, fc='none', alpha=0.5, ec='blue')
         self.background = None
         self.figure.axis.add_patch(self.rect)
         self.onPress = self.onPress
@@ -63,11 +63,11 @@ class SpanWorld(object):
             self.rect.set_animated(False)
             self.background = None
             self.figure.canvas.draw()
-            self.parent.printCoordinates(self.x_p, self.y_p, self.x_r, self.y_r, form="World")
+            self.parent.printCoordinates(self.x_p, self.y_p, self.x_r, self.y_r, form='World')
 
         except AttributeError:
             pass
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     pass
