@@ -15,7 +15,7 @@ from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly
 # TODO: beliebiges polygon erstellen durch rumklicken
 # TODO: tabelle mit qlistwidget ersetzen
 # TODO: bild als hintergrund einstellen zum nachmalen
-# TODO: disable world after creation
+# TODO: disable world after creation  # pun intended
 
 
 class Builder(QtGui.QWidget):
@@ -392,10 +392,10 @@ class Builder(QtGui.QWidget):
                 self.polys.append(plc.createLine(
                 start=start, end=end, segments=segments, boundaryMarker=boundaryMarker, leftDirection=leftDirection
                 ))
-            elif item == 'Rectangle':
+            elif item == 'Polygon':
                 self.polys.append(plc.createPolygon(
-                verts=self.polygon, boundaryMarker=boundaryMarker, leftDirection=leftDirection, marker=marker, area=area
-                ))
+                verts=self.polygon, boundaryMarker=boundaryMarker, marker=marker, area=area, isHole=isHole, isClosed=isClosed
+                ))  # leftDirection=leftDirection,
 
         self.drawPoly(fillTable=False)
 
