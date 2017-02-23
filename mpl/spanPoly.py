@@ -40,8 +40,6 @@ class SpanPoly(object):
 
         if event.button is 1:
             if event.dblclick:  # close polygon
-                self.x.append(self.x[0])
-                self.y.append(self.y[0])
                 self.parent.printPolygon([[self.x[i], self.y[i]] for i in range(len(self.x))])
                 del self.x[:]
                 del self.y[:]
