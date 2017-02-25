@@ -83,8 +83,8 @@ class PlotWidget(QtGui.QWidget):
 
         # set the layout
         layout = QtGui.QVBoxLayout()
-        layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
+        layout.addWidget(self.toolbar)
         layout.setMargin(0)
         self.setLayout(layout)
 
@@ -394,9 +394,16 @@ class MainWindow(QtGui.QMainWindow):
 
         # ####################################################################################### #
         #                                      SET UP TOOLBOX                                     #
+        self.statusBar = QtGui.QStatusBar()
+        self.setStatusBar(self.statusBar)
+
+        self.toolBar = QtGui.QToolBar(self)
+        self.toolBar.setIconSize(QtCore.QSize(18, 18))
+        self.addToolBar(self.toolBar)
+
         # initialize the plot widget
         self.plotWidget = PlotWidget(self)
-        self.builder = Builder(self.plotWidget)
+        self.builder = Builder(self)
         self.regions = RegionQuickCheck(self)
         tool_box = QtGui.QTabWidget(self)
         tool_box.setTabPosition(QtGui.QTabWidget.West)
@@ -412,9 +419,6 @@ class MainWindow(QtGui.QMainWindow):
         splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
         splitter.addWidget(tool_box)
         splitter.addWidget(self.plotWidget)
-
-        self.statusBar = QtGui.QStatusBar()
-        self.setStatusBar(self.statusBar)
 
         self.acn_aboutVerison = QtGui.QAction("Version", self)
 
