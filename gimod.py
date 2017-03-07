@@ -29,7 +29,6 @@ import matplotlib.pyplot as plt
 
 from collections import defaultdict, Counter
 from builder import Builder
-from regions import RegionQuickCheck
 from mpl import DraggablePoint
 
 # TODO: CLEAAAAAAAAAAAAAN THIS!!!!
@@ -143,11 +142,6 @@ class MainWindow(QtGui.QMainWindow):
         self.spb_paths.valueChanged.connect(self.changedSpbSldPaths)
         self.spb_paths.valueChanged.connect(self.changedSldPaths)
 
-        # self.btn_region_init.clicked.connect(self.regionTable)
-        # self.btn_region_refresh.clicked.connect(self.regionRefresh)
-        # self.btn_region_check.toggled.connect(self.regionCheckMarkerPosition)
-        # self.btn_region_export.clicked.connect(self.regionExportPoly)
-        #
         self.chbx_mesh_refine.stateChanged.connect(self.changedChbxMeshRefine)
         self.chbx_smooth.stateChanged.connect(self.changedChbxSmooth)
         self.chbx_switches.stateChanged.connect(self.changedChbxSwitches)
@@ -404,13 +398,10 @@ class MainWindow(QtGui.QMainWindow):
         # initialize the plot widget
         self.plotWidget = PlotWidget(self)
         self.builder = Builder(self)
-        self.regions = RegionQuickCheck(self)
         tool_box = QtGui.QTabWidget(self)
         tool_box.setTabPosition(QtGui.QTabWidget.West)
         tool_box.addTab(file_widget, "start with sketch")
         tool_box.addTab(self.builder, "model builder")
-        # tool_box.addTab(region_widget, "region manager")
-        tool_box.addTab(self.regions, "region manager")
         tool_box.addTab(mesh_widget, "mesh options")
         v_plotWidget = QtGui.QVBoxLayout()
         v_plotWidget.addWidget(self.plotWidget)

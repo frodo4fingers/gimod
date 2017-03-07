@@ -3,10 +3,13 @@
 
 ''' model builder components '''
 from PyQt4 import QtGui
-from pygimli.mplviewer import drawMesh
+from pygimli.mplviewer import drawMesh, drawMeshBoundaries, drawModel
 from pygimli.meshtools import polytools as plc
+from pygimli.meshtools import createMesh, writePLC
+import pygimli as pg
 import numpy as np
 from PyQt4 import QtCore, QtGui
+from collections import OrderedDict as od
 
 from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly
 
@@ -24,7 +27,8 @@ class Builder(QtGui.QWidget):
         super(Builder, self).__init__(parent)
         self.figure = parent.plotWidget
         self.toolBar = parent.toolBar
-        self.marker = 1
+        self.statusBar = parent.statusBar
+        self.marker = 1  # 0
         self.polys = []
         self.undone = []
 
@@ -37,10 +41,10 @@ class Builder(QtGui.QWidget):
         self.acn_line.triggered.connect(self.createPolyLine)
         self.acn_polygon.triggered.connect(self.FormPolygon)
 
-        self.btn_redraw.clicked.connect(self.redrawTable2)
+        self.btn_redraw.clicked.connect(self.redrawTable)
 
         self.btn_undo.clicked.connect(self.undoPoly)
-        # self.btn_redo.clicked.connect(self.redoPoly)
+        self.btn_redo.clicked.connect(self.redoPoly)
 
     def setupUI(self):
         """
@@ -98,10 +102,18 @@ class Builder(QtGui.QWidget):
         self.btn_undo = QtGui.QPushButton()
         self.btn_undo.setToolTip("undo last poly")
         self.btn_undo.setIcon(QtGui.QIcon('material/ic_undo_black_18px.svg'))
+        self.btn_undo.setEnabled(False)
         self.btn_redo = QtGui.QPushButton()
         self.btn_redo.setToolTip("redo last poly")
         self.btn_redo.setIcon(QtGui.QIcon('material/ic_redo_black_18px.svg'))
         self.btn_redo.setEnabled(False)
+        self.rbtn_plotRegions = QtGui.QRadioButton('plot regions')
+        self.rbtn_plotRegions.setChecked(True)
+        self.rbtn_plotAttributes = QtGui.QRadioButton('plot attributes')
+        self.btn_export = QtGui.QPushButton()
+        self.btn_export.setIcon(QtGui.QIcon("material/ic_save_black_24px.svg"))
+        self.btn_export.setToolTip("save as *.poly")
+        self.btn_export.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         self.btn_redraw = QtGui.QPushButton()
         self.btn_redraw.setToolTip("redraw whole table after changes were made")
         self.btn_redraw.setIcon(QtGui.QIcon('material/ic_refresh_black_24px.svg'))
@@ -109,8 +121,12 @@ class Builder(QtGui.QWidget):
         hbox = QtGui.QHBoxLayout()
         hbox.addWidget(self.btn_undo)
         hbox.addWidget(self.btn_redo)
+        hbox.addWidget(self.rbtn_plotRegions)
+        hbox.addWidget(self.rbtn_plotAttributes)
         hbox.addStretch(1)
         hbox.addWidget(self.btn_redraw)
+        hbox.addStretch(1)
+        hbox.addWidget(self.btn_export)
         hbox.setMargin(0)
 
         # form the layout
@@ -195,14 +211,27 @@ class Builder(QtGui.QWidget):
         elif self.form == 'Polygon':
             self.polys.append(plc.createPolygon(self.polygon, marker=self.marker, isClosed=True))
 
+        self.btn_undo.setEnabled(True)
         self.drawPoly()
 
     def drawPoly(self, fillTable=True):
         self.poly = plc.mergePLC(self.polys)
         self.figure.axis.cla()
 
-        drawMesh(self.figure.axis, self.poly, fitView=False)
-        self.figure.canvas.draw()
+        if self.rbtn_plotRegions.isChecked() is True:
+            drawMesh(self.figure.axis, self.poly, fitView=False, )
+            self.figure.canvas.draw()
+        else:
+            attrMap = self.zipUpMarkerAndAttributes()
+            meshTmp = createMesh(self.poly)
+            # try:
+            attrMap = pg.solver.parseMapToCellArray(attrMap, meshTmp)
+            drawMeshBoundaries(self.figure.axis, meshTmp, hideMesh=True)
+            drawModel(self.figure.axis, meshTmp, tri=True, data=attrMap)
+            self.figure.canvas.draw()
+
+            # except (AttributeError, IndexError):
+            #     print("boiiiii! dont he shite char where float belongs")
 
         if fillTable:
             self.fillTable()
@@ -297,7 +326,7 @@ class Builder(QtGui.QWidget):
 
         if self.form != 'Line':
             # insert marker
-            for k in range(self.marker):
+            for k in range(self.marker ):
                 a = QtGui.QComboBox()
                 [a.addItem(str(m + 1)) for m in range(self.marker)]
                 a.setCurrentIndex(k)
@@ -366,263 +395,60 @@ class Builder(QtGui.QWidget):
             self.tw_polys.setCurrentItem(self.tw_polys.topLevelItem(0))
             self.tw_polys.setEnabled(True)
 
-
-    # def fillTable(self):
-    #     """
-    #         for construction: header labels >>>
-    #         'Type', 'x0', 'y0', 'x1', 'y1', 'Radius', 'Segments', 'Start', 'End', 'Marker', 'Area', 'Boundary', 'Left?', 'Hole?', 'Closed?'
-    #     """
-    #     # update table on release
-    #     self.polys_table.setColumnCount(len(self.polys))
-    #     col = len(self.polys) - 1
-    #     # insert poly type... circle/world/rectangle/hand
-    #     self.polys_table.setItem(0, col, QtGui.QTableWidgetItem(self.form))
-    #
-    #     # insert position
-    #     if not self.form == 'Polygon':
-    #         self.polys_table.setItem(
-    #             1, col, QtGui.QTableWidgetItem(str(round(self.x_p, 2))))
-    #         self.polys_table.setItem(
-    #             2, col, QtGui.QTableWidgetItem(str(round(self.y_p, 2))))
-    #     else:
-    #         self.restrictCellFromEditing(1, col)
-    #         self.restrictCellFromEditing(2, col)
-    #
-    #     if self.form == 'Rectangle' or self.form == 'World' or self.form == 'Line':
-    #         self.polys_table.setItem(
-    #             3, col, QtGui.QTableWidgetItem(str(round(self.x_r, 2))))
-    #         self.polys_table.setItem(
-    #             4, col, QtGui.QTableWidgetItem(str(round(self.y_r, 2))))
-    #     else:
-    #         self.restrictCellFromEditing(3, col)
-    #         self.restrictCellFromEditing(4, col)
-    #
-    #     if self.form == 'Circle':
-    #         # insert segments
-    #         spx_segments = QtGui.QSpinBox()
-    #         spx_segments.setValue(12)
-    #         spx_segments.setMinimum(3)
-    #         self.polys_table.setCellWidget(6, col, spx_segments)
-    #         # insert radius
-    #         spx_radius = QtGui.QDoubleSpinBox()
-    #         spx_radius.setSingleStep(0.01)
-    #         spx_radius.setValue(self.x_r)
-    #         self.polys_table.setCellWidget(5, col, spx_radius)
-    #         # insert start
-    #         spx_start = QtGui.QDoubleSpinBox()
-    #         spx_start.setValue(0.00)
-    #         spx_start.setMinimum(0.00)
-    #         spx_start.setSingleStep(0.01)
-    #         spx_start.setMaximum(2 * np.pi)
-    #         self.polys_table.setCellWidget(7, col, spx_start)
-    #         # insert end
-    #         spx_end = QtGui.QDoubleSpinBox()
-    #         spx_end.setValue(2 * np.pi)
-    #         spx_end.setMinimum(0.00)
-    #         spx_end.setSingleStep(0.01)
-    #         spx_end.setMaximum(2 * np.pi)
-    #         self.polys_table.setCellWidget(8, col, spx_end)
-    #     else:
-    #         self.restrictCellFromEditing(5, col)
-    #         self.restrictCellFromEditing(6, col)
-    #         self.restrictCellFromEditing(7, col)
-    #         self.restrictCellFromEditing(8, col)
-    #
-    #     if self.form == 'Line':
-    #         # insert segments
-    #         spx_segments = QtGui.QSpinBox()
-    #         spx_segments.setValue(2)
-    #         spx_segments.setMinimum(2)
-    #         self.polys_table.setCellWidget(6, col, spx_segments)
-    #
-    #     if not self.form == 'Line':
-    #         # insert marker
-    #         for k in range(self.marker):
-    #             a = QtGui.QComboBox(self.polys_table)
-    #             [a.addItem(str(m + 1)) for m in range(self.marker)]
-    #             a.setCurrentIndex(k)
-    #             self.polys_table.setCellWidget(9, k, a)
-    #         # insert area
-    #         spx_area = QtGui.QDoubleSpinBox()
-    #         spx_area.setSingleStep(0.01)
-    #         spx_area.setValue(0.00)
-    #         spx_area.setMinimum(0.00)
-    #         self.polys_table.setCellWidget(10, col, spx_area)
-    #     else:
-    #         self.restrictCellFromEditing(9, col)
-    #         self.restrictCellFromEditing(10, col)
-    #
-    #     if not self.form == 'World':
-    #         # insert boundary marker
-    #         self.polys_table.setItem(11, col, QtGui.QTableWidgetItem(str(1)))
-    #     else:
-    #         self.restrictCellFromEditing(11, col)
-    #
-    #     if self.form == 'Rectangle' or self.form == 'Circle' or self.form == 'Line' or self.form == 'Polygon':
-    #         # insert left direction
-    #         cbx_isLeft = QtGui.QComboBox()
-    #         cbx_isLeft.addItem('False')
-    #         cbx_isLeft.addItem('True')
-    #         self.polys_table.setCellWidget(12, col, cbx_isLeft)
-    #     else:
-    #         self.restrictCellFromEditing(12, col)
-    #
-    #     if self.form == 'Rectangle' or self.form == 'Circle' or self.form == 'Polygon':
-    #         # insert is hole
-    #         cbx_isHole = QtGui.QComboBox()
-    #         cbx_isHole.addItem('False')
-    #         cbx_isHole.addItem('True')
-    #         self.polys_table.setCellWidget(13, col, cbx_isHole)
-    #         # insert is closed
-    #         cbx_isClosed = QtGui.QComboBox()
-    #         cbx_isClosed.addItem('False')
-    #         cbx_isClosed.addItem('True')
-    #         cbx_isClosed.setCurrentIndex(1)
-    #         self.polys_table.setCellWidget(14, col, cbx_isClosed)
-    #     else:
-    #         self.restrictCellFromEditing(13, col)
-    #         self.restrictCellFromEditing(14, col)
-    #
-    #     self.polys_table.setSizePolicy(
-    #         QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-    #     self.polys_table.resizeColumnsToContents()
-
-
-    def redrawTable2(self):
-
-        meta = []
-        polyMeta = []
-        self.polyData = []
-        iterator = QtGui.QTreeWidgetItemIterator(self.tw_polys)
-        for i in iterator.value():
-            print(i)
-        while iterator.value():
-            top = iterator.value().text(0)
-            # print(top)
-            if top == 'World' or top == 'Rectangle' or top == 'Circle' or top == 'Line' or top == 'Polygon':
-                polyMeta.append(meta)
-                print("META", meta)
-                print("POLYMETA", polyMeta)
-                meta.clear()
-                meta.append(top)
-            try:
-                meta.append(self.tw_polys.itemWidget(iterator.value(), 1).currentText())
-            except AttributeError:
-                try:
-                    meta.append(self.tw_polys.itemWidget(iterator.value(), 1).value())
-                except AttributeError:
-                    meta.append(iterator.value().text(1))
-            iterator += 1
-        # print("META", meta)
-        # print(meta)
-        # self.polyData.append(meta[-1])
-        # polyMeta.append(meta)
-        # print(polyMeta)
-
-        # if polyMeta[0] == 'World':
-        #     self.polys.append(plc.createWorld(
-        #     start=[float(polyMeta[2]), float(polyMeta[3])], end=[float(polyMeta[4]), float(polyMeta[5])], marker=int(polyMeta[6]), area=float(polyMeta[7])
-        #     ))
-        # elif polyMeta[0] == 'Rectangle':
-        #     self.polys.append(plc.createRectangle(
-        #     start=[float(polyMeta[2]), float(polyMeta[3])], end=[float(polyMeta[4]), float(polyMeta[5])], marker=marker, area=area, boundaryMarker=boundaryMarker, isHole=isHole, isClosed=isClosed
-        #     ))  # leftDirection=leftDirection
-        # elif polyMeta[0] == 'Circle':
-        #     self.polys.append(plc.createCircle(
-        #     pos=[float(polyMeta[2]), float(polyMeta[3])], radius=radius, segments=segments, start=start, end=end, marker=marker, area=area, boundaryMarker=boundaryMarker, leftDirection=leftDirection, isHole=isHole, isClosed=isClosed
-        #     ))
-        # elif polyMeta[0] == 'Line':
-        #     self.polys.append(plc.createLine(
-        #     start=start, end=end, segments=segments, boundaryMarker=boundaryMarker, leftDirection=leftDirection
-        #     ))
-        # elif polyMeta[0] == 'Polygon':
-        #     self.polys.append(plc.createPolygon(
-        #     verts=self.polygon, boundaryMarker=boundaryMarker, marker=marker, area=area, isClosed=isClosed
-        #     ))  # leftDirection=leftDirection, isHole=isHole
-        #
-        # del polyMeta[:]
-
-
+        # self.redrawTable()
 
     def redrawTable(self):
-        """
-            read the table after editing figures and redraw all polys
-        """
-        # empty the list of polygon figures
-        del self.polys[:]
+        self.statusBar.clearMessage()
+        self.polys.clear()
+        polyMeta = []
+        for i in range(self.tw_polys.topLevelItemCount()):
+            meta = []
+            # get polygon type
+            meta.append(self.tw_polys.topLevelItem(i).text(0))
+            for k in range(self.tw_polys.topLevelItem(i).childCount()):
+                try:
+                    # text from ComboBox
+                    meta.append(self.tw_polys.itemWidget(self.tw_polys.topLevelItem(i).child(k), 1).currentIndex())
+                except AttributeError:
+                    try:
+                        # value from DoubleSpinBox
+                        meta.append(self.tw_polys.itemWidget(self.tw_polys.topLevelItem(i).child(k), 1).value())
+                    except AttributeError:
+                        # normal text cell
+                        meta.append(self.tw_polys.topLevelItem(i).child(k).text(1))
+            polyMeta.append(meta)
 
-        for col in range(self.polys_table.columnCount()):
-
-            item = self.polys_table.item(0, col).text()
-            try:
-                position1 = [float(self.polys_table.item(1, col).text()), float(self.polys_table.item(2, col).text())]
-            except (AttributeError, ValueError):
-                pass
-            try:  # Rectangle & World
-                position2 = [float(self.polys_table.item(3, col).text()), float(self.polys_table.item(4, col).text())]
-            except (AttributeError, ValueError):
-                pass
-            try:  # Circle
-                radius = self.polys_table.cellWidget(5, col).value()
-            except (AttributeError, ValueError):
-                pass
-            try:  # Circle & Line
-                segments = self.polys_table.cellWidget(6, col).value()
-            except (AttributeError, ValueError):
-                pass
-            try:
-                start = self.polys_table.cellWidget(7, col).value()
-            except (AttributeError, ValueError):
-                pass
-            try:
-                end = self.polys_table.cellWidget(8, col).value()
-            except (AttributeError, ValueError):
-                pass
-            try:
-                marker = int(self.polys_table.cellWidget(9, col).currentText())
-            except (AttributeError, ValueError):
-                pass
-            try:
-                area = self.polys_table.cellWidget(10, col).value()
-            except (AttributeError, ValueError):
-                pass
-            try:
-                boundaryMarker = int(self.polys_table.item(11, col).text())
-            except (AttributeError, ValueError):
-                pass
-            try:
-                leftDirection = int(self.polys_table.cellWidget(12, col).currentIndex())
-            except (AttributeError, ValueError):
-                pass
-            try:
-                isHole = int(self.polys_table.cellWidget(13, col).currentIndex())
-            except (AttributeError, ValueError):
-                pass
-            try:
-                isClosed = int(self.polys_table.cellWidget(14, col).currentIndex())
-            except (AttributeError, ValueError):
-                pass
-
-            if item == 'World':
+        self.polyAttributes = []
+        self.polyMarkers = []
+        for p in polyMeta:
+            if p[0] == 'World':
                 self.polys.append(plc.createWorld(
-                start=position1, end=position2, marker=marker, area=area
+                start=[float(p[1]), float(p[2])], end=[float(p[3]), float(p[4])], marker=int(p[5]), area=float(p[6])
                 ))
-            elif item == 'Rectangle':
+                self.polyAttributes.append(p[7])
+                self.polyMarkers.append(int(p[5]))
+            elif p[0] == 'Rectangle':
                 self.polys.append(plc.createRectangle(
-                    start=position1, end=position2, marker=marker, area=area, boundaryMarker=boundaryMarker, isHole=isHole, isClosed=isClosed
-                ))  # leftDirection=leftDirection
-            elif item == 'Circle':
+                start=[float(p[1]), float(p[2])], end=[float(p[3]), float(p[4])], marker=int(p[5]), area=float(p[6]), boundaryMarker=int(p[7]), isHole=int(p[9]), isClosed=int(p[10])
+                ))  # leftDirection=int(p[8])
+                self.polyAttributes.append(p[11])
+                self.polyMarkers.append(int(p[5]))
+            elif p[0] == 'Circle':
                 self.polys.append(plc.createCircle(
-                pos=position1, radius=radius, segments=segments, start=start, end=end, marker=marker, area=area, boundaryMarker=boundaryMarker, leftDirection=leftDirection, isHole=isHole, isClosed=isClosed
+                pos=tuple(np.asarray(p[1].split(', '), dtype=float)), radius=float(p[2]), segments=int(p[3]), start=float(p[4]), end=float(p[5]), marker=int(p[6]), area=float(p[7]), boundaryMarker=int(p[8]), leftDirection=int(p[9]), isHole=int(p[10]), isClosed=int(p[11])
                 ))
-            elif item == 'Line':
+                self.polyAttributes.append(p[12])
+                self.polyMarkers.append(int(p[6]))
+            elif p[0] == 'Line':
                 self.polys.append(plc.createLine(
-                start=start, end=end, segments=segments, boundaryMarker=boundaryMarker, leftDirection=leftDirection
+                start=[float(p[1]), float(p[2])], end=[float(p[3]), float(p[4])], segments=int(p[5]), boundaryMarker=int(p[6]), leftDirection=int(p[7])
                 ))
-            elif item == 'Polygon':
+            elif p[0] == 'Polygon':
                 self.polys.append(plc.createPolygon(
-                verts=self.polygon, boundaryMarker=boundaryMarker, marker=marker, area=area, isClosed=isClosed
-                ))  # leftDirection=leftDirection, isHole=isHole
+                verts=self.polygon, marker=int(p[1]), area=float(p[2]), boundaryMarker=int(p[3]), isClosed=int(p[6])
+                ))  # leftDirection=int(p[4]), isHole=int(p[5])
+                self.polyAttributes.append(p[7])
+                self.polyMarkers.append(int(p[1]))
 
         self.drawPoly(fillTable=False)
 
@@ -630,24 +456,59 @@ class Builder(QtGui.QWidget):
         """
             remove last made polygon from list and store it so it won't be lost
         """
+
         self.undone.append(self.polys.pop())
-        self.polys_table.removeColumn(self.polys_table.columnCount() - 1)
+        self.tw_polys.takeTopLevelItem(self.tw_polys.topLevelItemCount() - 1)
         self.marker -= 1
-        self.drawPoly(fillTable=False)
+        self.btn_redo.setEnabled(True)
+        if not len(self.polys) == 0:
+            self.drawPoly(fillTable=False)
+        else:
+            self.figure.axis.cla()
+            self.figure.canvas.draw()
+            self.btn_undo.setEnabled(False)
 
     def redoPoly(self):
-        self.polys.append(self.undone.pop())
-        self.marker += 1
-        self.drawPoly()
+        if len(self.undone) > 0:
+            self.polys.append(self.undone.pop())
+            self.marker += 1
+            self.drawPoly(fillTable=True)
+        if len(self.undone) == 0:
+            self.btn_redo.setEnabled(False)
 
     def getPoly(self):
         return self.polys
 
-    def restrictCellFromEditing(self, i, j):
-        item = QtGui.QTableWidgetItem()
-        item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-        # item.setBackground(QtCore.Qt.gray)
-        self.polys_table.setItem(i, j, item)
+    def exportPoly(self):
+        """
+            export the poly figure
+        """
+        export_poly = QtGui.QFileDialog.getSaveFileName(
+            self, caption='Save Poly Figure')
+
+        # if export_poly:
+        if export_poly.endswith('.poly'):
+            writePLC(self.poly, export_poly)
+        else:
+            writePLC(self.poly, export_poly + '.poly')
+
+    def zipUpMarkerAndAttributes(self):
+        """
+            make the list ready for plotting and check if duplicates were made
+        """
+        attrMap = []
+        for i, a in enumerate(self.polyAttributes):
+            if a == '':
+                self.statusBar.showMessage("ERROR: empty attributes can't be assigned!")
+            else:
+                try:
+                    a = float(a)
+                    # self.statusBar.showMessage("{} is a float now".format(a))
+                    attrMap.append([self.polyMarkers[i], a])
+                except ValueError:
+                    self.statusBar.showMessage("ERROR: some values seem to be string. int or float is needed")
+
+        return attrMap
 
 
 if __name__ == '__main__':
