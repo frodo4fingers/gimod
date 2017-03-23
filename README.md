@@ -16,4 +16,4 @@ GIMod is intended to make the creation of your basic model with/for [GIMLi](www.
 The GUI is parted in to two areas. On the left side there is a tree view of all polygons which are displayed on the right. The toolbar above those inherits the main tools from [GIMLi](www.pygimli.org)s *polytools* to create your polygon.
 
 ## TODOs
-There are a lot. GIMod still is buggy at a few lines and i am on to that. To see where the problems are, see the to.do file which was generated with [TODO-show](https://github.com/IanMitchell/atom-todo-show) or test at free will and feel free to [open a ticket](https://github.com/frodo4fingers/gimod/issues). For further reading i will set up a wiki.
+There are a lot. GIMod still is buggy at a few lines and i am on to that. To see where the problems are, see the to.do file which was generated with [TODO-show](https://github.com/IanMitchell/atom-todo-show) or test at free will and feel free to [open a ticket](https://github.com/frodo4fingers/gimod/issues). For further reading i will set up a [wiki](https://github.com/frodo4fingers/gimod/wiki).
