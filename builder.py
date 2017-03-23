@@ -10,15 +10,11 @@ import pygimli as pg
 import numpy as np
 from matplotlib import patches
 from PyQt4 import QtCore, QtGui
-from collections import OrderedDict as od
 
 from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly, DraggablePoint
 from imagery import ImageTools as it
 
-# TODO: DIE BUTTONS NUR ENABLEN WENN DER TAB AKTIV IST!!!!!!!!!
 # TODO: skizze laden und verändern können im model builder
-# TODO: beliebiges polygon erstellen durch rumklicken
-# TODO: tabelle mit qlistwidget ersetzen
 # TODO: bild als hintergrund einstellen zum nachmalen
 # TODO: disable world after creation  # pun intended
 
@@ -570,7 +566,7 @@ class Builder(QtGui.QWidget):
         """
             plots dots as marker positions which can be moved
         """
-        try:
+        try:  # to avoid emitting a signal and using it multiple ways
             self.span.disconnect()
         except AttributeError:
             pass

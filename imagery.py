@@ -75,7 +75,6 @@ class ImageTools():
             set chosen image file as background to draw over
         """
         img = plt.imread(self.fname)
-        # fig, ax = plt.subplots()
         self.figure.axis.imshow(img, alpha=0.6)
         self.figure.canvas.draw()
 
