@@ -16,7 +16,6 @@ class SpanPoly(object):
         self.line = line
         self.motionLine = motionLine
         self.background = None
-        self.clicker = -1  # so that the line will be drawn if clicked two times
         self.onPress = self.onPress
 
     def connect(self):
@@ -39,16 +38,17 @@ class SpanPoly(object):
         self.figure.canvas.draw()
 
         if event.button is 1:
+            # BUG: after creating ONE polygon by hand the second one wont draw the already clicked parts of itself
             if event.dblclick:  # close polygon
                 self.parent.printPolygon([[self.x[i], self.y[i]] for i in range(len(self.x))])
-                del self.x[:]
-                del self.y[:]
+                self.x = []
+                self.y = []
             else:  # append point to polygon
                 self.x.append(event.xdata)
                 self.y.append(event.ydata)
                 self.line.set_data(self.x, self.y)
+                # self.line.axes.draw_artist(self.line)
                 self.figure.canvas.draw()
-                self.clicker += 1
 
     def onRelease(self, event):
         try:  # to drag the line with the cursor
@@ -62,9 +62,8 @@ class SpanPoly(object):
     def onMotion(self, event):
         try:  # to draw this stuff
             self.motionLine.set_data((self.x[-1], event.xdata), (self.y[-1], event.ydata))
-
             self.figure.canvas.restore_region(self.background)
             self.motionLine.axes.draw_artist(self.motionLine)
             self.figure.canvas.blit(self.motionLine.axes.bbox)
-        except (AttributeError, IndexError):
+        except (AttributeError, IndexError, TypeError):
             pass

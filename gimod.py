@@ -34,20 +34,20 @@ from mpl import DraggablePoint
 # TODO: CLEAAAAAAAAAAAAAN THIS!!!!
 
 
-class PlotToolbar(NavigationToolbar):
-
-    def __init__(self, plot, parent=None):
-        # https://github.com/matplotlib/matplotlib/blob/master/lib/matplotlib/backends/backend_qt5.py
-        self.toolitems = (
-            ('Home', 'Reset original view', 'home', 'home'),
-            # (None, None, None, None),
-            ('Pan', 'Pan axes with left mouse, zoom with right', 'move', 'pan'),
-            ('Zoom', 'Zoom to recta ngle', 'zoom_to_rect', 'zoom'),
-            # (None, None, None, None),
-            ('Save', 'Save the figure', 'filesave', 'save_figure'),
-            )
-
-        NavigationToolbar.__init__(self, plot, parent=None, coordinates=False)
+# class PlotToolbar(NavigationToolbar):
+#
+#     def __init__(self, plot, parent=None):
+#         # https://github.com/matplotlib/matplotlib/blob/master/lib/matplotlib/backends/backend_qt5.py
+#         self.toolitems = (
+#             ('Home', 'Reset original view', 'home', 'home'),
+#             # (None, None, None, None),
+#             ('Pan', 'Pan axes with left mouse, zoom with right', 'move', 'pan'),
+#             ('Zoom', 'Zoom to recta ngle', 'zoom_to_rect', 'zoom'),
+#             # (None, None, None, None),
+#             ('Save', 'Save the figure', 'filesave', 'save_figure'),
+#             )
+#
+#         NavigationToolbar.__init__(self, plot, parent=None, coordinates=False)
 
 
 class PlotWidget(QtGui.QWidget):
@@ -64,21 +64,22 @@ class PlotWidget(QtGui.QWidget):
         self.axis.set_ylim(self.axis.get_ylim()[::-1])
         self.canvas = FigureCanvas(self.figure)
 
-        self.toolbar = PlotToolbar(self.canvas, self)
+        # self.toolbar = PlotToolbar(self.canvas, self)
+        self.toolbar = NavigationToolbar(self.canvas, self)
         self.toolbar.setIconSize(QtCore.QSize(18, 18))
         self.toolbar.setContentsMargins(0, 0, 0, 0)
 
         # add buttons
-        self.btn_zoom_in = QtGui.QToolButton()
-        self.btn_zoom_in.setIcon(QtGui.QIcon("material/ic_zoom_in_black_24px.svg"))
-        self.btn_zoom_in.setToolTip("zoom in")
-        self.btn_zoom_in.clicked.connect(self.zoomIn)
-        self.btn_zoom_out = QtGui.QToolButton()
-        self.btn_zoom_out.setIcon(QtGui.QIcon("material/ic_zoom_out_black_24px.svg"))
-        self.btn_zoom_out.setToolTip("zoom out")
-        self.btn_zoom_out.clicked.connect(self.zoomOut)
-        self.toolbar.addWidget(self.btn_zoom_in)
-        self.toolbar.addWidget(self.btn_zoom_out)
+        # self.btn_zoom_in = QtGui.QToolButton()
+        # self.btn_zoom_in.setIcon(QtGui.QIcon("material/ic_zoom_in_black_24px.svg"))
+        # self.btn_zoom_in.setToolTip("zoom in")
+        # self.btn_zoom_in.clicked.connect(self.zoomIn)
+        # self.btn_zoom_out = QtGui.QToolButton()
+        # self.btn_zoom_out.setIcon(QtGui.QIcon("material/ic_zoom_out_black_24px.svg"))
+        # self.btn_zoom_out.setToolTip("zoom out")
+        # self.btn_zoom_out.clicked.connect(self.zoomOut)
+        # self.toolbar.addWidget(self.btn_zoom_in)
+        # self.toolbar.addWidget(self.btn_zoom_out)
 
         # set the layout
         layout = QtGui.QVBoxLayout()
@@ -122,25 +123,25 @@ class MainWindow(QtGui.QMainWindow):
         self.initUI()
 
         """ connect the buttons with their functions """
-        self.btn_file.clicked.connect(self.chooseOpenSketch)
+        # self.btn_file.clicked.connect(self.chooseOpenSketch)
 
-        self.sld_min.valueChanged.connect(self.movedSldMin)
-        self.sld_min.sliderReleased.connect(self.imageContour)
-        self.sld_max.valueChanged.connect(self.movedSldMax)
-        self.sld_max.sliderReleased.connect(self.imageContour)
+        # self.sld_min.valueChanged.connect(self.movedSldMin)
+        # self.sld_min.sliderReleased.connect(self.imageContour)
+        # self.sld_max.valueChanged.connect(self.movedSldMax)
+        # self.sld_max.sliderReleased.connect(self.imageContour)
 
-        self.sld_dens.valueChanged.connect(self.movedSldDens)
-        # self.sld_dens.sliderReleased.connect(self.movedSldDens)
-        self.sld_dens.sliderReleased.connect(self.imageDensity)
-        self.spb_sld_dens.valueChanged.connect(self.changedSpbSldDens)
-        self.spb_sld_dens.valueChanged.connect(self.imageDensity)
-        self.spb_sld_min.valueChanged.connect(self.changedSpbSldMin)
-        self.spb_sld_max.valueChanged.connect(self.changedSpbSldMax)
-
-        self.sld_paths.valueChanged.connect(self.movedSldPaths)
-        self.sld_paths.sliderReleased.connect(self.changedSldPaths)
-        self.spb_paths.valueChanged.connect(self.changedSpbSldPaths)
-        self.spb_paths.valueChanged.connect(self.changedSldPaths)
+        # self.sld_dens.valueChanged.connect(self.movedSldDens)
+        # # self.sld_dens.sliderReleased.connect(self.movedSldDens)
+        # self.sld_dens.sliderReleased.connect(self.imageDensity)
+        # self.spb_sld_dens.valueChanged.connect(self.changedSpbSldDens)
+        # self.spb_sld_dens.valueChanged.connect(self.imageDensity)
+        # self.spb_sld_min.valueChanged.connect(self.changedSpbSldMin)
+        # self.spb_sld_max.valueChanged.connect(self.changedSpbSldMax)
+        #
+        # self.sld_paths.valueChanged.connect(self.movedSldPaths)
+        # self.sld_paths.sliderReleased.connect(self.changedSldPaths)
+        # self.spb_paths.valueChanged.connect(self.changedSpbSldPaths)
+        # self.spb_paths.valueChanged.connect(self.changedSldPaths)
 
         self.chbx_mesh_refine.stateChanged.connect(self.changedChbxMeshRefine)
         self.chbx_smooth.stateChanged.connect(self.changedChbxSmooth)
@@ -200,90 +201,90 @@ class MainWindow(QtGui.QMainWindow):
                 }
             """
 
-        file_widget = QtGui.QWidget()
-        self.vbox_file = QtGui.QVBoxLayout()
-        self.le_file = QtGui.QLineEdit()
-        self.btn_file = QtGui.QPushButton("&File")
-        hbox_file = QtGui.QHBoxLayout()
-        hbox_file.addWidget(self.btn_file)
-        hbox_file.addWidget(self.le_file)
-        # small picture of chosen file
-        self.file_image = QtGui.QLabel()
-
-        # ## threshold tab of tool_box
-        vbox_slds = QtGui.QVBoxLayout()
-        self.sld_min = QtGui.QSlider(QtCore.Qt.Horizontal, self)
-        self.sld_min.setRange(0, 254)
-        self.sld_min.setSliderPosition(200)
-        self.spb_sld_min = QtGui.QSpinBox(self)
-        self.spb_sld_min.setMinimum(0)
-        self.spb_sld_min.setMaximum(254)
-        self.spb_sld_min.setValue(200)
-        self.sld_max = QtGui.QSlider(QtCore.Qt.Horizontal, self)
-        self.sld_max.setRange(1, 255)
-        self.sld_max.setSliderPosition(255)
-        self.spb_sld_max = QtGui.QSpinBox(self)
-        self.spb_sld_max.setMinimum(1)
-        self.spb_sld_max.setMaximum(255)
-        self.spb_sld_max.setValue(255)
-        hbox_min = QtGui.QHBoxLayout()
-        hbox_min.addWidget(self.sld_min)
-        hbox_min.addWidget(self.spb_sld_min)
-        hbox_max = QtGui.QHBoxLayout()
-        hbox_max.addWidget(self.sld_max)
-        hbox_max.addWidget(self.spb_sld_max)
-
-        vbox_slds.addLayout(hbox_min)
-        vbox_slds.addLayout(hbox_max)
-
-        # ## slider for point density
-        vbox_sld_dens = QtGui.QVBoxLayout()
-        self.sld_dens = QtGui.QSlider(QtCore.Qt.Horizontal, self)
-        self.sld_dens.setRange(1, 20)
-        self.sld_dens.setSliderPosition(10)
-        self.spb_sld_dens = QtGui.QSpinBox(self)
-        self.spb_sld_dens.setMinimum(1)
-        self.spb_sld_dens.setMaximum(20)
-        self.spb_sld_dens.setValue(10)
-        hbox_sld_dens = QtGui.QHBoxLayout()
-        hbox_sld_dens.addWidget(self.sld_dens)
-        hbox_sld_dens.addWidget(self.spb_sld_dens)
-        vbox_sld_dens.addLayout(hbox_sld_dens)
-        # vbox_sld_dens.addStretch(1)
-
-        self.sld_paths = QtGui.QSlider(QtCore.Qt.Horizontal, self)
-        self.spb_paths = QtGui.QSpinBox(self)
-        hbox_sld_paths = QtGui.QHBoxLayout()
-        hbox_sld_paths.addWidget(self.sld_paths)
-        hbox_sld_paths.addWidget(self.spb_paths)
-        vbox_sld_paths = QtGui.QVBoxLayout()
-        vbox_sld_paths.addLayout(hbox_sld_paths)
-
-        le_slds = QtGui.QLabel("Threshold")
-        le_sld_dens = QtGui.QLabel("Point density")
-        le_sld_paths = QtGui.QLabel("Number of Polys")
-        le_dot_opts = QtGui.QLabel("Point Options")
-        vbox_slider = QtGui.QVBoxLayout()
-        vbox_slider.addWidget(le_slds)
-        vbox_slider.addLayout(vbox_slds)
-        vbox_slider.addWidget(le_sld_dens)
-        vbox_slider.addLayout(vbox_sld_dens)
-        vbox_slider.addWidget(le_sld_paths)
-        vbox_slider.addLayout(vbox_sld_paths)
-
-        self.vbox_file.addLayout(hbox_file)
-        self.vbox_file.addWidget(self.file_image)
-        # self.file_image.setGeometry(0, 0, 200, 100)
-        self.vbox_file.addLayout(vbox_slider)
-        # self.vbox_file.addStretch(1)
-
-        file_widget.setLayout(self.vbox_file)
-
-        # ## scratch tab of tool_box
-        scratch_widget = QtGui.QWidget()
-        vbox_scratch = QtGui.QVBoxLayout()
-        vbox_scratch.addWidget(QtGui.QPlainTextEdit("2 b continued"))
-        scratch_widget.setLayout(vbox_scratch)
+        # file_widget = QtGui.QWidget()
+        # self.vbox_file = QtGui.QVBoxLayout()
+        # self.le_file = QtGui.QLineEdit()
+        # self.btn_file = QtGui.QPushButton("&File")
+        # hbox_file = QtGui.QHBoxLayout()
+        # hbox_file.addWidget(self.btn_file)
+        # hbox_file.addWidget(self.le_file)
+        # # small picture of chosen file
+        # self.file_image = QtGui.QLabel()
+        #
+        # # ## threshold tab of tool_box
+        # vbox_slds = QtGui.QVBoxLayout()
+        # self.sld_min = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+        # self.sld_min.setRange(0, 254)
+        # self.sld_min.setSliderPosition(200)
+        # self.spb_sld_min = QtGui.QSpinBox(self)
+        # self.spb_sld_min.setMinimum(0)
+        # self.spb_sld_min.setMaximum(254)
+        # self.spb_sld_min.setValue(200)
+        # self.sld_max = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+        # self.sld_max.setRange(1, 255)
+        # self.sld_max.setSliderPosition(255)
+        # self.spb_sld_max = QtGui.QSpinBox(self)
+        # self.spb_sld_max.setMinimum(1)
+        # self.spb_sld_max.setMaximum(255)
+        # self.spb_sld_max.setValue(255)
+        # hbox_min = QtGui.QHBoxLayout()
+        # hbox_min.addWidget(self.sld_min)
+        # hbox_min.addWidget(self.spb_sld_min)
+        # hbox_max = QtGui.QHBoxLayout()
+        # hbox_max.addWidget(self.sld_max)
+        # hbox_max.addWidget(self.spb_sld_max)
+        #
+        # vbox_slds.addLayout(hbox_min)
+        # vbox_slds.addLayout(hbox_max)
+        #
+        # # ## slider for point density
+        # vbox_sld_dens = QtGui.QVBoxLayout()
+        # self.sld_dens = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+        # self.sld_dens.setRange(1, 20)
+        # self.sld_dens.setSliderPosition(10)
+        # self.spb_sld_dens = QtGui.QSpinBox(self)
+        # self.spb_sld_dens.setMinimum(1)
+        # self.spb_sld_dens.setMaximum(20)
+        # self.spb_sld_dens.setValue(10)
+        # hbox_sld_dens = QtGui.QHBoxLayout()
+        # hbox_sld_dens.addWidget(self.sld_dens)
+        # hbox_sld_dens.addWidget(self.spb_sld_dens)
+        # vbox_sld_dens.addLayout(hbox_sld_dens)
+        # # vbox_sld_dens.addStretch(1)
+        #
+        # self.sld_paths = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+        # self.spb_paths = QtGui.QSpinBox(self)
+        # hbox_sld_paths = QtGui.QHBoxLayout()
+        # hbox_sld_paths.addWidget(self.sld_paths)
+        # hbox_sld_paths.addWidget(self.spb_paths)
+        # vbox_sld_paths = QtGui.QVBoxLayout()
+        # vbox_sld_paths.addLayout(hbox_sld_paths)
+        #
+        # le_slds = QtGui.QLabel("Threshold")
+        # le_sld_dens = QtGui.QLabel("Point density")
+        # le_sld_paths = QtGui.QLabel("Number of Polys")
+        # le_dot_opts = QtGui.QLabel("Point Options")
+        # vbox_slider = QtGui.QVBoxLayout()
+        # vbox_slider.addWidget(le_slds)
+        # vbox_slider.addLayout(vbox_slds)
+        # vbox_slider.addWidget(le_sld_dens)
+        # vbox_slider.addLayout(vbox_sld_dens)
+        # vbox_slider.addWidget(le_sld_paths)
+        # vbox_slider.addLayout(vbox_sld_paths)
+        #
+        # self.vbox_file.addLayout(hbox_file)
+        # self.vbox_file.addWidget(self.file_image)
+        # # self.file_image.setGeometry(0, 0, 200, 100)
+        # self.vbox_file.addLayout(vbox_slider)
+        # # self.vbox_file.addStretch(1)
+        #
+        # file_widget.setLayout(self.vbox_file)
+        #
+        # # ## scratch tab of tool_box
+        # scratch_widget = QtGui.QWidget()
+        # vbox_scratch = QtGui.QVBoxLayout()
+        # vbox_scratch.addWidget(QtGui.QPlainTextEdit("2 b continued"))
+        # scratch_widget.setLayout(vbox_scratch)
 
         # ####################################################################################### #
         #                                    TAB MESH OPTIONS                                     #
@@ -400,9 +401,10 @@ class MainWindow(QtGui.QMainWindow):
         self.builder = Builder(self)
         tool_box = QtGui.QTabWidget(self)
         tool_box.setTabPosition(QtGui.QTabWidget.West)
-        tool_box.addTab(file_widget, "start with sketch")
-        tool_box.addTab(self.builder, "model builder")
+        # tool_box.addTab(file_widget, "start with sketch")
+        tool_box.addTab(self.builder, "poly properties")
         tool_box.addTab(mesh_widget, "mesh options")
+        # tool_box.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         v_plotWidget = QtGui.QVBoxLayout()
         v_plotWidget.addWidget(self.plotWidget)
 
@@ -429,30 +431,30 @@ class MainWindow(QtGui.QMainWindow):
             content = v.read()
         QtGui.QMessageBox.information(self, "About", content)
 
-    def movedSldMin(self):
-        self.spb_sld_min.setValue(self.sld_min.sliderPosition())
-        if self.sld_min.sliderPosition() == self.sld_max.sliderPosition():
-            self.sld_max.setSliderPosition(self.sld_max.sliderPosition() + 1)
-
-    def movedSldMax(self):
-        self.spb_sld_max.setValue(self.sld_max.sliderPosition())
-        if self.sld_max.sliderPosition() == self.sld_min.sliderPosition():
-            self.sld_min.setSliderPosition(self.sld_min.sliderPosition() - 1)
-
-    def movedSldDens(self):
-        self.spb_sld_dens.setValue(self.sld_dens.sliderPosition())
-
-    def changedSpbSldMin(self):
-        self.sld_min.setSliderPosition(self.spb_sld_min.value())
-
-    def changedSpbSldMax(self):
-        self.sld_max.setSliderPosition(self.spb_sld_max.value())
-
-    def changedSpbSldDens(self):
-        self.sld_dens.setSliderPosition(self.spb_sld_dens.value())
-
-    def changedSpbSldPaths(self):
-        self.sld_paths.setSliderPosition(self.spb_paths.value())
+    # def movedSldMin(self):
+    #     self.spb_sld_min.setValue(self.sld_min.sliderPosition())
+    #     if self.sld_min.sliderPosition() == self.sld_max.sliderPosition():
+    #         self.sld_max.setSliderPosition(self.sld_max.sliderPosition() + 1)
+    #
+    # def movedSldMax(self):
+    #     self.spb_sld_max.setValue(self.sld_max.sliderPosition())
+    #     if self.sld_max.sliderPosition() == self.sld_min.sliderPosition():
+    #         self.sld_min.setSliderPosition(self.sld_min.sliderPosition() - 1)
+    #
+    # def movedSldDens(self):
+    #     self.spb_sld_dens.setValue(self.sld_dens.sliderPosition())
+    #
+    # def changedSpbSldMin(self):
+    #     self.sld_min.setSliderPosition(self.spb_sld_min.value())
+    #
+    # def changedSpbSldMax(self):
+    #     self.sld_max.setSliderPosition(self.spb_sld_max.value())
+    #
+    # def changedSpbSldDens(self):
+    #     self.sld_dens.setSliderPosition(self.spb_sld_dens.value())
+    #
+    # def changedSpbSldPaths(self):
+    #     self.sld_paths.setSliderPosition(self.spb_paths.value())
 
     def changedChbxMeshRefine(self):
         if self.chbx_mesh_refine.isChecked() is True:
@@ -484,114 +486,114 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.le_switches.setEnabled(False)
 
-    def chooseOpenSketch(self):
-        # introduce the safe option for points here, because this function is
-        # called once per sketch
-        self.x_safe = []
-        self.y_safe = []
-        self.fname = QtGui.QFileDialog.getOpenFileName(
-            self, caption="choose sketch")
-        if self.fname:
-            self.le_file.setText(self.fname)
-            pixmap = QtGui.QPixmap(self.fname)
-            myScaledPixmap = pixmap.scaled(self.file_image.size(), QtCore.Qt.KeepAspectRatio)
-            self.vbox_file.addStretch(1)
-            self.file_image.setPixmap(myScaledPixmap)
-            # self.file_image.setFrameShape(QtGui.QFrame.StyledPanel)
-            # self.file_image.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Sunken)
-            self.vbox_file.addStretch(1)
+    # def chooseOpenSketch(self):
+    #     # introduce the safe option for points here, because this function is
+    #     # called once per sketch
+    #     self.x_safe = []
+    #     self.y_safe = []
+    #     self.fname = QtGui.QFileDialog.getOpenFileName(
+    #         self, caption="choose sketch")
+    #     if self.fname:
+    #         self.le_file.setText(self.fname)
+    #         pixmap = QtGui.QPixmap(self.fname)
+    #         myScaledPixmap = pixmap.scaled(self.file_image.size(), QtCore.Qt.KeepAspectRatio)
+    #         self.vbox_file.addStretch(1)
+    #         self.file_image.setPixmap(myScaledPixmap)
+    #         # self.file_image.setFrameShape(QtGui.QFrame.StyledPanel)
+    #         # self.file_image.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Sunken)
+    #         self.vbox_file.addStretch(1)
+    #
+    #         self.imageContour()
+    #
+    # def imageContour(self):
+    #     # Read image
+    #     src = cv2.imread(self.fname)
+    #     img = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
+    #     # self.x_range, self.y_range = img.shape
+    #
+    #     # Basic threshold example
+    #     th, dst = cv2.threshold(img, float(self.sld_min.sliderPosition()), float(
+    #         self.sld_max.sliderPosition()), cv2.THRESH_BINARY)
+    #
+    #     # Find Contours
+    #     image, contours, hierarchy = cv2.findContours(
+    #         dst, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    #
+    #     # sort after polygon area and takes the 10 biggest
+    #     paths = sorted(contours, key=cv2.contourArea)[::-1]  # [-11:-1]
+    #     self.paths = [i for i in paths if len(i) > 5][1:]
+    #     if len(self.paths) >= 50:
+    #         self.statusBar.showMessage("WARNING: detected %i polygons... possible bad conditioned threshold or image" % (len(self.paths)))
+    #     else:
+    #         self.statusBar.clearMessage()
+    #     self.sld_paths.setRange(1, len(self.paths))
+    #     self.sld_paths.setSliderPosition(1)
+    #     self.spb_paths.setMinimum(1)
+    #     self.spb_paths.setMaximum(len(self.paths))
+    #     self.spb_paths.setValue(1)
+    #     # draw initially
+    #     self.changedSldPaths()
+    #     # print(len(self.paths))
+    #     # print(len(paths[-11:-1]))
+    #     # sys.exit()
 
-            self.imageContour()
+    # def movedSldPaths(self):
+    #     self.spb_paths.setValue(self.sld_paths.sliderPosition())
 
-    def imageContour(self):
-        # Read image
-        src = cv2.imread(self.fname)
-        img = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
-        # self.x_range, self.y_range = img.shape
+    # def changedSldPaths(self):
+    #     self.paths_cut = self.paths[:self.spb_paths.value()]
+    #     self.polygons = []
+    #     for path in self.paths_cut:
+    #         tuples = []
+    #         for tup in path:
+    #             tuples.append([float(tup[0][0]), float(tup[0][1])])
+    #         self.polygons.append(tuples)
+    #
+    #     self.imageDensity()
+    #     # TODO achse auf 0 - 1 begrenzen und skala selbst angeben können
 
-        # Basic threshold example
-        th, dst = cv2.threshold(img, float(self.sld_min.sliderPosition()), float(
-            self.sld_max.sliderPosition()), cv2.THRESH_BINARY)
+    # def findMinMax(self):
+    #     """
+    #         # TODO: force deprecation!!!!
+    #         nur gebraucht bei createWorld in regionRefresh
+    #     """
+    #     min_x = []
+    #     max_x = []
+    #     min_y = []
+    #     max_y = []
+    #     for p in self.polygons:
+    #         min_x.append(min(p, key=lambda t: t[0])[0])
+    #         max_x.append(max(p, key=lambda t: t[0])[0])
+    #         min_y.append(min(p, key=lambda t: t[1])[1])
+    #         max_y.append(max(p, key=lambda t: t[1])[1])
+    #
+    #     self.min_x = min(min_x)
+    #     self.max_x = max(max_x)
+    #     self.min_y = min(min_y)
+    #     self.max_y = max(max_y)
 
-        # Find Contours
-        image, contours, hierarchy = cv2.findContours(
-            dst, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    # def imageDensity(self):
+    #     """ take every n-th tuple given from the slider 'density' to reduce number of points """
+    #     self.polygons_dens = []
+    #     for p in self.polygons:
+    #         self.polygons_dens.append([p[i] for i in range(0, len(p), self.spb_sld_dens.value())])
+    #     self.findMinMax()
+    #     self.imagePlot()
 
-        # sort after polygon area and takes the 10 biggest
-        paths = sorted(contours, key=cv2.contourArea)[::-1]  # [-11:-1]
-        self.paths = [i for i in paths if len(i) > 5][1:]
-        if len(self.paths) >= 50:
-            self.statusBar.showMessage("WARNING: detected %i polygons... possible bad conditioned threshold or image" % (len(self.paths)))
-        else:
-            self.statusBar.clearMessage()
-        self.sld_paths.setRange(1, len(self.paths))
-        self.sld_paths.setSliderPosition(1)
-        self.spb_paths.setMinimum(1)
-        self.spb_paths.setMaximum(len(self.paths))
-        self.spb_paths.setValue(1)
-        # draw initially
-        self.changedSldPaths()
-        # print(len(self.paths))
-        # print(len(paths[-11:-1]))
-        # sys.exit()
-
-    def movedSldPaths(self):
-        self.spb_paths.setValue(self.sld_paths.sliderPosition())
-
-    def changedSldPaths(self):
-        self.paths_cut = self.paths[:self.spb_paths.value()]
-        self.polygons = []
-        for path in self.paths_cut:
-            tuples = []
-            for tup in path:
-                tuples.append([float(tup[0][0]), float(tup[0][1])])
-            self.polygons.append(tuples)
-
-        self.imageDensity()
-        # TODO achse auf 0 - 1 begrenzen und skala selbst angeben können
-
-    def findMinMax(self):
-        """
-            # TODO: force deprecation!!!!
-            nur gebraucht bei createWorld in regionRefresh
-        """
-        min_x = []
-        max_x = []
-        min_y = []
-        max_y = []
-        for p in self.polygons:
-            min_x.append(min(p, key=lambda t: t[0])[0])
-            max_x.append(max(p, key=lambda t: t[0])[0])
-            min_y.append(min(p, key=lambda t: t[1])[1])
-            max_y.append(max(p, key=lambda t: t[1])[1])
-
-        self.min_x = min(min_x)
-        self.max_x = max(max_x)
-        self.min_y = min(min_y)
-        self.max_y = max(max_y)
-
-    def imageDensity(self):
-        """ take every n-th tuple given from the slider 'density' to reduce number of points """
-        self.polygons_dens = []
-        for p in self.polygons:
-            self.polygons_dens.append([p[i] for i in range(0, len(p), self.spb_sld_dens.value())])
-        self.findMinMax()
-        self.imagePlot()
-
-    def imagePlot(self):
-        self.plotWidget.axis.cla()
-        for p in self.polygons_dens:
-            # print(path)
-            # print(path.shape)
-            self.plotWidget.axis.scatter(*zip(*p), alpha=0.5, s=2)
-
-        self.plotWidget.canvas.draw()
-        # self.btn_region_init.setEnabled(True)
-        # self.rbtn_region_regions.setEnabled(True)
-        # self.rbtn_region_attributes.setEnabled(True)
-
-        # if self.btn_rs.isChecked() is False and len(self.x) != 0:
-        #     self.btn_mesh.setEnabled(True)
+    # def imagePlot(self):
+    #     self.plotWidget.axis.cla()
+    #     for p in self.polygons_dens:
+    #         # print(path)
+    #         # print(path.shape)
+    #         self.plotWidget.axis.scatter(*zip(*p), alpha=0.5, s=2)
+    #
+    #     self.plotWidget.canvas.draw()
+    #     # self.btn_region_init.setEnabled(True)
+    #     # self.rbtn_region_regions.setEnabled(True)
+    #     # self.rbtn_region_attributes.setEnabled(True)
+    #
+    #     # if self.btn_rs.isChecked() is False and len(self.x) != 0:
+    #     #     self.btn_mesh.setEnabled(True)
 
     def clickedBtnMesh(self):
         if self.mesh_refine is False:
@@ -613,7 +615,7 @@ class MainWindow(QtGui.QMainWindow):
             # TODO make th switches work --> http://pygimli.org/_examples_auto/modelling/plot_hybrid-mesh-2d.html?highlight=switches
 
         self.statusBar.showMessage("generating mesh...")
-        self.mesh = createMesh(self.regions.getPoly(), quality=self.spb_mesh_quality.value(), area=self.spb_cell_area.value(), smooth=self.smooth_method, switches=self.switches)
+        self.mesh = createMesh(self.builder.getPoly(), quality=self.spb_mesh_quality.value(), area=self.spb_cell_area.value(), smooth=self.smooth_method, switches=self.switches)
 
         if self.mesh_refine is True and self.cbx_mesh_refine.currentText() == "quadratic":
             self.statusBar.showMessage("create quadratic...")

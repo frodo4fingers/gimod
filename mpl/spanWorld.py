@@ -2,6 +2,7 @@
 # encoding: UTF-8
 
 from matplotlib.patches import Rectangle
+# BUG: cant create world twice e.g. after undoing the creation due to false dimension it cant be done a second time... shame
 
 
 class SpanWorld(object):

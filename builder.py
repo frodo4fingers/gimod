@@ -8,10 +8,12 @@ from pygimli.meshtools import polytools as plc
 from pygimli.meshtools import createMesh, writePLC
 import pygimli as pg
 import numpy as np
+from matplotlib import patches
 from PyQt4 import QtCore, QtGui
 from collections import OrderedDict as od
 
-from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly
+from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly, DraggablePoint
+from imagery import ImageTools as it
 
 # TODO: DIE BUTTONS NUR ENABLEN WENN DER TAB AKTIV IST!!!!!!!!!
 # TODO: skizze laden und verändern können im model builder
@@ -25,21 +27,36 @@ class Builder(QtGui.QWidget):
 
     def __init__(self, parent=None):
         super(Builder, self).__init__(parent)
+        self.parent = parent
         self.figure = parent.plotWidget
         self.toolBar = parent.toolBar
         self.statusBar = parent.statusBar
         self.marker = 1  # 0
+        self.newMarkers = []
         self.polys = []
         self.undone = []
+        self.imageClicked = True
+        self.markersClicked = True
+        self.poly = None
 
         self.setupUI()
 
         ''' connect signals '''
-        self.acn_world.triggered.connect(self.createPolyWorld)
-        self.acn_rectangle.triggered.connect(self.createPolyRectangle)
-        self.acn_circle.triggered.connect(self.createPolyCircle)
-        self.acn_line.triggered.connect(self.createPolyLine)
-        self.acn_polygon.triggered.connect(self.FormPolygon)
+        self.acn_image.triggered.connect(self.imagery)
+        self.acn_imageAsBackground.stateChanged.connect(self.imageryBackground)
+        self.acn_imageThreshold1.valueChanged.connect(self.updateImagery)
+        self.acn_imageThreshold2.valueChanged.connect(self.updateImagery)
+        self.acn_imageDensity.valueChanged.connect(self.updateImagery)
+        self.acn_imagePolys.valueChanged.connect(self.updateImagery)
+        self.acn_polygonize.triggered.connect(self.formPolygonFromFigure)
+
+        self.acn_world.triggered.connect(self.formPolyWorld)
+        self.acn_rectangle.triggered.connect(self.formPolyRectangle)
+        self.acn_circle.triggered.connect(self.formPolyCircle)
+        self.acn_line.triggered.connect(self.formPolyLine)
+        self.acn_polygon.triggered.connect(self.formPolygon)
+
+        self.acn_markerCheck.triggered.connect(self.markersMove)
 
         self.btn_redraw.clicked.connect(self.redrawTable)
 
@@ -53,8 +70,43 @@ class Builder(QtGui.QWidget):
         self.bold = QtGui.QFont()
         self.bold.setBold(True)
         # polytool buttons
-        self.grp_polyTools = QtGui.QActionGroup(self)
 
+        self.grp_imageTools = QtGui.QActionGroup(self)
+        self.acn_image = QtGui.QAction(QtGui.QIcon('material/ic_image.svg'), 'image', self.grp_imageTools)
+        self.acn_image.setToolTip("Load image to set as model background or try to extract polygons from")
+        self.acn_image.setCheckable(True)
+
+        self.acn_polygonize = QtGui.QAction(QtGui.QIcon('material/ic_polygonize.svg'), 'image', self.grp_imageTools)
+        self.acn_polygonize.setToolTip("polygonize the contours")
+        self.acn_polygonize.setVisible(False)
+
+        self.acn_imageAsBackground = QtGui.QCheckBox('as background')
+        # self.acn_imageAsBackground.setEnabled(False)
+        self.acn_imageAsBackground.setToolTip("set the chosen image as background to paint your model")
+        self.acn_imageThreshold1 = QtGui.QSpinBox()
+        self.acn_imageThreshold1.setRange(0, 254)
+        self.acn_imageThreshold1.setValue(200)
+        self.acn_imageThreshold1.setToolTip("bottom value for threshold")
+        self.acn_imageThreshold2 = QtGui.QSpinBox()
+        self.acn_imageThreshold2.setRange(1, 255)
+        self.acn_imageThreshold2.setValue(255)
+        self.acn_imageThreshold2.setToolTip("top value for threshold")
+        self.acn_imageDensity = QtGui.QSpinBox()
+        self.acn_imageDensity.setToolTip("set density of dots in polygon")
+        self.acn_imagePolys = QtGui.QSpinBox()
+        self.acn_imagePolys.setToolTip("set the number of polygons used for model creation")
+        acnBox = QtGui.QHBoxLayout()
+        acnBox.addWidget(self.acn_imageAsBackground)
+        acnBox.addWidget(self.acn_imageThreshold1)
+        acnBox.addWidget(self.acn_imageThreshold2)
+        acnBox.addWidget(self.acn_imageDensity)
+        acnBox.addWidget(self.acn_imagePolys)
+        # acnBox.addAction(self.acn_polygonize)
+        acnBox.setMargin(0)
+        acnWidget = QtGui.QWidget()
+        acnWidget.setLayout(acnBox)
+
+        self.grp_polyTools = QtGui.QActionGroup(self)
         self.acn_world = QtGui.QAction(QtGui.QIcon('material/ic_spanWorld.svg'), 'world', self.grp_polyTools)
         self.acn_world.setToolTip("Create your model world where everything happens")
         self.acn_world.setCheckable(True)
@@ -75,13 +127,24 @@ class Builder(QtGui.QWidget):
         self.acn_polygon.setToolTip("Create a polygon by clicking, finish with double click")
         self.acn_polygon.setCheckable(True)
 
+        self.acn_markerCheck = QtGui.QAction(QtGui.QIcon('material/marker_check.svg'), 'marker', self.grp_polyTools)
+        self.acn_markerCheck.setToolTip("check and reset marker positions")
+        self.acn_markerCheck.setCheckable(True)
+
         # tb = QtGui.QToolBar()
         # tb.setMovable(False)
+        self.toolBar.addAction(self.acn_image)
+        self.widgetAction = self.toolBar.addWidget(acnWidget)
+        self.widgetAction.setVisible(False)
+        self.toolBar.addAction(self.acn_polygonize)
+        self.toolBar.addSeparator()
         self.toolBar.addAction(self.acn_world)
         self.toolBar.addAction(self.acn_polygon)
         self.toolBar.addAction(self.acn_rectangle)
         self.toolBar.addAction(self.acn_circle)
         self.toolBar.addAction(self.acn_line)
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.acn_markerCheck)
 
         self.tw_polys = QtGui.QTreeWidget()
         self.tw_polys.setAlternatingRowColors(True)
@@ -90,13 +153,6 @@ class Builder(QtGui.QWidget):
         # self.tw_polys.header().hide()
         # self.tw_polys.showDropIndicator()
         # self.tw_polys.setRootIsDecorated(False)
-
-        # parameter table for different polygons
-        # TODO: gegen gescheites qlistwidget ersetzen! tabelle ist scheiße
-        # self.polys_table = QtGui.QTableWidget(self)
-        # self.polys_table.setRowCount(15)
-        # self.polys_table.setVerticalHeaderLabels(
-        #    ('Type', 'x0', 'y0', 'x1', 'y1', 'Radius', 'Segments', 'Start', 'End', 'Marker', 'Area', 'Boundary', 'Left?', 'Hole?', 'Closed?'))
 
         # redraw table button
         self.btn_undo = QtGui.QPushButton()
@@ -131,13 +187,39 @@ class Builder(QtGui.QWidget):
 
         # form the layout
         vbox = QtGui.QVBoxLayout()
-        # vbox.addWidget(tb)
-        # vbox.addWidget(self.polys_table)
         vbox.addWidget(self.tw_polys)
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
-    def createPolyWorld(self):
+    def imagery(self):
+
+        if self.imageClicked is True:
+            self.widgetAction.setVisible(True)
+            self.acn_polygonize.setVisible(True)
+            self.imageClicked = False
+            # BUG: cheeky piece of shit
+            self.fname = QtGui.QFileDialog.getOpenFileName(self, caption='choose sketch')
+            # instanciate the imageTools class
+            self.imageTools = it(self)  # slightly distracting
+            self.imageTools.getContours()
+
+        else:
+            self.widgetAction.setVisible(False)
+            self.acn_polygonize.setVisible(False)
+            self.acn_image.setChecked(False)
+            self.imageClicked = True
+
+    def updateImagery(self):
+        self.imageTools.getContours()
+
+    def imageryBackground(self):
+        if self.acn_imageAsBackground.isChecked() is True:
+            self.figure.axis.cla()
+            self.imageTools.setBackground()
+        else:
+            self.updateImagery()
+
+    def formPolyWorld(self):
         try:
             self.span.disconnect()
         except AttributeError:
@@ -145,7 +227,7 @@ class Builder(QtGui.QWidget):
             self.span = SpanWorld(self)
             self.span.connect()
 
-    def createPolyRectangle(self):
+    def formPolyRectangle(self):
         try:
             self.span.disconnect()
         except AttributeError:
@@ -153,7 +235,7 @@ class Builder(QtGui.QWidget):
         self.span = SpanRectangle(self)
         self.span.connect()
 
-    def createPolyCircle(self):
+    def formPolyCircle(self):
         try:
             self.span.disconnect()
         except AttributeError:
@@ -161,7 +243,7 @@ class Builder(QtGui.QWidget):
         self.span = SpanCircle(self)
         self.span.connect()
 
-    def createPolyLine(self):
+    def formPolyLine(self):
         try:
             self.span.disconnect()
         except AttributeError:
@@ -169,13 +251,26 @@ class Builder(QtGui.QWidget):
         self.span = SpanLine(self)
         self.span.connect()
 
-    def FormPolygon(self):
+    def formPolygon(self):
         try:
             self.span.disconnect()
         except AttributeError:
             pass
         self.span = SpanPoly(self)
         self.span.connect()
+
+    def formPolygonFromFigure(self):
+        # self.setCursor(QtCore.Qt.WaitCursor)
+        self.tw_polys.clear()
+        self.polys.clear()
+        self.marker = 1
+        self.parent.setCursor(QtCore.Qt.WaitCursor)
+        for c in self.imageTools.contoursCutted:
+            self.printPolygon(c)
+        self.figure.axis.set_ylim(self.figure.axis.get_ylim()[::-1])
+        self.figure.canvas.draw()
+        self.statusBar.showMessage(str(self.poly))
+        self.parent.setCursor(QtCore.Qt.ArrowCursor)
 
     def printCoordinates(self, x1, y1, x2, y2, form):
 
@@ -190,11 +285,9 @@ class Builder(QtGui.QWidget):
     def printPolygon(self, polygon):
         self.polygon = polygon
         self.form = 'Polygon'
-
         self.constructPoly()
 
     def constructPoly(self):
-
         if self.form == 'World':
             self.polys.append(plc.createWorld(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.marker))
 
@@ -206,7 +299,8 @@ class Builder(QtGui.QWidget):
             pos=(self.x_p, self.y_p), segments=12, radius=self.x_r, marker=self.marker))
 
         elif self.form == 'Line':
-            self.polys.append(plc.createLine(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], segments=2))
+            # print(self.x_p, self.y_p, self.x_r, self.y_r)
+            self.polys.append(plc.createLine(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], segments=1))
 
         elif self.form == 'Polygon':
             self.polys.append(plc.createPolygon(self.polygon, marker=self.marker, isClosed=True))
@@ -219,7 +313,7 @@ class Builder(QtGui.QWidget):
         self.figure.axis.cla()
 
         if self.rbtn_plotRegions.isChecked() is True:
-            drawMesh(self.figure.axis, self.poly, fitView=False, )
+            drawMesh(self.figure.axis, self.poly, fitView=False)
             self.figure.canvas.draw()
         else:
             attrMap = self.zipUpMarkerAndAttributes()
@@ -230,15 +324,13 @@ class Builder(QtGui.QWidget):
             drawModel(self.figure.axis, meshTmp, tri=True, data=attrMap)
             self.figure.canvas.draw()
 
-            # except (AttributeError, IndexError):
-            #     print("boiiiii! dont he shite char where float belongs")
-
         if fillTable:
             self.fillTable()
             # iterate marker counter
             self.marker += 1
 
     def fillTable(self):
+        # FIXME: marker is iterated to existent state. needs to be recounted after table creation so all markers can be chosen for all polys
         twItem = QtGui.QTreeWidgetItem()
         twItem.setText(0, self.form)
         twItem.setFont(0, self.bold)
@@ -249,25 +341,25 @@ class Builder(QtGui.QWidget):
             xStart = QtGui.QTreeWidgetItem()
             xStart.setFlags(xStart.flags() | QtCore.Qt.ItemIsEditable)
             xStart.setText(0, "Start x:")
-            xStart.setText(1, str(round(self.x_p, 2)))
+            xStart.setText(1, str(self.x_p))
             twItem.addChild(xStart)
             # start y
             yStart = QtGui.QTreeWidgetItem()
             yStart.setFlags(yStart.flags() | QtCore.Qt.ItemIsEditable)
             yStart.setText(0, "Start y:")
-            yStart.setText(1, str(round(self.y_p, 2)))
+            yStart.setText(1, str(self.y_p))
             twItem.addChild(yStart)
             # end x
             xEnd = QtGui.QTreeWidgetItem()
             xEnd.setFlags(xEnd.flags() | QtCore.Qt.ItemIsEditable)
             xEnd.setText(0, "End x:")
-            xEnd.setText(1, str(round(self.x_r, 2)))
+            xEnd.setText(1, str(self.x_r))
             twItem.addChild(xEnd)
             # end y
             yEnd = QtGui.QTreeWidgetItem()
             yEnd.setFlags(yEnd.flags() | QtCore.Qt.ItemIsEditable)
             yEnd.setText(0, "End y:")
-            yEnd.setText(1, str(round(self.y_r, 2)))
+            yEnd.setText(1, str(self.y_r))
             twItem.addChild(yEnd)
 
         if self.form == 'Circle':
@@ -317,8 +409,8 @@ class Builder(QtGui.QWidget):
         if self.form == 'Line':
             # insert segments
             spx_segments = QtGui.QSpinBox()
-            spx_segments.setValue(2)
-            spx_segments.setMinimum(2)
+            spx_segments.setValue(1)
+            spx_segments.setMinimum(1)
             segments = QtGui.QTreeWidgetItem()
             segments.setText(0, "Segments:")
             twItem.addChild(segments)
@@ -326,9 +418,9 @@ class Builder(QtGui.QWidget):
 
         if self.form != 'Line':
             # insert marker
-            for k in range(self.marker ):
+            for k in range(self.marker):
                 a = QtGui.QComboBox()
-                [a.addItem(str(m + 1)) for m in range(self.marker)]
+                [a.addItem(str(m + 1)) for m in range(len(self.polys))]
                 a.setCurrentIndex(k)
             marker = QtGui.QTreeWidgetItem()
             marker.setText(0, "Marker:")
@@ -383,6 +475,13 @@ class Builder(QtGui.QWidget):
             twItem.addChild(isClosed)
             self.tw_polys.setItemWidget(isClosed, 1, cbx_isClosed)
 
+        if self.form == 'Polygon':
+            verts = QtGui.QTreeWidgetItem()
+            verts.setText(0, "Verts:")
+            verts.setText(1, ', '.join(str(i) for i in self.polygon))
+            verts.setFlags(verts.flags() | QtCore.Qt.ItemIsEditable)
+            twItem.addChild(verts)
+
         if self.form != 'Line':
             attributes = QtGui.QTreeWidgetItem()
             attributes.setText(0, "Attributes:")
@@ -394,11 +493,13 @@ class Builder(QtGui.QWidget):
         if not self.tw_polys.currentItem():
             self.tw_polys.setCurrentItem(self.tw_polys.topLevelItem(0))
             self.tw_polys.setEnabled(True)
-
-        # self.redrawTable()
+        self.tw_polys.resizeColumnToContents(0)
 
     def redrawTable(self):
-        self.statusBar.clearMessage()
+        # BUG: line misses first half after redraw
+        # BUG: after redraw marker might be lost: control mechanism and/or possible manual adding of a marker
+        # self.setCursor(QtCore.Qt.WaitCursor)
+        self.statusBar.showMessage("updating...")
         self.polys.clear()
         polyMeta = []
         for i in range(self.tw_polys.topLevelItemCount()):
@@ -420,37 +521,86 @@ class Builder(QtGui.QWidget):
 
         self.polyAttributes = []
         self.polyMarkers = []
-        for p in polyMeta:
+        for i, p in enumerate(polyMeta):
             if p[0] == 'World':
                 self.polys.append(plc.createWorld(
                 start=[float(p[1]), float(p[2])], end=[float(p[3]), float(p[4])], marker=int(p[5]), area=float(p[6])
                 ))
                 self.polyAttributes.append(p[7])
                 self.polyMarkers.append(int(p[5]))
+
             elif p[0] == 'Rectangle':
                 self.polys.append(plc.createRectangle(
                 start=[float(p[1]), float(p[2])], end=[float(p[3]), float(p[4])], marker=int(p[5]), area=float(p[6]), boundaryMarker=int(p[7]), isHole=int(p[9]), isClosed=int(p[10])
                 ))  # leftDirection=int(p[8])
                 self.polyAttributes.append(p[11])
                 self.polyMarkers.append(int(p[5]))
+
             elif p[0] == 'Circle':
                 self.polys.append(plc.createCircle(
                 pos=tuple(np.asarray(p[1].split(', '), dtype=float)), radius=float(p[2]), segments=int(p[3]), start=float(p[4]), end=float(p[5]), marker=int(p[6]), area=float(p[7]), boundaryMarker=int(p[8]), leftDirection=int(p[9]), isHole=int(p[10]), isClosed=int(p[11])
                 ))
                 self.polyAttributes.append(p[12])
                 self.polyMarkers.append(int(p[6]))
+
             elif p[0] == 'Line':
+                # print(p[1], p[2], p[3], p[4])
                 self.polys.append(plc.createLine(
                 start=[float(p[1]), float(p[2])], end=[float(p[3]), float(p[4])], segments=int(p[5]), boundaryMarker=int(p[6]), leftDirection=int(p[7])
                 ))
             elif p[0] == 'Polygon':
-                self.polys.append(plc.createPolygon(
-                verts=self.polygon, marker=int(p[1]), area=float(p[2]), boundaryMarker=int(p[3]), isClosed=int(p[6])
-                ))  # leftDirection=int(p[4]), isHole=int(p[5])
-                self.polyAttributes.append(p[7])
+                # meh..
+                vertStr = p[7].replace('[', '').replace(']', '').replace(',', '').split(' ')
+                verts = [[float(vertStr[i]), float(vertStr[i+1])] for i in range(0, len(vertStr), 2)]
+                poly = plc.createPolygon(
+                verts=verts, area=float(p[2]), boundaryMarker=int(p[3]), isClosed=int(p[6]))  # leftDirection=int(p[4])
+
+                if int(p[5]) == 1:
+                    pg.Mesh.addHoleMarker(poly, self.newMarkers[i][0])
+                else:
+                    pg.Mesh.addRegionMarker(poly, self.newMarkers[i][0], marker=int(p[1]))
+                self.polys.append(poly)
+                self.polyAttributes.append(p[8])
                 self.polyMarkers.append(int(p[1]))
 
+        self.statusBar.clearMessage()
         self.drawPoly(fillTable=False)
+
+    def markersMove(self):
+        """
+            plots dots as marker positions which can be moved
+        """
+        try:
+            self.span.disconnect()
+        except AttributeError:
+            pass
+
+        if self.markersClicked is True:
+            self.markersClicked = False
+            self.dps = []
+            for i, p in enumerate(self.polys):
+                m = pg.center(p.positions())
+                mark = patches.Circle(m, radius=self.markerSize(), fc='r')
+                self.figure.axis.add_patch(mark)
+                dp = DraggablePoint(mark, i, m)
+                dp.connect()
+                self.dps.append(dp)
+            self.figure.canvas.draw()
+
+        else:
+            self.parent.setCursor(QtCore.Qt.WaitCursor)
+            for p in self.dps:
+                val = p.returnValue()
+                self.newMarkers.append(list(val.values()))
+                p.disconnect()
+            self.markersClicked = True
+            self.acn_markerCheck.setChecked(False)
+            self.redrawTable()
+            self.parent.setCursor(QtCore.Qt.ArrowCursor)
+
+    def markerSize(self):
+        m, n = self.figure.axis.get_xlim()
+        return abs(m - n)/40
 
     def undoPoly(self):
         """
@@ -494,7 +644,8 @@ class Builder(QtGui.QWidget):
 
     def zipUpMarkerAndAttributes(self):
         """
-            make the list ready for plotting and check if duplicates were made
+            join marker and attribute into list so it can be pased to cells and check if duplicates
+            were made
         """
         attrMap = []
         for i, a in enumerate(self.polyAttributes):
@@ -509,6 +660,9 @@ class Builder(QtGui.QWidget):
                     self.statusBar.showMessage("ERROR: some values seem to be string. int or float is needed")
 
         return attrMap
+
+    def getPoly(self):
+        return self.poly
 
 
 if __name__ == '__main__':
