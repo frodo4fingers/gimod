@@ -1,16 +1,19 @@
 # GIMod
 **G**raphical **I**nterface for basic **Mod**el creation
 
-GIMod is intended to make the creation of your basic model with/for [GIMLi](www.pygimli.org) easier. The result is a poly or mesh which can be further used in your own script.
+GIMod is intended to make the creation of your basic model with/for [GIMLi](www.pygimli.org) easier. The result is a poly (.poly) or mesh (.bms) which can be further used in your own script.
+(written and tested with python 3.6.0 and matplotlib 2.0.0)
 
 ---
-## you need:
-+ [python](https://www.python.org/downloads/) (written and tested with python 3.5.2)
+## requirements:
++ [python](https://www.python.org/downloads/)
 + [Qt](https://www.qt.io/download/)
 + [GIMLi](http://www.pygimli.org/installation.html)
 + [OpenCV](http://opencv.org/downloads.html)
++ [Shapely](https://pypi.python.org/pypi/Shapely)
 
-### handling
-So far it is only possible to start with a sketch/ a picture (png, jpg, etc.) and handle the threshold for a black and white image. The result is the dotted shape of your image. You can adjust the number of polygons found within the shape and adjust the point density (the lower, the denser.. need to fix that)
+## handling
+The GUI is parted in to two areas. On the left side there is a tree view of all polygons which are displayed on the right. The toolbar above those inherits the main tools from [GIMLi](www.pygimli.org)s *polytools* to create your polygon.
 
-<img src="https://gitlab.com/friedrich/gimod/raw/ac311dc2111a97e7daf6988d3931a2f116dd01a4/images/scrot_01.png" width="500">
+## TODOs
+There are a lot. GIMod still is buggy at a few lines and i am on to that. To see where the problems are, see the to.do file which was generated with [TODO-show](https://github.com/IanMitchell/atom-todo-show) or test at free will and feel free to [open a ticket](https://github.com/frodo4fingers/gimod/issues). For further reading i will set up a wiki.
