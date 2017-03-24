@@ -584,6 +584,7 @@ class Builder(QtGui.QWidget):
             self.figure.canvas.draw()
 
         else:
+            # BUG: figure upside down
             self.parent.setCursor(QtCore.Qt.WaitCursor)
             for p in self.dps:
                 val = p.returnValue()
