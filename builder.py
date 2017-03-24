@@ -3,10 +3,10 @@
 
 ''' model builder components '''
 from PyQt4 import QtGui
+import pygimli as pg
 from pygimli.mplviewer import drawMesh, drawMeshBoundaries, drawModel
 from pygimli.meshtools import polytools as plc
 from pygimli.meshtools import createMesh, writePLC
-import pygimli as pg
 import numpy as np
 from matplotlib import patches
 from PyQt4 import QtCore, QtGui
@@ -196,7 +196,7 @@ class Builder(QtGui.QWidget):
             # BUG: cheeky piece of shit
             self.fname = QtGui.QFileDialog.getOpenFileName(self, caption='choose sketch')
             # instanciate the imageTools class
-            self.imageTools = it(self)  # slightly distracting
+            self.imageTools = it(self)
             self.imageTools.getContours()
 
         else:
@@ -256,7 +256,6 @@ class Builder(QtGui.QWidget):
         self.span.connect()
 
     def formPolygonFromFigure(self):
-        # self.setCursor(QtCore.Qt.WaitCursor)
         self.tw_polys.clear()
         self.polys.clear()
         self.marker = 1
@@ -414,10 +413,10 @@ class Builder(QtGui.QWidget):
 
         if self.form != 'Line':
             # insert marker
-            for k in range(self.marker):
-                a = QtGui.QComboBox()
-                [a.addItem(str(m + 1)) for m in range(len(self.polys))]
-                a.setCurrentIndex(k)
+            # for k in range(self.marker):
+            a = QtGui.QComboBox()
+            [a.addItem(str(m + 1)) for m in range(self.marker)]
+            a.setCurrentIndex(self.marker - 1)
             marker = QtGui.QTreeWidgetItem()
             marker.setText(0, "Marker:")
             twItem.addChild(marker)
@@ -494,7 +493,7 @@ class Builder(QtGui.QWidget):
     def redrawTable(self):
         # BUG: line misses first half after redraw
         # BUG: after redraw marker might be lost: control mechanism and/or possible manual adding of a marker
-        # self.setCursor(QtCore.Qt.WaitCursor)
+        self.parent.setCursor(QtCore.Qt.WaitCursor)
         self.statusBar.showMessage("updating...")
         self.polys.clear()
         polyMeta = []
@@ -551,16 +550,22 @@ class Builder(QtGui.QWidget):
                 poly = plc.createPolygon(
                 verts=verts, area=float(p[2]), boundaryMarker=int(p[3]), isClosed=int(p[6]))  # leftDirection=int(p[4])
 
-                if int(p[5]) == 1:
-                    pg.Mesh.addHoleMarker(poly, self.newMarkers[i][0])
+                if len(self.newMarkers) != 0:
+                    markerPos = self.newMarkers[i][0]
                 else:
-                    pg.Mesh.addRegionMarker(poly, self.newMarkers[i][0], marker=int(p[1]))
+                    markerPos = pg.center(verts)
+
+                if int(p[5]) == 1:
+                    pg.Mesh.addHoleMarker(poly, markerPos)
+                else:
+                    pg.Mesh.addRegionMarker(poly, markerPos, marker=int(p[1]))
                 self.polys.append(poly)
                 self.polyAttributes.append(p[8])
                 self.polyMarkers.append(int(p[1]))
 
         self.statusBar.clearMessage()
         self.drawPoly(fillTable=False)
+        self.parent.setCursor(QtCore.Qt.ArrowCursor)
 
     def markersMove(self):
         """
@@ -597,7 +602,7 @@ class Builder(QtGui.QWidget):
 
     def markerSize(self):
         m, n = self.figure.axis.get_xlim()
-        return abs(m - n)/40
+        return abs(m - n)/50
 
     def undoPoly(self):
         """
@@ -646,7 +651,7 @@ class Builder(QtGui.QWidget):
         """
         attrMap = []
         for i, a in enumerate(self.polyAttributes):
-            if a == '':
+            if a == '' or a == '\n':
                 self.statusBar.showMessage("ERROR: empty attributes can't be assigned!")
             else:
                 try:
@@ -655,7 +660,6 @@ class Builder(QtGui.QWidget):
                     attrMap.append([self.polyMarkers[i], a])
                 except ValueError:
                     self.statusBar.showMessage("ERROR: some values seem to be string. int or float is needed")
-
         return attrMap
 
     def getPoly(self):
