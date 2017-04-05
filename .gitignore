@@ -1,10 +1,8 @@
 # gitignore file for untracked files and folders
 ##########
 /GUI
+/screenshots
 __pycache__/
-drawMesh_test.py
 examples/
 icons/
-output.mp4
-test_class.py
 version.sh

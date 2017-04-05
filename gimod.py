@@ -230,6 +230,7 @@ class MainWindow(QtGui.QMainWindow):
         self.statusBar = QtGui.QStatusBar()
         self.setStatusBar(self.statusBar)
 
+        # instanciate empty toolbar that will be equipped elsewhere
         self.toolBar = QtGui.QToolBar(self)
         self.toolBar.setIconSize(QtCore.QSize(18, 18))
         self.addToolBar(self.toolBar)

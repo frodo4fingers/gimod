@@ -11,7 +11,7 @@ import numpy as np
 from matplotlib import patches
 from PyQt4 import QtCore, QtGui
 
-from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly, DraggablePoint
+from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly, DraggablePoint, MagnetizePolygons
 from imagery import ImageTools as it
 
 # TODO: skizze laden und verändern können im model builder
@@ -33,6 +33,9 @@ class Builder(QtGui.QWidget):
         self.undone = []
         self.imageClicked = True
         self.markersClicked = True
+        self.gridClicked = True
+        self.magnetizeClicked = True
+        self.mPolyClicked = True
         self.poly = None
 
         self.setupUI()
@@ -51,8 +54,11 @@ class Builder(QtGui.QWidget):
         self.acn_circle.triggered.connect(self.formPolyCircle)
         self.acn_line.triggered.connect(self.formPolyLine)
         self.acn_polygon.triggered.connect(self.formPolygon)
-
         self.acn_markerCheck.triggered.connect(self.markersMove)
+
+        self.acn_gridToggle.triggered.connect(self.toggleGrid)
+        self.acn_magnetizeGrid.triggered.connect(self.magnetizeGrid)
+        self.acn_magnetizePoly.triggered.connect(self.magnetizePoly)
 
         self.btn_redraw.clicked.connect(self.redrawTable)
 
@@ -97,38 +103,39 @@ class Builder(QtGui.QWidget):
         acnBox.addWidget(self.acn_imageThreshold2)
         acnBox.addWidget(self.acn_imageDensity)
         acnBox.addWidget(self.acn_imagePolys)
-        # acnBox.addAction(self.acn_polygonize)
         acnBox.setMargin(0)
         acnWidget = QtGui.QWidget()
         acnWidget.setLayout(acnBox)
 
         self.grp_polyTools = QtGui.QActionGroup(self)
-        self.acn_world = QtGui.QAction(QtGui.QIcon('material/ic_spanWorld.svg'), 'world', self.grp_polyTools)
+        self.acn_world = QtGui.QAction(QtGui.QIcon('material/ic_spanWorld.svg'), 'world', self.grp_polyTools, checkable=True)
         self.acn_world.setToolTip("Create your model world where everything happens")
-        self.acn_world.setCheckable(True)
 
-        self.acn_rectangle = QtGui.QAction(QtGui.QIcon('material/ic_spanRectangle.svg'), 'rectangle', self.grp_polyTools)
+        self.acn_rectangle = QtGui.QAction(QtGui.QIcon('material/ic_spanRectangle.svg'), 'rectangle', self.grp_polyTools, checkable=True)
         self.acn_rectangle.setToolTip("Create a rectangle body")
-        self.acn_rectangle.setCheckable(True)
 
-        self.acn_circle = QtGui.QAction(QtGui.QIcon('material/ic_spanCircle.svg'), 'circle', self.grp_polyTools)
+        self.acn_circle = QtGui.QAction(QtGui.QIcon('material/ic_spanCircle.svg'), 'circle', self.grp_polyTools, checkable=True)
         self.acn_circle.setToolTip("Create a circle body")
-        self.acn_circle.setCheckable(True)
 
-        self.acn_line = QtGui.QAction(QtGui.QIcon('material/ic_spanLine.png'), 'line', self.grp_polyTools)
+        self.acn_line = QtGui.QAction(QtGui.QIcon('material/ic_spanLine.png'), 'line', self.grp_polyTools, checkable=True)
         self.acn_line.setToolTip("Create a line by clicking")
-        self.acn_line.setCheckable(True)
 
-        self.acn_polygon = QtGui.QAction(QtGui.QIcon('material/ic_spanPoly.svg'), 'polygon', self.grp_polyTools)
+        self.acn_polygon = QtGui.QAction(QtGui.QIcon('material/ic_spanPoly.svg'), 'polygon', self.grp_polyTools, checkable=True)
         self.acn_polygon.setToolTip("Create a polygon by clicking, finish with double click")
-        self.acn_polygon.setCheckable(True)
 
-        self.acn_markerCheck = QtGui.QAction(QtGui.QIcon('material/marker_check.svg'), 'marker', self.grp_polyTools)
+        self.acn_markerCheck = QtGui.QAction(QtGui.QIcon('material/marker_check.svg'), 'marker', self.grp_polyTools, checkable=True)
         self.acn_markerCheck.setToolTip("check and reset marker positions")
-        self.acn_markerCheck.setCheckable(True)
 
-        # tb = QtGui.QToolBar()
-        # tb.setMovable(False)
+        # self.grp_gridTools = QtGui.QActionGroup(self)
+        self.acn_gridToggle = QtGui.QAction(QtGui.QIcon('material/grid.svg'), 'grid', None, checkable=True)
+        self.acn_gridToggle.setToolTip("turn on and off a grid")
+
+        self.acn_magnetizeGrid = QtGui.QAction(QtGui.QIcon('material/grid_magnetize.svg'), 'magnetizeGrid', None, checkable=True)
+        self.acn_magnetizeGrid.setToolTip("magnetize the grid junctions")
+
+        self.acn_magnetizePoly = QtGui.QAction(QtGui.QIcon('material/magnetize.svg'), 'magnetizePoly', None, checkable=True)
+        self.acn_magnetizePoly.setToolTip("magnetize the polygons")
+
         self.toolBar.addAction(self.acn_image)
         self.widgetAction = self.toolBar.addWidget(acnWidget)
         self.widgetAction.setVisible(False)
@@ -141,6 +148,10 @@ class Builder(QtGui.QWidget):
         self.toolBar.addAction(self.acn_line)
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.acn_markerCheck)
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.acn_gridToggle)
+        self.toolBar.addAction(self.acn_magnetizeGrid)
+        self.toolBar.addAction(self.acn_magnetizePoly)
 
         self.tw_polys = QtGui.QTreeWidget()
         self.tw_polys.setAlternatingRowColors(True)
@@ -159,9 +170,9 @@ class Builder(QtGui.QWidget):
         self.btn_redo.setToolTip("redo last poly")
         self.btn_redo.setIcon(QtGui.QIcon('material/ic_redo_black_18px.svg'))
         self.btn_redo.setEnabled(False)
-        self.rbtn_plotRegions = QtGui.QRadioButton('plot regions')
+        self.rbtn_plotRegions = QtGui.QRadioButton('regions')
         self.rbtn_plotRegions.setChecked(True)
-        self.rbtn_plotAttributes = QtGui.QRadioButton('plot attributes')
+        self.rbtn_plotAttributes = QtGui.QRadioButton('attributes')
         self.btn_export = QtGui.QPushButton()
         self.btn_export.setIcon(QtGui.QIcon("material/ic_save_black_24px.svg"))
         self.btn_export.setToolTip("save as *.poly")
@@ -170,6 +181,7 @@ class Builder(QtGui.QWidget):
         self.btn_redraw.setToolTip("redraw whole table after changes were made")
         self.btn_redraw.setIcon(QtGui.QIcon('material/ic_refresh_black_24px.svg'))
 
+        # TODO: move that to gimod.py:
         hbox = QtGui.QHBoxLayout()
         hbox.addWidget(self.btn_undo)
         hbox.addWidget(self.btn_redo)
@@ -188,7 +200,6 @@ class Builder(QtGui.QWidget):
         self.setLayout(vbox)
 
     def imagery(self):
-
         if self.imageClicked is True:
             self.widgetAction.setVisible(True)
             self.acn_polygonize.setVisible(True)
@@ -210,10 +221,18 @@ class Builder(QtGui.QWidget):
 
     def imageryBackground(self):
         if self.acn_imageAsBackground.isChecked() is True:
+            self.acn_imageThreshold1.setEnabled(False)
+            self.acn_imageThreshold2.setEnabled(False)
+            self.acn_imagePolys.setEnabled(False)
+            self.acn_imageDensity.setEnabled(False)
             self.figure.axis.cla()
             self.imageTools.setBackground()
         else:
             self.updateImagery()
+            self.acn_imageThreshold1.setEnabled(True)
+            self.acn_imageThreshold2.setEnabled(True)
+            self.acn_imagePolys.setEnabled(True)
+            self.acn_imageDensity.setEnabled(True)
 
     def formPolyWorld(self):
         try:
@@ -268,13 +287,11 @@ class Builder(QtGui.QWidget):
         self.parent.setCursor(QtCore.Qt.ArrowCursor)
 
     def printCoordinates(self, x1, y1, x2, y2, form):
-
         self.x_p = x1
         self.y_p = y1
         self.x_r = x2
         self.y_r = y2
         self.form = form
-
         self.constructPoly()
 
     def printPolygon(self, polygon):
@@ -324,8 +341,13 @@ class Builder(QtGui.QWidget):
             # iterate marker counter
             self.marker += 1
 
+        if not self.mPolyClicked:
+            x,y =self.getNodes()
+            self.mp.plotMagnets(x, y)
+
     def fillTable(self):
-        # FIXME: marker is iterated to existent state. needs to be recounted after table creation so all markers can be chosen for all polys
+        # FIXME: marker is iterated to existent state. needs to be recounted AFTER table creation so all markers can be chosen for all polys
+        # HACK: maybe with redrawTable, bc the marker counter wont change within that process
         twItem = QtGui.QTreeWidgetItem()
         twItem.setText(0, self.form)
         twItem.setFont(0, self.bold)
@@ -604,6 +626,49 @@ class Builder(QtGui.QWidget):
         m, n = self.figure.axis.get_xlim()
         return abs(m - n)/50
 
+    def toggleGrid(self):
+        if self.gridClicked is True:
+            self.figure.axis.grid()
+            self.gridClicked = False
+        else:
+            self.figure.axis.grid(False)
+            self.gridClicked = True
+            self.acn_gridToggle.setChecked(False)
+        self.figure.canvas.draw()
+
+    def magnetizeGrid(self):
+        if self.magnetize is True:
+            self.figure.axis.grid()
+            self.magnetize = False
+        else:
+            self.figure.axis.grid(False)
+            self.magnetize = True
+            self.acn_magnetizeGrid.setChecked(False)
+        self.figure.canvas.draw()
+
+    def magnetizePoly(self):
+        if self.mPolyClicked is True:
+            # points = []
+            x = []
+            y = []
+            x, y = self.getNodes()
+
+            self.mp = MagnetizePolygons(self, x, y)
+            self.mPolyClicked = False
+        else:
+            self.mp.disconnect()
+            self.figure.axis.grid(False)
+            self.mPolyClicked = True
+            self.acn_magnetizeGrid.setChecked(False)
+        self.figure.canvas.draw()
+
+    def getNodes(self):
+        arr = self.poly.positions()
+        x = list(pg.x(arr))
+        y = list(pg.y(arr))
+
+        return x, y
+
     def undoPoly(self):
         """
             remove last made polygon from list and store it so it won't be lost
@@ -631,6 +696,7 @@ class Builder(QtGui.QWidget):
     def getPoly(self):
         return self.polys
 
+    # TODO: move to gimod.py
     def exportPoly(self):
         """
             export the poly figure
