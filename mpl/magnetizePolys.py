@@ -7,10 +7,8 @@ import numpy as np
 class MagnetizePolygons():
     """
         this class provides the graphical visualization of the list with dots to magnetize
-        and takes care that the clicked sensitive area will return the correct value to
-        the magnetized coordinate.
-
-        http://stackoverflow.com/questions/14338051/matplotlib-cursor-snap-to-plotted-data-with-datetime-axis
+        and takes care that the click-sensitive area will return the correct value to
+        the magnetized coordinate. this will help to create polygons directly to one another.
     """
 
     def __init__(self, parent, x, y):
@@ -24,10 +22,8 @@ class MagnetizePolygons():
         self.background = None
 
         self.plotMagnets()
-        self.connect()
 
     def connect(self):
-        # self.pid = self.figure.canvas.mpl_connect('pick_event', self.onPick)
         self.cidP = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
         self.cidM = self.figure.canvas.mpl_connect('motion_notify_event', self.onMotion)
         self.cidR = self.figure.canvas.mpl_connect('button_release_event', self.onRelease)
@@ -35,7 +31,6 @@ class MagnetizePolygons():
     def disconnect(self):
         self.sc.remove()
         self.figure.canvas.draw()
-        # self.figure.canvas.mpl_disconnect(self.pid)
         self.figure.canvas.mpl_disconnect(self.cidP)
         self.figure.canvas.mpl_disconnect(self.cidM)
         self.figure.canvas.mpl_disconnect(self.cidR)
@@ -62,18 +57,17 @@ class MagnetizePolygons():
         self.figure.canvas.blit(self.line.axes.bbox)
         try:
             dot = self.vicinity(event.xdata, event.ydata)
-            # self.statusBar.showMessage("Snapped to x{}, y{}".format(dot[0], dot[1]))
-            self.line.set_data(dot[0], dot[1])
+            self.xM = dot[0]
+            self.yM = dot[1]
+            self.line.set_data(self.xM, self.yM)
             self.figure.canvas.restore_region(self.background)
             self.line.axes.draw_artist(self.line)
             self.figure.canvas.blit(self.line.axes.bbox)
         except (ValueError, TypeError):
-            # self.statusBar.clearMessage()
             self.line.set_data([0], [0])
             self.line.axes.draw_artist(self.line)
             self.line.set_animated(False)
             self.background = None
-            # self.figure.canvas.draw()
 
     def onPress(self, event):
         try:

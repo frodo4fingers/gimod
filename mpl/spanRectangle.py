@@ -2,7 +2,6 @@
 # encoding: UTF-8
 
 from matplotlib.patches import Rectangle
-from .magnetizePolys import MagnetizePolygons
 
 
 class SpanRectangle(object):
@@ -30,7 +29,6 @@ class SpanRectangle(object):
         if event.button is 1:
             self.xP = event.xdata
             self.yP = event.ydata
-            print("P span", self.xP, self.yP)
             self.rect.set_animated(True)
             self.figure.canvas.draw()
             self.background = self.figure.canvas.copy_from_bbox(self.rect.axes.bbox)
@@ -39,9 +37,6 @@ class SpanRectangle(object):
 
     def onMotion(self, event):
         if event.inaxes != self.rect.axes: return
-        # slow as fuck:
-        # if self.parent.acn_magnetizePoly.isChecked() is True:
-        #     self.parent.mp.onMotion(event)
         try:
             self.xM = event.xdata
             self.yM = event.ydata
@@ -59,7 +54,6 @@ class SpanRectangle(object):
         try:
             self.xR = event.xdata
             self.yR = event.ydata
-            print("R span", self.xR, self.yR)
             self.rect.set_width(0)
             self.rect.set_height(0)
             self.rect.set_xy((0, 0))
@@ -76,18 +70,10 @@ class SpanRectangle(object):
             if self.parent.mp.xR is not None:
                 self.xR = self.parent.mp.xR
                 self.yR = self.parent.mp.yR
-            # else:
-            #     self.xR = self.xR
-            #     self.yR = self.yR
 
             if self.parent.mp.xP is not None:
                 self.xP = self.parent.mp.xP
                 self.yP = self.parent.mp.yP
-            # else:
-            #     self.xP = self.xP
-            #     self.yP = self.yP
-
-        print(self.xP, self.yP, self.xR, self.yR)
 
         self.parent.printCoordinates(self.xP, self.yP, self.xR, self.yR, form='Rectangle')
 
