@@ -136,7 +136,7 @@ class MainWindow(QtGui.QMainWindow):
         self.la_cell_area = QtGui.QLabel("max. cell area:")
         self.spb_cell_area = QtGui.QDoubleSpinBox(self)
         self.spb_cell_area.setValue(0.0)
-        self.spb_cell_area.setSingleStep(0.1)
+        self.spb_cell_area.setSingleStep(0.01)
 
         self.la_mesh_refine = QtGui.QLabel("Refinement:")
         self.cbx_mesh_refine = QtGui.QComboBox()
