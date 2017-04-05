@@ -78,24 +78,26 @@ class MagnetizePolygons():
     def onPress(self, event):
         try:
             dot = self.vicinity(event.xdata, event.ydata)
-            # if dot is not None:
-            self.xP = dot[0]
-            self.yP = dot[1]
+            if dot is not None:
+                self.xP = dot[0]
+                self.yP = dot[1]
+            else:
+                self.xP = None
+                self.yP = None
         except (ValueError, TypeError):
-            self.xP = None
-            self.yP = None
-        print(dot)
+            pass
 
     def onRelease(self, event):
         try:
             dot = self.vicinity(event.xdata, event.ydata)
-            # if dot is not None:
-            self.xR = dot[0]
-            self.yR = dot[1]
+            if dot is not None:
+                self.xR = dot[0]
+                self.yR = dot[1]
+            else:
+                self.xR = None
+                self.yR = None
         except (ValueError, TypeError):
-            self.xR = None
-            self.yR = None
-        print(dot)
+            pass
 
     def vicinity(self, x, y, picker=10):
         pixel = tuple(self.figure.axis.transData.transform((x, y)))
