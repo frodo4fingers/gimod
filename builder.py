@@ -129,9 +129,11 @@ class Builder(QtGui.QWidget):
         # self.grp_gridTools = QtGui.QActionGroup(self)
         self.acn_gridToggle = QtGui.QAction(QtGui.QIcon('material/grid.svg'), 'grid', None, checkable=True)
         self.acn_gridToggle.setToolTip("turn on and off a grid")
+        self.acn_gridToggle.setEnabled(False)
 
         self.acn_magnetizeGrid = QtGui.QAction(QtGui.QIcon('material/grid_magnetize.svg'), 'magnetizeGrid', None, checkable=True)
         self.acn_magnetizeGrid.setToolTip("magnetize the grid junctions")
+        self.acn_magnetizeGrid.setEnabled(False)
 
         self.acn_magnetizePoly = QtGui.QAction(QtGui.QIcon('material/magnetize.svg'), 'magnetizePoly', None, checkable=True)
         self.acn_magnetizePoly.setToolTip("magnetize the polygons")
@@ -398,6 +400,7 @@ class Builder(QtGui.QWidget):
             spx_segments = QtGui.QSpinBox()
             spx_segments.setValue(12)
             spx_segments.setMinimum(3)
+            spx_segments.setMaximum(int(1e10))
             segments = QtGui.QTreeWidgetItem()
             segments.setText(0, "Segments:")
             twItem.addChild(segments)
@@ -654,6 +657,10 @@ class Builder(QtGui.QWidget):
             x, y = self.getNodes()
 
             self.mp = MagnetizePolygons(self, x, y)
+            self.mp.connect()
+            # HACK: against flickering and false data while spanning
+            self.span.disconnect()
+            self.span.connect()
             self.mPolyClicked = False
         else:
             self.mp.disconnect()
