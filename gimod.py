@@ -264,6 +264,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setGeometry(200, 100, 1000, 600)
         # window name
         self.setWindowTitle("GIMod")
+        self.setWindowIcon(QtGui.QIcon('icons/logo.png'))
         self.show()
 
     def aboutVersion(self):
