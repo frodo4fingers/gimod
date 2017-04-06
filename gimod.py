@@ -17,7 +17,7 @@ from pygimli.meshtools import polytools as plc
 from pygimli.meshtools import createMesh, writePLC
 from pygimli.mplviewer import drawMeshBoundaries, drawMesh, drawPLC, drawModel
 
-from builder import Builder
+from core import Builder
 
 # TODO: CLEAAAAAAAAAAAAAN THIS!!!!
 
@@ -59,11 +59,11 @@ class PlotWidget(QtGui.QWidget):
 
         # add buttons
         # self.btn_zoom_in = QtGui.QToolButton()
-        # self.btn_zoom_in.setIcon(QtGui.QIcon("material/ic_zoom_in_black_24px.svg"))
+        # self.btn_zoom_in.setIcon(QtGui.QIcon("icons/ic_zoom_in_black_24px.svg"))
         # self.btn_zoom_in.setToolTip("zoom in")
         # self.btn_zoom_in.clicked.connect(self.zoomIn)
         # self.btn_zoom_out = QtGui.QToolButton()
-        # self.btn_zoom_out.setIcon(QtGui.QIcon("material/ic_zoom_out_black_24px.svg"))
+        # self.btn_zoom_out.setIcon(QtGui.QIcon("icons/ic_zoom_out_black_24px.svg"))
         # self.btn_zoom_out.setToolTip("zoom out")
         # self.btn_zoom_out.clicked.connect(self.zoomOut)
         # self.toolbar.addWidget(self.btn_zoom_in)
@@ -175,7 +175,7 @@ class MainWindow(QtGui.QMainWindow):
         self.btn_mesh.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.btn_mesh_export = QtGui.QPushButton()
         self.btn_mesh_export.setToolTip("save as *.bms")
-        self.btn_mesh_export.setIcon(QtGui.QIcon("material/ic_save_black_24px.svg"))
+        self.btn_mesh_export.setIcon(QtGui.QIcon("icons/ic_save_black_24px.svg"))
         self.btn_mesh_export.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         self.btn_mesh_export.setEnabled(False)
         # labels stacked in vbox

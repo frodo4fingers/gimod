@@ -4,5 +4,6 @@
 /screenshots
 __pycache__/
 examples/
-icons/
+mpl_examples/
+tests/
 version.sh

@@ -9,7 +9,6 @@ import cv2
 class ImageTools():
 
     def __init__(self, parent=None):
-        # self.parent = parent
         self.statusBar = parent.statusBar
         self.threshold1 = parent.acn_imageThreshold1.value()
         self.threshold2 = parent.acn_imageThreshold2.value()
