@@ -2,15 +2,25 @@
 # encoding: UTF-8
 
 import sys
-
 import matplotlib
-matplotlib.use("Qt4Agg")
+try:
+    matplotlib.use("Qt5Agg")
+    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+    from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+    from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QLineEdit,  QPushButton, QStatusBar, QToolBar, QTabWidget, QSplitter, QAction, QMessageBox
+    from PyQt5.QtCore import QSize, Qt
+    from PyQt5.QtGui import QIcon
+
+except ImportError:
+    matplotlib.use("Qt4Agg")
+    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+    from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+    from PyQt4.QtGui import QMainWindow, QWidget, QApplication, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QLineEdit,  QPushButton, QStatusBar, QToolBar, QTabWidget, QSplitter, QAction, QMessageBox, QIcon
+    from PyQt4.QtCore import QSize, Qt
+
 from matplotlib.figure import Figure
 from matplotlib import patches
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
-from PyQt4 import QtGui, QtCore
 
 import pygimli as pg
 from pygimli.meshtools import polytools as plc
@@ -38,42 +48,45 @@ from core import Builder
 #         NavigationToolbar.__init__(self, plot, parent=None, coordinates=False)
 
 
-class PlotWidget(QtGui.QWidget):
+class PlotWidget(QWidget):
+
     def __init__(self, parent=None):
         super(PlotWidget, self).__init__(parent)
 
         # a figure instance to plot on
         self.figure = Figure()
-        self.figure.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95)
+        self.figure.subplots_adjust(
+            left=0.05, right=0.95, bottom=0.05, top=0.95)
         self.axis = self.figure.add_subplot(111)
 
         self.axis.set_xlabel("x")
         self.axis.set_ylabel("z")
         self.axis.set_ylim(self.axis.get_ylim()[::-1])
+        self.axis.set_aspect('equal')
         self.canvas = FigureCanvas(self.figure)
 
         # self.toolbar = PlotToolbar(self.canvas, self)
         self.toolbar = NavigationToolbar(self.canvas, self)
-        self.toolbar.setIconSize(QtCore.QSize(18, 18))
+        self.toolbar.setIconSize(QSize(18, 18))
         self.toolbar.setContentsMargins(0, 0, 0, 0)
 
         # add buttons
-        # self.btn_zoom_in = QtGui.QToolButton()
-        # self.btn_zoom_in.setIcon(QtGui.QIcon("icons/ic_zoom_in_black_24px.svg"))
+        # self.btn_zoom_in = QToolButton()
+        # self.btn_zoom_in.setIcon(QIcon("icons/ic_zoom_in_black_24px.svg"))
         # self.btn_zoom_in.setToolTip("zoom in")
         # self.btn_zoom_in.clicked.connect(self.zoomIn)
-        # self.btn_zoom_out = QtGui.QToolButton()
-        # self.btn_zoom_out.setIcon(QtGui.QIcon("icons/ic_zoom_out_black_24px.svg"))
+        # self.btn_zoom_out = QToolButton()
+        # self.btn_zoom_out.setIcon(QIcon("icons/ic_zoom_out_black_24px.svg"))
         # self.btn_zoom_out.setToolTip("zoom out")
         # self.btn_zoom_out.clicked.connect(self.zoomOut)
         # self.toolbar.addWidget(self.btn_zoom_in)
         # self.toolbar.addWidget(self.btn_zoom_out)
 
         # set the layout
-        layout = QtGui.QVBoxLayout()
+        layout = QVBoxLayout()
         layout.addWidget(self.canvas)
         layout.addWidget(self.toolbar)
-        layout.setMargin(0)
+        # layout.setMargin(0)
         self.setLayout(layout)
 
     # def zoomOut(self):
@@ -103,7 +116,7 @@ class PlotWidget(QtGui.QWidget):
     #     self.canvas.draw()
 
 
-class MainWindow(QtGui.QMainWindow):
+class MainWindow(QMainWindow):
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
@@ -123,63 +136,65 @@ class MainWindow(QtGui.QMainWindow):
 
     def initUI(self):
 
-
         # ####################################################################################### #
-        #                                    TAB MESH OPTIONS                                     #
-        self.la_mesh_quality = QtGui.QLabel("Mesh Quality:")
-        self.spb_mesh_quality = QtGui.QDoubleSpinBox(self)
+        # TAB MESH OPTIONS                                     #
+        self.la_mesh_quality = QLabel("Mesh Quality:")
+        self.spb_mesh_quality = QDoubleSpinBox(self)
         self.spb_mesh_quality.setMinimum(30.0)
         self.spb_mesh_quality.setMaximum(34.0)
         self.spb_mesh_quality.setValue(30.0)
         self.spb_mesh_quality.setSingleStep(0.1)
 
-        self.la_cell_area = QtGui.QLabel("max. cell area:")
-        self.spb_cell_area = QtGui.QDoubleSpinBox(self)
+        self.la_cell_area = QLabel("max. cell area:")
+        self.spb_cell_area = QDoubleSpinBox(self)
         self.spb_cell_area.setValue(0.0)
         self.spb_cell_area.setSingleStep(0.01)
 
-        self.la_mesh_refine = QtGui.QLabel("Refinement:")
-        self.cbx_mesh_refine = QtGui.QComboBox()
-        self.cbx_mesh_refine.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        self.la_mesh_refine = QLabel("Refinement:")
+        self.cbx_mesh_refine = QComboBox()
+        self.cbx_mesh_refine.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.cbx_mesh_refine.setEnabled(False)
-        self.chbx_mesh_refine = QtGui.QCheckBox()
+        self.chbx_mesh_refine = QCheckBox()
         self.cbx_mesh_refine.addItem("quadratic")
         self.cbx_mesh_refine.addItem("spatially")
         self.mesh_refine = False
 
-        self.la_smooth = QtGui.QLabel("Smooth:")
-        self.chbx_smooth = QtGui.QCheckBox()
-        self.cbx_smooth = QtGui.QComboBox()
-        self.cbx_smooth.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        self.la_smooth = QLabel("Smooth:")
+        self.chbx_smooth = QCheckBox()
+        self.cbx_smooth = QComboBox()
+        self.cbx_smooth.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.cbx_smooth.setToolTip("1 node center\n2 weighted node center")
         self.cbx_smooth.setEnabled(False)
         # self.cbx_smooth.addItem("0")
         self.cbx_smooth.addItem("1")
         self.cbx_smooth.addItem("2")
-        self.spb_smooth = QtGui.QSpinBox()
+        self.spb_smooth = QSpinBox()
         self.spb_smooth.setToolTip("number of iterations")
         self.spb_smooth.setEnabled(False)
         self.spb_smooth.setMinimum(1)
         self.spb_smooth.setValue(5)
 
-        self.la_switches = QtGui.QLabel("Switches:")
-        self.chbx_switches = QtGui.QCheckBox()
-        self.le_switches = QtGui.QLineEdit("-pzeAfaq31")
+        self.la_switches = QLabel("Switches:")
+        self.chbx_switches = QCheckBox()
+        self.le_switches = QLineEdit("-pzeAfaq31")
         self.le_switches.setEnabled(False)
         self.switches = None
 
-        self.la_mesh_show_attr = QtGui.QLabel("Show Attributes:")
-        self.chbx_mesh_attr = QtGui.QCheckBox()
+        self.la_mesh_show_attr = QLabel("Show Attributes:")
+        self.chbx_mesh_attr = QCheckBox()
 
-        self.btn_mesh = QtGui.QPushButton("mesh")
-        self.btn_mesh.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.btn_mesh_export = QtGui.QPushButton()
+        self.btn_mesh = QPushButton("mesh")
+        self.btn_mesh.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.btn_mesh_export = QPushButton()
         self.btn_mesh_export.setToolTip("save as *.bms")
-        self.btn_mesh_export.setIcon(QtGui.QIcon("icons/ic_save_black_24px.svg"))
-        self.btn_mesh_export.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        self.btn_mesh_export.setIcon(QIcon("icons/ic_save_black_24px.svg"))
+        self.btn_mesh_export.setSizePolicy(
+            QSizePolicy.Minimum, QSizePolicy.Minimum)
         self.btn_mesh_export.setEnabled(False)
         # labels stacked in vbox
-        vbox_mesh_labels = QtGui.QVBoxLayout()
+        vbox_mesh_labels = QVBoxLayout()
         vbox_mesh_labels.addWidget(self.la_mesh_quality)
         vbox_mesh_labels.addWidget(self.la_cell_area)
         vbox_mesh_labels.addWidget(self.la_mesh_refine)
@@ -187,73 +202,73 @@ class MainWindow(QtGui.QMainWindow):
         vbox_mesh_labels.addWidget(self.la_switches)
         vbox_mesh_labels.addWidget(self.la_mesh_show_attr)
         # rest organized in layout boxes
-        vbox_mesh_params = QtGui.QVBoxLayout()
+        vbox_mesh_params = QVBoxLayout()
         vbox_mesh_params.addWidget(self.spb_mesh_quality)
         vbox_mesh_params.addWidget(self.spb_cell_area)
-        hbox_mesh_refine = QtGui.QHBoxLayout()
+        hbox_mesh_refine = QHBoxLayout()
         hbox_mesh_refine.addWidget(self.chbx_mesh_refine)
         hbox_mesh_refine.addWidget(self.cbx_mesh_refine)
         vbox_mesh_params.addLayout(hbox_mesh_refine)
-        hbox_mesh_smooth = QtGui.QHBoxLayout()
+        hbox_mesh_smooth = QHBoxLayout()
         hbox_mesh_smooth.addWidget(self.chbx_smooth)
         hbox_mesh_smooth.addWidget(self.cbx_smooth)
         hbox_mesh_smooth.addWidget(self.spb_smooth)
         vbox_mesh_params.addLayout(hbox_mesh_smooth)
         # TODO
-        # hbox_mesh_switches = QtGui.QHBoxLayout()
+        # hbox_mesh_switches = QHBoxLayout()
         # hbox_mesh_switches.addWidget(self.chbx_switches)
         # hbox_mesh_switches.addWidget(self.le_switches)
         # vbox_mesh_params.addLayout(hbox_mesh_switches)
-        hbox_mesh_attr = QtGui.QHBoxLayout()
+        hbox_mesh_attr = QHBoxLayout()
         hbox_mesh_attr.addWidget(self.chbx_mesh_attr)
         hbox_mesh_attr.addStretch(1)
         vbox_mesh_params.addLayout(hbox_mesh_attr)
 
-        hbox_mesh = QtGui.QHBoxLayout()
+        hbox_mesh = QHBoxLayout()
         hbox_mesh.addLayout(vbox_mesh_labels)
         hbox_mesh.addLayout(vbox_mesh_params)
 
-        hbox_mesh_n_export = QtGui.QHBoxLayout()
+        hbox_mesh_n_export = QHBoxLayout()
         hbox_mesh_n_export.addWidget(self.btn_mesh)
         hbox_mesh_n_export.addWidget(self.btn_mesh_export)
 
-        vbox_mesh = QtGui.QVBoxLayout()
+        vbox_mesh = QVBoxLayout()
         vbox_mesh.addLayout(hbox_mesh)
         vbox_mesh.addLayout(hbox_mesh_n_export)
         vbox_mesh.addStretch(1)
 
-        mesh_widget = QtGui.QWidget()
+        mesh_widget = QWidget()
         mesh_widget.setLayout(vbox_mesh)
 
         # ####################################################################################### #
-        #                                      SET UP TOOLBOX                                     #
-        self.statusBar = QtGui.QStatusBar()
+        # SET UP TOOLBOX                                     #
+        self.statusBar = QStatusBar()
         self.setStatusBar(self.statusBar)
 
         # instanciate empty toolbar that will be equipped elsewhere
-        self.toolBar = QtGui.QToolBar(self)
-        self.toolBar.setIconSize(QtCore.QSize(18, 18))
+        self.toolBar = QToolBar(self)
+        self.toolBar.setIconSize(QSize(18, 18))
         self.addToolBar(self.toolBar)
 
         # initialize the plot widget
         self.plotWidget = PlotWidget(self)
-        self.plotWidget.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        self.plotWidget.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         self.builder = Builder(self)
-        tabBox = QtGui.QTabWidget(self)
-        tabBox.setTabPosition(QtGui.QTabWidget.West)
+        tabBox = QTabWidget(self)
+        tabBox.setTabPosition(QTabWidget.West)
         # tabBox.addTab(file_widget, "start with sketch")
         tabBox.addTab(self.builder, "poly properties")
         tabBox.addTab(mesh_widget, "mesh options")
-        tabBox.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-        v_plotWidget = QtGui.QVBoxLayout()
+        tabBox.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        v_plotWidget = QVBoxLayout()
         v_plotWidget.addWidget(self.plotWidget)
 
         # ### split this
-        splitter = QtGui.QSplitter(QtCore.Qt.Horizontal)
+        splitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(tabBox)
         splitter.addWidget(self.plotWidget)
 
-        self.acn_aboutVerison = QtGui.QAction("Version", self)
+        self.acn_aboutVerison = QAction("Version", self)
 
         menubar = self.menuBar()
         menu_file = menubar.addMenu("&About")
@@ -264,13 +279,13 @@ class MainWindow(QtGui.QMainWindow):
         self.setGeometry(200, 100, 1000, 600)
         # window name
         self.setWindowTitle("GIMod")
-        self.setWindowIcon(QtGui.QIcon('icons/logo.png'))
+        self.setWindowIcon(QIcon('icons/logo.png'))
         self.show()
 
     def aboutVersion(self):
         with open('version.json') as v:
             content = v.read()
-        QtGui.QMessageBox.information(self, "About", content)
+        QMessageBox.information(self, "About", content)
 
     def changedChbxMeshRefine(self):
         if self.chbx_mesh_refine.isChecked() is True:
@@ -302,7 +317,6 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.le_switches.setEnabled(False)
 
-
     def clickedBtnMesh(self):
         if self.mesh_refine is False:
             self.refine_method = None
@@ -314,16 +328,19 @@ class MainWindow(QtGui.QMainWindow):
         if self.chbx_smooth.isChecked() is False:
             self.smooth_method = None
         else:
-            self.smooth_method = [int(self.cbx_smooth.currentText()), self.spb_smooth.value()]
+            self.smooth_method = [
+                int(self.cbx_smooth.currentText()), self.spb_smooth.value()]
 
         if self.chbx_switches.isChecked() is False:
             self.switches = None
         else:
             self.switches = self.le_switches.text()
-            # TODO make th switches work --> http://pygimli.org/_examples_auto/modelling/plot_hybrid-mesh-2d.html?highlight=switches
+            # TODO make th switches work -->
+            # http://pygimli.org/_examples_auto/modelling/plot_hybrid-mesh-2d.html?highlight=switches
 
         self.statusBar.showMessage("generating mesh...")
-        self.mesh = createMesh(self.builder.getPoly(), quality=self.spb_mesh_quality.value(), area=self.spb_cell_area.value(), smooth=self.smooth_method, switches=self.switches)
+        self.mesh = createMesh(self.builder.getPoly(), quality=self.spb_mesh_quality.value(
+        ), area=self.spb_cell_area.value(), smooth=self.smooth_method, switches=self.switches)
 
         if self.mesh_refine is True and self.cbx_mesh_refine.currentText() == "quadratic":
             self.statusBar.showMessage("create quadratic...")
@@ -342,7 +359,8 @@ class MainWindow(QtGui.QMainWindow):
             self.regionGetAttributes()
             pg.show(self.mesh, pg.solver.parseArgToArray(self.attr_map, self.mesh.cellCount(
             ), self.mesh), ax=self.plotWidget.axis)
-            pg.show(drawMeshBoundaries(self.plotWidget.axis, self.mesh, hideMesh=False), ax=self.plotWidget.axis, fillRegion=False)
+            pg.show(drawMeshBoundaries(self.plotWidget.axis, self.mesh,
+                                       hideMesh=False), ax=self.plotWidget.axis, fillRegion=False)
         else:
             pg.show(self.mesh, ax=self.plotWidget.axis)
 
@@ -353,7 +371,7 @@ class MainWindow(QtGui.QMainWindow):
         """
             export the final mesh
         """
-        export_mesh = QtGui.QFileDialog.getSaveFileName(
+        export_mesh = QFileDialog.getSaveFileName(
             self, caption="Save Mesh")
 
         # if export_poly:
@@ -365,7 +383,7 @@ class MainWindow(QtGui.QMainWindow):
 
 if __name__ == "__main__":
 
-    app = QtGui.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     app.setApplicationName("MainWindow")
 
     main = MainWindow()

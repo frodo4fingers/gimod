@@ -2,24 +2,32 @@
 # encoding: UTF-8
 
 ''' model builder components '''
-from PyQt4 import QtGui
+try:
+    from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QHBoxLayout, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QPushButton, QAction, QActionGroup, QTreeWidget, QTreeWidgetItem, QRadioButton, QFileDialog
+    from PyQt5.QtCore import Qt
+    from PyQt5.QtGui import QIcon, QFont
+
+except ImportError:
+    from PyQt4.QtGui import QWidget, QApplication, QVBoxLayout, QHBoxLayout, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QPushButton, QAction, QIcon, QFont, QActionGroup, QTreeWidget, QTreeWidgetItem, QRadioButton, QFileDialog
+    from PyQt4.QtCore import Qt
+
+    from matplotlib import patches
+
+from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly, DraggablePoint, MagnetizePolygons
+from core import ImageTools as it
+import numpy as np
+
 import pygimli as pg
 from pygimli.mplviewer import drawMesh, drawMeshBoundaries, drawModel
 from pygimli.meshtools import polytools as plc
 from pygimli.meshtools import createMesh, writePLC
-import numpy as np
-from matplotlib import patches
-from PyQt4 import QtCore, QtGui
-
-from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly, DraggablePoint, MagnetizePolygons
-from core import ImageTools as it
 
 # TODO: skizze laden und verändern können im model builder
 # TODO: bild als hintergrund einstellen zum nachmalen
 # TODO: disable world after creation  # pun intended
 
 
-class Builder(QtGui.QWidget):
+class Builder(QWidget):
 
     def __init__(self, parent=None):
         super(Builder, self).__init__(parent)
@@ -69,73 +77,73 @@ class Builder(QtGui.QWidget):
         """
             composing the layout for the tab
         """
-        self.bold = QtGui.QFont()
+        self.bold = QFont()
         self.bold.setBold(True)
         # polytool buttons
 
-        self.grp_imageTools = QtGui.QActionGroup(self)
-        self.acn_image = QtGui.QAction(QtGui.QIcon('icons/ic_image.svg'), 'image', self.grp_imageTools)
+        self.grp_imageTools = QActionGroup(self)
+        self.acn_image = QAction(QIcon('icons/ic_image.svg'), 'image', self.grp_imageTools)
         self.acn_image.setToolTip("Load image to set as model background or try to extract polygons from")
         self.acn_image.setCheckable(True)
 
-        self.acn_polygonize = QtGui.QAction(QtGui.QIcon('icons/ic_polygonize.svg'), 'image', self.grp_imageTools)
+        self.acn_polygonize = QAction(QIcon('icons/ic_polygonize.svg'), 'image', self.grp_imageTools)
         self.acn_polygonize.setToolTip("polygonize the contours")
         self.acn_polygonize.setVisible(False)
 
-        self.acn_imageAsBackground = QtGui.QCheckBox('as background')
+        self.acn_imageAsBackground = QCheckBox('as background')
         # self.acn_imageAsBackground.setEnabled(False)
         self.acn_imageAsBackground.setToolTip("set the chosen image as background to paint your model")
-        self.acn_imageThreshold1 = QtGui.QSpinBox()
+        self.acn_imageThreshold1 = QSpinBox()
         self.acn_imageThreshold1.setRange(0, 254)
         self.acn_imageThreshold1.setValue(200)
         self.acn_imageThreshold1.setToolTip("bottom value for threshold")
-        self.acn_imageThreshold2 = QtGui.QSpinBox()
+        self.acn_imageThreshold2 = QSpinBox()
         self.acn_imageThreshold2.setRange(1, 255)
         self.acn_imageThreshold2.setValue(255)
         self.acn_imageThreshold2.setToolTip("top value for threshold")
-        self.acn_imageDensity = QtGui.QSpinBox()
+        self.acn_imageDensity = QSpinBox()
         self.acn_imageDensity.setToolTip("set density of dots in polygon")
-        self.acn_imagePolys = QtGui.QSpinBox()
+        self.acn_imagePolys = QSpinBox()
         self.acn_imagePolys.setToolTip("set the number of polygons used for model creation")
-        acnBox = QtGui.QHBoxLayout()
+        acnBox = QHBoxLayout()
         acnBox.addWidget(self.acn_imageAsBackground)
         acnBox.addWidget(self.acn_imageThreshold1)
         acnBox.addWidget(self.acn_imageThreshold2)
         acnBox.addWidget(self.acn_imageDensity)
         acnBox.addWidget(self.acn_imagePolys)
-        acnBox.setMargin(0)
-        acnWidget = QtGui.QWidget()
+        # acnBox.setMargin(0)
+        acnWidget = QWidget()
         acnWidget.setLayout(acnBox)
 
-        self.grp_polyTools = QtGui.QActionGroup(self)
-        self.acn_world = QtGui.QAction(QtGui.QIcon('icons/ic_spanWorld.svg'), 'world', self.grp_polyTools, checkable=True)
+        self.grp_polyTools = QActionGroup(self)
+        self.acn_world = QAction(QIcon('icons/ic_spanWorld.svg'), 'world', self.grp_polyTools, checkable=True)
         self.acn_world.setToolTip("Create your model world where everything happens")
 
-        self.acn_rectangle = QtGui.QAction(QtGui.QIcon('icons/ic_spanRectangle.svg'), 'rectangle', self.grp_polyTools, checkable=True)
+        self.acn_rectangle = QAction(QIcon('icons/ic_spanRectangle.svg'), 'rectangle', self.grp_polyTools, checkable=True)
         self.acn_rectangle.setToolTip("Create a rectangle body")
 
-        self.acn_circle = QtGui.QAction(QtGui.QIcon('icons/ic_spanCircle.svg'), 'circle', self.grp_polyTools, checkable=True)
+        self.acn_circle = QAction(QIcon('icons/ic_spanCircle.svg'), 'circle', self.grp_polyTools, checkable=True)
         self.acn_circle.setToolTip("Create a circle body")
 
-        self.acn_line = QtGui.QAction(QtGui.QIcon('icons/ic_spanLine.png'), 'line', self.grp_polyTools, checkable=True)
+        self.acn_line = QAction(QIcon('icons/ic_spanLine.png'), 'line', self.grp_polyTools, checkable=True)
         self.acn_line.setToolTip("Create a line by clicking")
 
-        self.acn_polygon = QtGui.QAction(QtGui.QIcon('icons/ic_spanPoly.svg'), 'polygon', self.grp_polyTools, checkable=True)
+        self.acn_polygon = QAction(QIcon('icons/ic_spanPoly.svg'), 'polygon', self.grp_polyTools, checkable=True)
         self.acn_polygon.setToolTip("Create a polygon by clicking, finish with double click")
 
-        self.acn_markerCheck = QtGui.QAction(QtGui.QIcon('icons/marker_check.svg'), 'marker', self.grp_polyTools, checkable=True)
+        self.acn_markerCheck = QAction(QIcon('icons/marker_check.svg'), 'marker', self.grp_polyTools, checkable=True)
         self.acn_markerCheck.setToolTip("check and reset marker positions")
 
-        # self.grp_gridTools = QtGui.QActionGroup(self)
-        self.acn_gridToggle = QtGui.QAction(QtGui.QIcon('icons/grid.svg'), 'grid', None, checkable=True)
+        # self.grp_gridTools = QActionGroup(self)
+        self.acn_gridToggle = QAction(QIcon('icons/grid.svg'), 'grid', None, checkable=True)
         self.acn_gridToggle.setToolTip("turn on and off a grid")
         self.acn_gridToggle.setEnabled(False)
 
-        self.acn_magnetizeGrid = QtGui.QAction(QtGui.QIcon('icons/grid_magnetize.svg'), 'magnetizeGrid', None, checkable=True)
+        self.acn_magnetizeGrid = QAction(QIcon('icons/grid_magnetize.svg'), 'magnetizeGrid', None, checkable=True)
         self.acn_magnetizeGrid.setToolTip("magnetize the grid junctions")
         self.acn_magnetizeGrid.setEnabled(False)
 
-        self.acn_magnetizePoly = QtGui.QAction(QtGui.QIcon('icons/magnetize.svg'), 'magnetizePoly', None, checkable=True)
+        self.acn_magnetizePoly = QAction(QIcon('icons/magnetize.svg'), 'magnetizePoly', None, checkable=True)
         self.acn_magnetizePoly.setToolTip("magnetize the polygons")
 
         self.toolBar.addAction(self.acn_image)
@@ -155,7 +163,7 @@ class Builder(QtGui.QWidget):
         self.toolBar.addAction(self.acn_magnetizeGrid)
         self.toolBar.addAction(self.acn_magnetizePoly)
 
-        self.tw_polys = QtGui.QTreeWidget()
+        self.tw_polys = QTreeWidget()
         self.tw_polys.setAlternatingRowColors(True)
         self.tw_polys.setHeaderLabels(("Type", "Value"))
         # TODO: stretch that darn first column to content!
@@ -164,27 +172,27 @@ class Builder(QtGui.QWidget):
         # self.tw_polys.setRootIsDecorated(False)
 
         # redraw table button
-        self.btn_undo = QtGui.QPushButton()
+        self.btn_undo = QPushButton()
         self.btn_undo.setToolTip("undo last poly")
-        self.btn_undo.setIcon(QtGui.QIcon('icons/ic_undo_black_18px.svg'))
+        self.btn_undo.setIcon(QIcon('icons/ic_undo_black_18px.svg'))
         self.btn_undo.setEnabled(False)
-        self.btn_redo = QtGui.QPushButton()
+        self.btn_redo = QPushButton()
         self.btn_redo.setToolTip("redo last poly")
-        self.btn_redo.setIcon(QtGui.QIcon('icons/ic_redo_black_18px.svg'))
+        self.btn_redo.setIcon(QIcon('icons/ic_redo_black_18px.svg'))
         self.btn_redo.setEnabled(False)
-        self.rbtn_plotRegions = QtGui.QRadioButton('regions')
+        self.rbtn_plotRegions = QRadioButton('regions')
         self.rbtn_plotRegions.setChecked(True)
-        self.rbtn_plotAttributes = QtGui.QRadioButton('attributes')
-        self.btn_export = QtGui.QPushButton()
-        self.btn_export.setIcon(QtGui.QIcon("icons/ic_save_black_24px.svg"))
+        self.rbtn_plotAttributes = QRadioButton('attributes')
+        self.btn_export = QPushButton()
+        self.btn_export.setIcon(QIcon("icons/ic_save_black_24px.svg"))
         self.btn_export.setToolTip("save as *.poly")
-        self.btn_export.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-        self.btn_redraw = QtGui.QPushButton()
+        self.btn_export.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        self.btn_redraw = QPushButton()
         self.btn_redraw.setToolTip("redraw whole table after changes were made")
-        self.btn_redraw.setIcon(QtGui.QIcon('icons/ic_refresh_black_24px.svg'))
+        self.btn_redraw.setIcon(QIcon('icons/ic_refresh_black_24px.svg'))
 
         # TODO: move that to gimod.py:
-        hbox = QtGui.QHBoxLayout()
+        hbox = QHBoxLayout()
         hbox.addWidget(self.btn_undo)
         hbox.addWidget(self.btn_redo)
         hbox.addWidget(self.rbtn_plotRegions)
@@ -193,10 +201,10 @@ class Builder(QtGui.QWidget):
         hbox.addWidget(self.btn_redraw)
         hbox.addStretch(1)
         hbox.addWidget(self.btn_export)
-        hbox.setMargin(0)
+        # hbox.setMargin(0)
 
         # form the layout
-        vbox = QtGui.QVBoxLayout()
+        vbox = QVBoxLayout()
         vbox.addWidget(self.tw_polys)
         vbox.addLayout(hbox)
         self.setLayout(vbox)
@@ -207,7 +215,7 @@ class Builder(QtGui.QWidget):
             self.acn_polygonize.setVisible(True)
             self.imageClicked = False
             # BUG: cheeky piece of shit
-            self.fname = QtGui.QFileDialog.getOpenFileName(self, caption='choose sketch')
+            self.fname = QFileDialog.getOpenFileName(self, caption='choose sketch')
             # instanciate the imageTools class
             self.imageTools = it(self)
             self.imageTools.getContours()
@@ -280,13 +288,13 @@ class Builder(QtGui.QWidget):
         self.tw_polys.clear()
         self.polys.clear()
         self.marker = 1
-        self.parent.setCursor(QtCore.Qt.WaitCursor)
+        self.parent.setCursor(Qt.WaitCursor)
         for c in self.imageTools.contoursCutted:
             self.printPolygon(c)
         self.figure.axis.set_ylim(self.figure.axis.get_ylim()[::-1])
         self.figure.canvas.draw()
         self.statusBar.showMessage(str(self.poly))
-        self.parent.setCursor(QtCore.Qt.ArrowCursor)
+        self.parent.setCursor(Qt.ArrowCursor)
 
     def printCoordinates(self, x1, y1, x2, y2, form):
         self.x_p = x1
@@ -349,88 +357,88 @@ class Builder(QtGui.QWidget):
     def fillTable(self):
         # FIXME: marker is iterated to existent state. needs to be recounted AFTER table creation so all markers can be chosen for all polys
         # HACK: maybe with redrawTable, bc the marker counter wont change within that process
-        twItem = QtGui.QTreeWidgetItem()
+        twItem = QTreeWidgetItem()
         twItem.setText(0, self.form)
         twItem.setFont(0, self.bold)
 
         if self.form == 'World' or self.form == 'Rectangle' or self.form == 'Line':
-            # twItem.setBackgroundColor(0, QtGui.QColor(0, 255, 0))
+            # twItem.setBackgroundColor(0, QColor(0, 255, 0))
             # start x
-            xStart = QtGui.QTreeWidgetItem()
-            xStart.setFlags(xStart.flags() | QtCore.Qt.ItemIsEditable)
+            xStart = QTreeWidgetItem()
+            xStart.setFlags(xStart.flags() | Qt.ItemIsEditable)
             xStart.setText(0, "Start x:")
             xStart.setText(1, str(self.x_p))
             twItem.addChild(xStart)
             # start y
-            yStart = QtGui.QTreeWidgetItem()
-            yStart.setFlags(yStart.flags() | QtCore.Qt.ItemIsEditable)
+            yStart = QTreeWidgetItem()
+            yStart.setFlags(yStart.flags() | Qt.ItemIsEditable)
             yStart.setText(0, "Start y:")
             yStart.setText(1, str(self.y_p))
             twItem.addChild(yStart)
             # end x
-            xEnd = QtGui.QTreeWidgetItem()
-            xEnd.setFlags(xEnd.flags() | QtCore.Qt.ItemIsEditable)
+            xEnd = QTreeWidgetItem()
+            xEnd.setFlags(xEnd.flags() | Qt.ItemIsEditable)
             xEnd.setText(0, "End x:")
             xEnd.setText(1, str(self.x_r))
             twItem.addChild(xEnd)
             # end y
-            yEnd = QtGui.QTreeWidgetItem()
-            yEnd.setFlags(yEnd.flags() | QtCore.Qt.ItemIsEditable)
+            yEnd = QTreeWidgetItem()
+            yEnd.setFlags(yEnd.flags() | Qt.ItemIsEditable)
             yEnd.setText(0, "End y:")
             yEnd.setText(1, str(self.y_r))
             twItem.addChild(yEnd)
 
         if self.form == 'Circle':
             # insert center
-            center = QtGui.QTreeWidgetItem()
-            center.setFlags(center.flags() | QtCore.Qt.ItemIsEditable)
+            center = QTreeWidgetItem()
+            center.setFlags(center.flags() | Qt.ItemIsEditable)
             center.setText(0, "Center:")
             center.setText(1, (str(round(self.x_p, 2)) + ", " + str(round(self.y_p, 2))))
             twItem.addChild(center)
             # radius
-            spx_radius = QtGui.QDoubleSpinBox()
+            spx_radius = QDoubleSpinBox()
             spx_radius.setSingleStep(0.01)
             spx_radius.setValue(self.x_r)
-            radius = QtGui.QTreeWidgetItem()
+            radius = QTreeWidgetItem()
             radius.setText(0, "Radius:")
             twItem.addChild(radius)
             self.tw_polys.setItemWidget(radius, 1, spx_radius)
             # insert segments
-            spx_segments = QtGui.QSpinBox()
+            spx_segments = QSpinBox()
             spx_segments.setValue(12)
             spx_segments.setMinimum(3)
             spx_segments.setMaximum(int(1e10))
-            segments = QtGui.QTreeWidgetItem()
+            segments = QTreeWidgetItem()
             segments.setText(0, "Segments:")
             twItem.addChild(segments)
             self.tw_polys.setItemWidget(segments, 1, spx_segments)
             # insert start
-            spx_start = QtGui.QDoubleSpinBox()
+            spx_start = QDoubleSpinBox()
             spx_start.setValue(0.00)
             spx_start.setMinimum(0.00)
             spx_start.setSingleStep(0.01)
             spx_start.setMaximum(2 * np.pi)
-            start = QtGui.QTreeWidgetItem()
+            start = QTreeWidgetItem()
             start.setText(0, "Start angle:")
             twItem.addChild(start)
             self.tw_polys.setItemWidget(start, 1, spx_start)
             # insert end
-            spx_end = QtGui.QDoubleSpinBox()
+            spx_end = QDoubleSpinBox()
             spx_end.setValue(2 * np.pi)
             spx_end.setMinimum(0.00)
             spx_end.setSingleStep(0.01)
             spx_end.setMaximum(2 * np.pi)
-            end = QtGui.QTreeWidgetItem()
+            end = QTreeWidgetItem()
             end.setText(0, "End angle:")
             twItem.addChild(end)
             self.tw_polys.setItemWidget(end, 1, spx_end)
 
         if self.form == 'Line':
             # insert segments
-            spx_segments = QtGui.QSpinBox()
+            spx_segments = QSpinBox()
             spx_segments.setValue(1)
             spx_segments.setMinimum(1)
-            segments = QtGui.QTreeWidgetItem()
+            segments = QTreeWidgetItem()
             segments.setText(0, "Segments:")
             twItem.addChild(segments)
             self.tw_polys.setItemWidget(segments, 1, spx_segments)
@@ -438,73 +446,73 @@ class Builder(QtGui.QWidget):
         if self.form != 'Line':
             # insert marker
             # for k in range(self.marker):
-            a = QtGui.QComboBox()
+            a = QComboBox()
             [a.addItem(str(m + 1)) for m in range(self.marker)]
             a.setCurrentIndex(self.marker - 1)
-            marker = QtGui.QTreeWidgetItem()
+            marker = QTreeWidgetItem()
             marker.setText(0, "Marker:")
             twItem.addChild(marker)
             self.tw_polys.setItemWidget(marker, 1, a)
             # insert area
-            spx_area = QtGui.QDoubleSpinBox()
+            spx_area = QDoubleSpinBox()
             spx_area.setSingleStep(0.01)
             spx_area.setValue(0.00)
             spx_area.setMinimum(0.00)
-            area = QtGui.QTreeWidgetItem()
+            area = QTreeWidgetItem()
             area.setText(0, "Area:")
             twItem.addChild(area)
             self.tw_polys.setItemWidget(area, 1, spx_area)
 
         if self.form != 'World':
             # insert boundary marker
-            spx_boundaryMarker = QtGui.QSpinBox()
+            spx_boundaryMarker = QSpinBox()
             spx_boundaryMarker.setValue(1)
             spx_boundaryMarker.setMinimum(1)
-            boundaryMarker = QtGui.QTreeWidgetItem()
+            boundaryMarker = QTreeWidgetItem()
             boundaryMarker.setText(0, "BoundaryMarker:")
             twItem.addChild(boundaryMarker)
             self.tw_polys.setItemWidget(boundaryMarker, 1, spx_boundaryMarker)
 
         if self.form == 'Rectangle' or self.form == 'Circle' or self.form == 'Line' or self.form == 'Polygon':
             # insert left direction
-            cbx_isLeft = QtGui.QComboBox()
+            cbx_isLeft = QComboBox()
             cbx_isLeft.addItem('False')
             cbx_isLeft.addItem('True')
-            isLeft = QtGui.QTreeWidgetItem()
+            isLeft = QTreeWidgetItem()
             isLeft.setText(0, "isLeft:")
             twItem.addChild(isLeft)
             self.tw_polys.setItemWidget(isLeft, 1, cbx_isLeft)
 
         if self.form == 'Rectangle' or self.form == 'Circle' or self.form == 'Polygon':
             # insert is hole
-            cbx_isHole = QtGui.QComboBox()
+            cbx_isHole = QComboBox()
             cbx_isHole.addItem('False')
             cbx_isHole.addItem('True')
-            isHole = QtGui.QTreeWidgetItem()
+            isHole = QTreeWidgetItem()
             isHole.setText(0, "isHole:")
             twItem.addChild(isHole)
             self.tw_polys.setItemWidget(isHole, 1, cbx_isHole)
             # insert is closed
-            cbx_isClosed = QtGui.QComboBox()
+            cbx_isClosed = QComboBox()
             cbx_isClosed.addItem('False')
             cbx_isClosed.addItem('True')
             cbx_isClosed.setCurrentIndex(1)
-            isClosed = QtGui.QTreeWidgetItem()
+            isClosed = QTreeWidgetItem()
             isClosed.setText(0, "isClosed:")
             twItem.addChild(isClosed)
             self.tw_polys.setItemWidget(isClosed, 1, cbx_isClosed)
 
         if self.form == 'Polygon':
-            verts = QtGui.QTreeWidgetItem()
+            verts = QTreeWidgetItem()
             verts.setText(0, "Verts:")
             verts.setText(1, ', '.join(str(i) for i in self.polygon))
-            verts.setFlags(verts.flags() | QtCore.Qt.ItemIsEditable)
+            verts.setFlags(verts.flags() | Qt.ItemIsEditable)
             twItem.addChild(verts)
 
         if self.form != 'Line':
-            attributes = QtGui.QTreeWidgetItem()
+            attributes = QTreeWidgetItem()
             attributes.setText(0, "Attributes:")
-            attributes.setFlags(attributes.flags() | QtCore.Qt.ItemIsEditable)
+            attributes.setFlags(attributes.flags() | Qt.ItemIsEditable)
             twItem.addChild(attributes)
 
         self.tw_polys.addTopLevelItem(twItem)
@@ -517,7 +525,7 @@ class Builder(QtGui.QWidget):
     def redrawTable(self):
         # BUG: line misses first half after redraw
         # BUG: after redraw marker might be lost: control mechanism and/or possible manual adding of a marker
-        self.parent.setCursor(QtCore.Qt.WaitCursor)
+        self.parent.setCursor(Qt.WaitCursor)
         self.statusBar.showMessage("updating...")
         self.polys.clear()
         polyMeta = []
@@ -589,7 +597,7 @@ class Builder(QtGui.QWidget):
 
         self.statusBar.clearMessage()
         self.drawPoly(fillTable=False)
-        self.parent.setCursor(QtCore.Qt.ArrowCursor)
+        self.parent.setCursor(Qt.ArrowCursor)
 
     def markersMove(self):
         """
@@ -614,7 +622,7 @@ class Builder(QtGui.QWidget):
 
         else:
             # BUG: figure upside down
-            self.parent.setCursor(QtCore.Qt.WaitCursor)
+            self.parent.setCursor(Qt.WaitCursor)
             for p in self.dps:
                 val = p.returnValue()
                 self.newMarkers.append(list(val.values()))
@@ -622,7 +630,7 @@ class Builder(QtGui.QWidget):
             self.markersClicked = True
             self.acn_markerCheck.setChecked(False)
             self.redrawTable()
-            self.parent.setCursor(QtCore.Qt.ArrowCursor)
+            self.parent.setCursor(Qt.ArrowCursor)
 
     def markerSize(self):
         m, n = self.figure.axis.get_xlim()
@@ -707,7 +715,7 @@ class Builder(QtGui.QWidget):
         """
             export the poly figure
         """
-        export_poly = QtGui.QFileDialog.getSaveFileName(
+        export_poly = QFileDialog.getSaveFileName(
             self, caption='Save Poly Figure')
 
         # if export_poly:
@@ -742,7 +750,7 @@ if __name__ == '__main__':
 
     import sys
 
-    app = QtGui.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     builderWin = Builder()
     builderWin.show()
     sys.exit(builderWin.exec_())
