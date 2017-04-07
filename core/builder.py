@@ -111,7 +111,7 @@ class Builder(QWidget):
         acnBox.addWidget(self.acn_imageThreshold2)
         acnBox.addWidget(self.acn_imageDensity)
         acnBox.addWidget(self.acn_imagePolys)
-        # acnBox.setMargin(0)
+        acnBox.setContentsMargins(0, 0, 0, 1)
         acnWidget = QWidget()
         acnWidget.setLayout(acnBox)
 
@@ -211,14 +211,15 @@ class Builder(QWidget):
 
     def imagery(self):
         if self.imageClicked is True:
-            self.widgetAction.setVisible(True)
-            self.acn_polygonize.setVisible(True)
-            self.imageClicked = False
             # BUG: cheeky piece of shit
-            self.fname = QFileDialog.getOpenFileName(self, caption='choose sketch')
-            # instanciate the imageTools class
-            self.imageTools = it(self)
-            self.imageTools.getContours()
+            self.fname = QFileDialog.getOpenFileName(self, caption='choose sketch')[0]
+            if self.fname:
+                self.widgetAction.setVisible(True)
+                self.acn_polygonize.setVisible(True)
+                self.imageClicked = False
+                # instanciate the imageTools class
+                self.imageTools = it(self)
+                self.imageTools.getContours()
 
         else:
             self.widgetAction.setVisible(False)

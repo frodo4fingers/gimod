@@ -22,7 +22,7 @@ class ImageTools():
         # read image
         src = cv2.imread(self.fname)
         img = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
-        # basic threshold example
+        # basic threshold
         th, dst = cv2.threshold(img, float(self.threshold1), float(
             self.threshold2), cv2.THRESH_BINARY)
         # find Contours
