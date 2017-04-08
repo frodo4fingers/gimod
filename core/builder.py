@@ -14,7 +14,7 @@ except ImportError:
     from matplotlib import patches
 
 from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly, DraggablePoint, MagnetizePolygons
-from core import ImageTools as it
+from core import ImageTools
 import numpy as np
 
 import pygimli as pg
@@ -211,14 +211,14 @@ class Builder(QWidget):
 
     def imagery(self):
         if self.imageClicked is True:
-            # BUG: cheeky piece of shit
+            # BUG: cheeky piece of shit... wont accept given formats
             self.fname = QFileDialog.getOpenFileName(self, caption='choose sketch')[0]
             if self.fname:
                 self.widgetAction.setVisible(True)
                 self.acn_polygonize.setVisible(True)
                 self.imageClicked = False
                 # instanciate the imageTools class
-                self.imageTools = it(self)
+                self.imageTools = ImageTools(self)
                 self.imageTools.getContours()
 
         else:
@@ -236,7 +236,6 @@ class Builder(QWidget):
             self.acn_imageThreshold2.setEnabled(False)
             self.acn_imagePolys.setEnabled(False)
             self.acn_imageDensity.setEnabled(False)
-            self.figure.axis.cla()
             self.imageTools.setBackground()
         else:
             self.updateImagery()
