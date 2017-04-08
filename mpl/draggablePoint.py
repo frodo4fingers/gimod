@@ -18,7 +18,6 @@ class DraggablePoint():
         self.marker = marker
         self.params = (self.marker, self.center)
         self.dict = {}
-        # FIXME: WTF!!!! die initialisierung SCHEINT hier notwendig, da die funktionen on_press/release/motion andernfalls nicht aufgerufen werden. WARUM AUCH IMMER. unnötig bei python 3.4.3 und mpl 1.4.3 @nico
         self.on_press = self.on_press
 
     def connect(self):
