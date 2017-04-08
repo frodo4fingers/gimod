@@ -9,3 +9,5 @@ from .spanLine import SpanLine
 from .spanPoly import SpanPoly
 
 from .draggablePoint import DraggablePoint
+
+from .magnetizePolys import MagnetizePolygons
