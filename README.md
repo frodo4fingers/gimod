@@ -9,7 +9,7 @@ GIMod is intended to make the creation of your basic model with/for
 ---
 ## requirements:
 + [python](https://www.python.org/downloads/)
-+ [Qt](https://www.qt.io/download/)
++ [Qt4/Qt5](https://www.qt.io/download/)
 + [GIMLi](http://www.pygimli.org/installation.html)
 + [OpenCV](http://opencv.org/downloads.html)
 
