@@ -151,8 +151,8 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.statusBar)
 
         # instanciate empty toolbar that will be equipped elsewhere
-        # self.toolBar = QToolBar(self)
-        self.toolBar = PolyToolBar(self)
+        self.toolBar = QToolBar(self)
+        # self.toolBar = PolyToolBar(self)
         self.toolBar.setIconSize(QSize(18, 18))
         self.addToolBar(self.toolBar)
 
