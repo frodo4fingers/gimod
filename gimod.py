@@ -1,119 +1,24 @@
 #!/usr/bin/env python
 # encoding: UTF-8
 
-import sys
-import matplotlib
 try:
-    matplotlib.use("Qt5Agg")
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-    from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
     from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QLineEdit,  QPushButton, QStatusBar, QToolBar, QTabWidget, QSplitter, QAction, QMessageBox
     from PyQt5.QtCore import QSize, Qt
     from PyQt5.QtGui import QIcon
 
 except ImportError:
-    matplotlib.use("Qt4Agg")
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-    from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
     from PyQt4.QtGui import QMainWindow, QWidget, QApplication, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QLineEdit,  QPushButton, QStatusBar, QToolBar, QTabWidget, QSplitter, QAction, QMessageBox, QIcon
     from PyQt4.QtCore import QSize, Qt
 
-from matplotlib.figure import Figure
-from matplotlib import patches
-import matplotlib.pyplot as plt
-
+import sys
 import pygimli as pg
-from pygimli.meshtools import polytools as plc
 from pygimli.meshtools import createMesh, writePLC
 from pygimli.mplviewer import drawMeshBoundaries, drawMesh, drawPLC, drawModel
 
 from core import Builder
+from gui import PlotWidget, PolyToolBar
 
 # TODO: CLEAAAAAAAAAAAAAN THIS!!!!
-
-
-# class PlotToolbar(NavigationToolbar):
-#
-#     def __init__(self, plot, parent=None):
-#         # https://github.com/matplotlib/matplotlib/blob/master/lib/matplotlib/backends/backend_qt5.py
-#         self.toolitems = (
-#             ('Home', 'Reset original view', 'home', 'home'),
-#             # (None, None, None, None),
-#             ('Pan', 'Pan axes with left mouse, zoom with right', 'move', 'pan'),
-#             ('Zoom', 'Zoom to rectangle', 'zoom_to_rect', 'zoom'),
-#             # (None, None, None, None),
-#             ('Save', 'Save the figure', 'filesave', 'save_figure'),
-#             )
-#
-#         NavigationToolbar.__init__(self, plot, parent=None, coordinates=False)
-
-
-class PlotWidget(QWidget):
-
-    def __init__(self, parent=None):
-        super(PlotWidget, self).__init__(parent)
-
-        # a figure instance to plot on
-        self.figure = Figure()
-        self.figure.subplots_adjust(
-            left=0.05, right=0.95, bottom=0.05, top=0.95)
-        self.axis = self.figure.add_subplot(111)
-
-        self.axis.set_xlabel("x")
-        self.axis.set_ylabel("z")
-        self.axis.set_ylim(self.axis.get_ylim()[::-1])
-        self.axis.set_aspect('equal')
-        self.canvas = FigureCanvas(self.figure)
-
-        # self.toolbar = PlotToolbar(self.canvas, self)
-        self.toolbar = NavigationToolbar(self.canvas, self)
-        self.toolbar.setIconSize(QSize(18, 18))
-        self.toolbar.setContentsMargins(0, 0, 0, 0)
-
-        # add buttons
-        # self.btn_zoom_in = QToolButton()
-        # self.btn_zoom_in.setIcon(QIcon("icons/ic_zoom_in_black_24px.svg"))
-        # self.btn_zoom_in.setToolTip("zoom in")
-        # self.btn_zoom_in.clicked.connect(self.zoomIn)
-        # self.btn_zoom_out = QToolButton()
-        # self.btn_zoom_out.setIcon(QIcon("icons/ic_zoom_out_black_24px.svg"))
-        # self.btn_zoom_out.setToolTip("zoom out")
-        # self.btn_zoom_out.clicked.connect(self.zoomOut)
-        # self.toolbar.addWidget(self.btn_zoom_in)
-        # self.toolbar.addWidget(self.btn_zoom_out)
-
-        # set the layout
-        layout = QVBoxLayout()
-        layout.addWidget(self.canvas)
-        layout.addWidget(self.toolbar)
-        # layout.setMargin(0)
-        self.setLayout(layout)
-
-    # def zoomOut(self):
-    #     """
-    #         zoom Out of the current dimension
-    #     """
-    #     x_dim = self.axis.get_xlim()
-    #     x_dist = abs(x_dim[1] - x_dim[0])
-    #     y_dim = self.axis.get_ylim()
-    #     y_dist = abs(y_dim[1] - y_dim[0])
-    #
-    #     self.axis.set_xlim(x_dim[0] - 0.1*x_dist, x_dim[1] + 0.1*x_dist)
-    #     self.axis.set_ylim(y_dim[0] - 0.1*y_dist, y_dim[1] + 0.1*y_dist)
-    #     self.canvas.draw()
-    #
-    # def zoomIn(self):
-    #     """
-    #         zoom In of the current dimension
-    #     """
-    #     x_dim = self.axis.get_xlim()
-    #     x_dist = abs(x_dim[1] - x_dim[0])
-    #     y_dim = self.axis.get_ylim()
-    #     y_dist = abs(y_dim[1] - y_dim[0])
-    #
-    #     self.axis.set_xlim(x_dim[0] + 0.1*x_dist, x_dim[1] - 0.1*x_dist)
-    #     self.axis.set_ylim(y_dim[0] + 0.1*y_dist, y_dim[1] - 0.1*y_dist)
-    #     self.canvas.draw()
 
 
 class MainWindow(QMainWindow):
@@ -246,7 +151,8 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.statusBar)
 
         # instanciate empty toolbar that will be equipped elsewhere
-        self.toolBar = QToolBar(self)
+        # self.toolBar = QToolBar(self)
+        self.toolBar = PolyToolBar(self)
         self.toolBar.setIconSize(QSize(18, 18))
         self.addToolBar(self.toolBar)
 

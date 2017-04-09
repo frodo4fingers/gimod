@@ -11,7 +11,7 @@ except ImportError:
     from PyQt4.QtGui import QWidget, QApplication, QVBoxLayout, QHBoxLayout, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QPushButton, QAction, QIcon, QFont, QActionGroup, QTreeWidget, QTreeWidgetItem, QRadioButton, QFileDialog
     from PyQt4.QtCore import Qt
 
-    from matplotlib import patches
+from matplotlib import patches
 
 from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly, DraggablePoint, MagnetizePolygons
 from core import ImageTools
@@ -49,24 +49,24 @@ class Builder(QWidget):
         self.setupUI()
 
         ''' connect signals '''
-        self.acn_image.triggered.connect(self.imagery)
-        self.acn_imageAsBackground.stateChanged.connect(self.imageryBackground)
-        self.acn_imageThreshold1.valueChanged.connect(self.updateImagery)
-        self.acn_imageThreshold2.valueChanged.connect(self.updateImagery)
-        self.acn_imageDensity.valueChanged.connect(self.updateImagery)
-        self.acn_imagePolys.valueChanged.connect(self.updateImagery)
-        self.acn_polygonize.triggered.connect(self.formPolygonFromFigure)
-
-        self.acn_world.triggered.connect(self.formPolyWorld)
-        self.acn_rectangle.triggered.connect(self.formPolyRectangle)
-        self.acn_circle.triggered.connect(self.formPolyCircle)
-        self.acn_line.triggered.connect(self.formPolyLine)
-        self.acn_polygon.triggered.connect(self.formPolygon)
-        self.acn_markerCheck.triggered.connect(self.markersMove)
-
-        self.acn_gridToggle.triggered.connect(self.toggleGrid)
-        self.acn_magnetizeGrid.triggered.connect(self.magnetizeGrid)
-        self.acn_magnetizePoly.triggered.connect(self.magnetizePoly)
+        # self.acn_image.triggered.connect(self.imagery)
+        # self.acn_imageAsBackground.stateChanged.connect(self.imageryBackground)
+        # self.acn_imageThreshold1.valueChanged.connect(self.updateImagery)
+        # self.acn_imageThreshold2.valueChanged.connect(self.updateImagery)
+        # self.acn_imageDensity.valueChanged.connect(self.updateImagery)
+        # self.acn_imagePolys.valueChanged.connect(self.updateImagery)
+        # self.acn_polygonize.triggered.connect(self.formPolygonFromFigure)
+        #
+        # self.acn_world.triggered.connect(self.formPolyWorld)
+        # self.acn_rectangle.triggered.connect(self.formPolyRectangle)
+        # self.acn_circle.triggered.connect(self.formPolyCircle)
+        # self.acn_line.triggered.connect(self.formPolyLine)
+        # self.acn_polygon.triggered.connect(self.formPolygon)
+        # self.acn_markerCheck.triggered.connect(self.markersMove)
+        #
+        # self.acn_gridToggle.triggered.connect(self.toggleGrid)
+        # self.acn_magnetizeGrid.triggered.connect(self.magnetizeGrid)
+        # self.acn_magnetizePoly.triggered.connect(self.magnetizePoly)
 
         self.btn_redraw.clicked.connect(self.redrawTable)
 
@@ -146,22 +146,22 @@ class Builder(QWidget):
         self.acn_magnetizePoly = QAction(QIcon('icons/magnetize.svg'), 'magnetizePoly', None, checkable=True)
         self.acn_magnetizePoly.setToolTip("magnetize the polygons")
 
-        self.toolBar.addAction(self.acn_image)
-        self.widgetAction = self.toolBar.addWidget(acnWidget)
-        self.widgetAction.setVisible(False)
-        self.toolBar.addAction(self.acn_polygonize)
-        self.toolBar.addSeparator()
-        self.toolBar.addAction(self.acn_world)
-        self.toolBar.addAction(self.acn_polygon)
-        self.toolBar.addAction(self.acn_rectangle)
-        self.toolBar.addAction(self.acn_circle)
-        self.toolBar.addAction(self.acn_line)
-        self.toolBar.addSeparator()
-        self.toolBar.addAction(self.acn_markerCheck)
-        self.toolBar.addSeparator()
-        self.toolBar.addAction(self.acn_gridToggle)
-        self.toolBar.addAction(self.acn_magnetizeGrid)
-        self.toolBar.addAction(self.acn_magnetizePoly)
+        # self.toolBar.addAction(self.acn_image)
+        # self.widgetAction = self.toolBar.addWidget(acnWidget)
+        # self.widgetAction.setVisible(False)
+        # self.toolBar.addAction(self.acn_polygonize)
+        # self.toolBar.addSeparator()
+        # self.toolBar.addAction(self.acn_world)
+        # self.toolBar.addAction(self.acn_polygon)
+        # self.toolBar.addAction(self.acn_rectangle)
+        # self.toolBar.addAction(self.acn_circle)
+        # self.toolBar.addAction(self.acn_line)
+        # self.toolBar.addSeparator()
+        # self.toolBar.addAction(self.acn_markerCheck)
+        # self.toolBar.addSeparator()
+        # self.toolBar.addAction(self.acn_gridToggle)
+        # self.toolBar.addAction(self.acn_magnetizeGrid)
+        # self.toolBar.addAction(self.acn_magnetizePoly)
 
         self.tw_polys = QTreeWidget()
         self.tw_polys.setAlternatingRowColors(True)
@@ -211,7 +211,7 @@ class Builder(QWidget):
 
     def imagery(self):
         if self.imageClicked is True:
-            # BUG: cheeky piece of shit... wont accept given formats
+            # FIXME: cheeky piece of shit... wont accept given formats
             self.fname = QFileDialog.getOpenFileName(self, caption='choose sketch')[0]
             if self.fname:
                 self.widgetAction.setVisible(True)
@@ -571,7 +571,6 @@ class Builder(QWidget):
                 self.polyMarkers.append(int(p[6]))
 
             elif p[0] == 'Line':
-                # print(p[1], p[2], p[3], p[4])
                 self.polys.append(plc.createLine(
                 start=[float(p[1]), float(p[2])], end=[float(p[3]), float(p[4])], segments=int(p[5]), boundaryMarker=int(p[6]), leftDirection=int(p[7])
                 ))
@@ -658,14 +657,13 @@ class Builder(QWidget):
 
     def magnetizePoly(self):
         if self.mPolyClicked is True:
-            # points = []
             x = []
             y = []
             x, y = self.getNodes()
 
             self.mp = MagnetizePolygons(self, x, y)
             self.mp.connect()
-            # HACK: against flickering and false data while spanning
+            # HACK: against flickering and false data while spanning:
             self.span.disconnect()
             self.span.connect()
             self.mPolyClicked = False
