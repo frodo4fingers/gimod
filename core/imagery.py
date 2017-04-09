@@ -1,20 +1,15 @@
 #!/usr/bin/env python
 # encoding: UTF-8
 
-''' image tools components '''
 import matplotlib.pyplot as plt
-# try:
-#     import cv4
-#     tmp = ImageTools()
-#     tmp.getContours()
-# except ModuleNotFoundError:
-#     print("NOOOOOOOOOOOOOOoo")
-#     tmp = ImageTools()
-#     tmp.parent.acn_imageAsBackground.setChecked(True)
-#     tmp.parent.acn_imageAsBackground.setEnabled(False)
 
 
 class ImageTools():
+    """
+        Provides the tools for contrast recognition with OpenCV and the
+        algorithms to split that into multiple paths or set chosen picture
+        as background
+    """
 
     def __init__(self, parent=None):
         self.parent = parent
@@ -29,17 +24,17 @@ class ImageTools():
 
     def getContours(self):
         try:
-            import cv3
+            import cv2
             # read image
-            src = cv3.imread(self.fname)
-            img = cv3.cvtColor(src, cv3.COLOR_BGR2GRAY)
+            src = cv2.imread(self.fname)
+            img = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
             # basic threshold
-            th, dst = cv3.threshold(img, float(self.threshold1), float(
-            self.threshold2), cv3.THRESH_BINARY)
+            th, dst = cv2.threshold(img, float(self.threshold1), float(
+            self.threshold2), cv2.THRESH_BINARY)
             # find Contours
-            image, contours, hierarchy = cv3.findContours(dst, cv3.RETR_TREE, cv3.CHAIN_APPROX_NONE)
+            image, contours, hierarchy = cv2.findContours(dst, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
             # sort after polygon area and start with largest area
-            paths = sorted(contours, key=cv3.contourArea)[::-1]
+            paths = sorted(contours, key=cv2.contourArea)[::-1]
             # sort out those structures that are smaller than 6 dots, first one is frame
             self.paths = [i for i in paths if len(i) > 5][1:]
             self.statusBar.showMessage("there are {} possible polygons with current settings".format(len(self.paths)))
