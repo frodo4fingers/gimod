@@ -14,13 +14,13 @@ class ImageTools():
     def __init__(self, parent=None):
         self.parent = parent
         self.statusBar = parent.statusBar
-        self.threshold1 = parent.acn_imageThreshold1.value()
-        self.threshold2 = parent.acn_imageThreshold2.value()
-        self.imagePolys = parent.acn_imagePolys
-        self.polyDensity = parent.acn_imageDensity
+        self.threshold1 = parent.toolBar.acn_imageThreshold1.value()
+        self.threshold2 = parent.toolBar.acn_imageThreshold2.value()
+        self.imagePolys = parent.toolBar.acn_imagePolys
+        self.polyDensity = parent.toolBar.acn_imageDensity
         self.fname = parent.fname
         self.figure = parent.figure
-        self.background = parent.acn_imageAsBackground
+        self.background = parent.toolBar.acn_imageAsBackground
 
     def getContours(self):
         try:

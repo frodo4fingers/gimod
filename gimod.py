@@ -151,23 +151,22 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.statusBar)
 
         # instanciate empty toolbar that will be equipped elsewhere
-        self.toolBar = QToolBar(self)
-        # self.toolBar = PolyToolBar(self)
-        self.toolBar.setIconSize(QSize(18, 18))
+        # self.toolBar = QToolBar(self)
+        self.toolBar = PolyToolBar(self)
         self.addToolBar(self.toolBar)
 
         # initialize the plot widget
         self.plotWidget = PlotWidget(self)
-        self.plotWidget.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        self.plotWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.builder = Builder(self)
         tabBox = QTabWidget(self)
         tabBox.setTabPosition(QTabWidget.West)
-        # tabBox.addTab(file_widget, "start with sketch")
         tabBox.addTab(self.builder, "poly properties")
         tabBox.addTab(mesh_widget, "mesh options")
         tabBox.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         v_plotWidget = QVBoxLayout()
         v_plotWidget.addWidget(self.plotWidget)
+
 
         # ### split this
         splitter = QSplitter(Qt.Horizontal)
