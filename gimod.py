@@ -16,16 +16,15 @@ from pygimli.meshtools import createMesh, writePLC
 from pygimli.mplviewer import drawMeshBoundaries, drawMesh, drawPLC, drawModel
 
 from core import Builder
-from gui import PlotWidget, PolyToolBar
+from gui import PlotWidget, PolyToolBar, PropertyTable
 
 # TODO: CLEAAAAAAAAAAAAAN THIS!!!!
 
 
-class MainWindow(QMainWindow):
+class GIMod(QMainWindow):
 
     def __init__(self, parent=None):
-        super(MainWindow, self).__init__(parent)
-
+        super(GIMod, self).__init__(parent)
         self.initUI()
 
         ''' connect the buttons with their functions '''
@@ -150,18 +149,20 @@ class MainWindow(QMainWindow):
         self.statusBar = QStatusBar()
         self.setStatusBar(self.statusBar)
 
-        # instanciate empty toolbar that will be equipped elsewhere
-        # self.toolBar = QToolBar(self)
         self.toolBar = PolyToolBar(self)
         self.addToolBar(self.toolBar)
+
+        self.propertyTable = PropertyTable(self)
 
         # initialize the plot widget
         self.plotWidget = PlotWidget(self)
         self.plotWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.builder = Builder(self)
+
+
         tabBox = QTabWidget(self)
         tabBox.setTabPosition(QTabWidget.West)
-        tabBox.addTab(self.builder, "poly properties")
+        tabBox.addTab(self.propertyTable, "poly properties")
         tabBox.addTab(mesh_widget, "mesh options")
         tabBox.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         v_plotWidget = QVBoxLayout()
@@ -289,9 +290,9 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
 
     app = QApplication(sys.argv)
-    app.setApplicationName("MainWindow")
+    app.setApplicationName("GIMod")
 
-    main = MainWindow()
+    main = GIMod()
     # main.resize(600, 600)
     main.show()
 

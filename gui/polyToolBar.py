@@ -23,28 +23,7 @@ class PolyToolBar(QToolBar):
 
         self.setupTools()
 
-        # ''' connect signals '''
-        # self.acn_image.triggered.connect(parent.builder.imagery)
-        # self.acn_imageAsBackground.stateChanged.connect(parent.builder.imageryBackground)
-        # self.acn_imageThreshold1.valueChanged.connect(parent.builder.updateImagery)
-        # self.acn_imageThreshold2.valueChanged.connect(parent.builder.updateImagery)
-        # self.acn_imageDensity.valueChanged.connect(parent.builder.updateImagery)
-        # self.acn_imagePolys.valueChanged.connect(parent.builder.updateImagery)
-        # self.acn_polygonize.triggered.connect(parent.builder.formPolygonFromFigure)
-        #
-        # self.acn_world.triggered.connect(parent.builder.formPolyWorld)
-        # self.acn_rectangle.triggered.connect(parent.builder.formPolyRectangle)
-        # self.acn_circle.triggered.connect(parent.builder.formPolyCircle)
-        # self.acn_line.triggered.connect(parent.builder.formPolyLine)
-        # self.acn_polygon.triggered.connect(parent.builder.formPolygon)
-        # self.acn_markerCheck.triggered.connect(parent.builder.markersMove)
-        #
-        # self.acn_gridToggle.triggered.connect(parent.builder.toggleGrid)
-        # self.acn_magnetizeGrid.triggered.connect(parent.builder.magnetizeGrid)
-        # self.acn_magnetizePoly.triggered.connect(parent.builder.magnetizePoly)
-
     def setupTools(self):
-
         self.grp_imageTools = QActionGroup(self)
         self.acn_image = QAction(QIcon('icons/ic_image.svg'), 'image', self.grp_imageTools, checkable=True)
         self.acn_image.setToolTip("Load image to set as model background or try to extract polygons from")
@@ -127,3 +106,13 @@ class PolyToolBar(QToolBar):
         self.addAction(self.acn_magnetizePoly)
 
         self.setIconSize(QSize(18, 18))
+
+
+if __name__ == '__main__':
+
+    import sys
+
+    app = QApplication(sys.argv)
+    ex = PolyToolBar()
+    ex.show()
+    sys.exit(app.exec_())

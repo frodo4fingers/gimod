@@ -66,7 +66,7 @@ class SpanRectangle(object):
             pass
 
     def sendToBuilder(self):
-        if self.parent.acn_magnetizePoly.isChecked() is True:
+        if self.parent.toolBar.acn_magnetizePoly.isChecked() is True:
             if self.parent.mp.xR is not None:
                 self.xR = self.parent.mp.xR
                 self.yR = self.parent.mp.yR

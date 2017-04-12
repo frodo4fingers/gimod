@@ -4,3 +4,4 @@
 
 from .plotWidget import PlotWidget
 from .polyToolBar import PolyToolBar
+from .propertyTable import PropertyTable
