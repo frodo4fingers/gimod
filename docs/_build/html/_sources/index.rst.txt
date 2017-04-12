@@ -20,17 +20,17 @@ Indices and tables
 * :ref:`search`
 
 
-$project
+GIMod
 ========
 
-$project will solve your problem of where to start with documentation,
+GIMod will solve your problem of where to start with documentation,
 by providing a basic explanation of how to do it easily.
 
 Look how easy it is to use:
 
-    import project
+    import GIMod
     # Get your stuff done
-    project.do_stuff()
+    GIMod.do_stuff()
 
 Features
 --------
@@ -41,23 +41,23 @@ Features
 Installation
 ------------
 
-Install $project by running:
+Install GIMod by running:
 
-    install project
+    install GIMod
 
 Contribute
 ----------
 
-- Issue Tracker: github.com/$project/$project/issues
-- Source Code: github.com/$project/$project
+- Issue Tracker: github.com/GIMod/GIMod/issues
+- Source Code: github.com/GIMod/GIMod
 
 Support
 -------
 
 If you are having issues, please let us know.
-We have a mailing list located at: project@google-groups.com
+We have a mailing list located at: GIMod@google-groups.com
 
 License
 -------
 
-The project is licensed under the BSD license.
+The GIMod is licensed under the BSD license.
