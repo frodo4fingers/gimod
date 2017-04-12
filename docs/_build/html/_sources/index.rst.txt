@@ -12,52 +12,39 @@ Welcome to GIMod's documentation!
 
 
 
-Indices and tables
-==================
+.. Indices and tables
+.. ==================
+..
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
+.. GIMod
+.. ========
 
-GIMod
-========
+GIMod is a Graphical Interface for basic Model creation. It is intended to make the creation of your basic model with/for GIMLi easier. The result is a poly (.poly) or mesh (.bms) which can be further used in your own script. GIMod is written and tested with python 3.6.0, matplotlib 2.0.0 and Qt5.
 
-GIMod will solve your problem of where to start with documentation,
-by providing a basic explanation of how to do it easily.
+Prerequisities
+--------------
+    + `python <https://www.python.org/downloads/>`_
+    + `Qt4/Qt5 <https://www.qt.io/download/>`_
+    + `GIMLi <http://www.pygimli.org/installation.html>`_
+    + (`OpenCV <http://opencv.org/downloads.html>`_)
 
-Look how easy it is to use:
-
-    import project
-    # Get your stuff done
-    project.do_stuff()
-
-Features
---------
-
-- Be awesome
-- Make things faster
 
 Installation
 ------------
 
-Install GIMod by running:
+Install `GIMod <https://github.com/frodo4fingers/gimod>`_ from `GitHub <https://github.com/frodo4fingers/gimod>`_ by cloning it:
 
-    install project
+    ``git clone https://github.com/frodo4fingers/gimod.git``
 
 Contribute
 ----------
-
-- Issue Tracker: github.com/GIMod/GIMod/issues
-- Source Code: github.com/GIMod/GIMod
-
-Support
--------
-
-If you are having issues, please let us know.
-We have a mailing list located at: project@google-groups.com
+If you are having issues, please feel free to write a `ticket <https://github.com/frodo4fingers/gimod/issues>`_.
 
 License
 -------
 
-The project is licensed under the BSD license.
+This project is licensed under the `GPL-3.0 <https://github.com/frodo4fingers/gimod/blob/master/LICENSE>`_.
