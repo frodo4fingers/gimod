@@ -10,23 +10,23 @@ Welcome to GIMod's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   theGui
+   examples.rst
 
 
-Indices and tables
-==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. Indices and tables
+.. ==================
+..
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
 
 
 .. GIMod
 .. ========
 
-GIMod is a Graphical Interface for basic Model creation. It is intended to make the creation of your basic model with/for GIMLi easier. The result is a poly (.poly) or mesh (.bms) which can be further used in your own script. GIMod is written and tested with python 3.6.0, matplotlib 2.0.0 and Qt5.
-
-For instance:
-.. figure:: ../icons/logo.png
+GIMod stands for **G**\ raphical **I**\ nterface for basic **Mod**\ el creation. It is intended to make the creation of your basic model with/for GIMLi easier. The result is a poly (.poly) or mesh (.bms) which can be further used in your own script. GIMod is written and tested with python 3.6.0, matplotlib 2.0.0 and Qt5.
 
 Prerequisities
 --------------
@@ -38,10 +38,7 @@ Prerequisities
 
 Installation
 ------------
-
-Install `GIMod <https://github.com/frodo4fingers/gimod>`_ from `GitHub <https://github.com/frodo4fingers/gimod>`_ by cloning it:
-
-    ``git clone https://github.com/frodo4fingers/gimod.git``
+Install `GIMod <https://github.com/frodo4fingers/gimod>`_ from `GitHub <https://github.com/frodo4fingers/gimod>`_ by cloning it: ``git clone https://github.com/frodo4fingers/gimod.git``
 
 Contribute
 ----------
@@ -49,5 +46,4 @@ If you are having issues, please feel free to write a `ticket <https://github.co
 
 License
 -------
-
 This project is licensed under the `GPL-3.0 <https://github.com/frodo4fingers/gimod/blob/master/LICENSE>`_.

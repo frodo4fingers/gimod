@@ -1,0 +1,445 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>The GUI &mdash; GIMod master-v0.2.118-6a7c3a1
+ documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="GIMod master-v0.2.118-6a7c3a1
+ documentation" href="index.html"/>
+        <link rel="next" title="Examples" href="examples.html"/>
+        <link rel="prev" title="Welcome to GIMod’s documentation!" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> GIMod
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.118
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The GUI</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-toolbar">The Toolbar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#property-table">Property Table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mesh-options">Mesh Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#plotting-area">Plotting Area</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GIMod</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>The GUI</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/theGui.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="the-gui">
+<h1>The GUI<a class="headerlink" href="#the-gui" title="Permalink to this headline">¶</a></h1>
+<p>The GUI is mainly divided into three parts. The toolbar where to this point GIMLIs polytools and some more functions are stored. Beneath that there is a property table on the left that will hold parameters of the drawn polys - that will happen to the right. Everything that is clickable should have a tool tip. So if hovered over a button it should show whats its use.</p>
+<div class="section" id="the-toolbar">
+<h2>The Toolbar<a class="headerlink" href="#the-toolbar" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="15%" />
+<col width="14%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Symbol</th>
+<th class="head">Tool</th>
+<th class="head"><div class="first last line-block">
+<div class="line">Descritption</div>
+</div>
+</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><a class="reference internal" href="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_image.svg"><img alt="open" src="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_image.svg" width="20px" /></a></td>
+<td>Open</td>
+<td><div class="first last line-block">
+<div class="line">Allows to open a picture of a drawing or a scheme so that it can</div>
+<div class="line">be analyzed for contrasts (with OpenCV) and later processed to</div>
+<div class="line">obtain the polygons. If no OpenCV is installed the loaded</div>
+<div class="line">picture can only be set as background.</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td rowspan="2">Threshold</td>
+<td>lower</td>
+<td><div class="first last line-block">
+<div class="line">First box contains the value (0-254) for the bottom threshold</div>
+<div class="line">value threshold for the contour detection.</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td>upper</td>
+<td><div class="first last line-block">
+<div class="line">Second box contains the value (1-255) for the top threshold value</div>
+<div class="line">threshold for the contour detection.</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td>Density of</td>
+<td>points</td>
+<td><div class="first last line-block">
+<div class="line">Defines a step width for every path plotted.</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td>Number of</td>
+<td>paths</td>
+<td><div class="first last line-block">
+<div class="line">The algorithm for contour detection (OpenCV) sorts the paths</div>
+<div class="line">after the area they are enclosing. So the higher the value is set</div>
+<div class="line">the more paths will be plotted/ the more polygons will be</div>
+<div class="line">obtained. The outcome depends on the contrast and can be bad.</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_polygonize.svg"><img alt="polygonize" src="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_polygonize.svg" width="20px" /></a></td>
+<td>Polygonize</td>
+<td><div class="first last line-block">
+<div class="line">After analyzing a given image and extracting paths accordingly</div>
+<div class="line">to the set contrast and parameters, this tool will convert all</div>
+<div class="line">received paths into a polygon. Only enabled with OpenCV.</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="3"><div class="first last line-block">
+<div class="line">GIMLi&#8217;s <strong>PolyTools</strong> are integrated in a matter that if a polygon is finished the whole</div>
+<div class="line">figure will be rebuilt.</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_spanWorld.svg"><img alt="polyWorld" src="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_spanWorld.svg" width="20px" /></a></td>
+<td><a class="reference external" href="http://pygimli.org/pygimliapi/_generated/pygimli.meshtools.html?highlight=createworld#pygimli.meshtools.createWorld&gt;">createWorld</a></td>
+<td><div class="first last line-block">
+<div class="line">polygon will be built. To create the modelling world simply</div>
+<div class="line">activate the function and span a rectangle on the plotting area.</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_spanPoly.svg"><img alt="polyPoly" src="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_spanPoly.svg" width="20px" /></a></td>
+<td><a class="reference external" href="http://pygimli.org/pygimliapi/_generated/pygimli.meshtools.html?highlight=createpolygon#pygimli.meshtools.createPolygon">createPolygon</a></td>
+<td><div class="first last line-block">
+<div class="line">This action enables you to create a polygon by clicking around in</div>
+<div class="line">the plotting area. To finish and <strong>close the polygon</strong> just</div>
+<div class="line">double click.</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_spanRectangle.svg"><img alt="polyRect" src="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_spanRectangle.svg" width="20px" /></a></td>
+<td><a class="reference external" href="http://pygimli.org/pygimliapi/_generated/pygimli.meshtools.html?highlight=createpolygon#pygimli.meshtools.createRectangle">createRectangle</a></td>
+<td><div class="first last line-block">
+<div class="line">Functioning the same as <a class="reference external" href="http://pygimli.org/pygimliapi/_generated/pygimli.meshtools.html?highlight=createworld#pygimli.meshtools.createWorld&gt;">createWorld</a> this will create a polygon</div>
+<div class="line">rectangle.</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_spanCircle.svg"><img alt="polyCircle" src="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_spanCircle.svg" width="20px" /></a></td>
+<td><a class="reference external" href="http://pygimli.org/pygimliapi/_generated/pygimli.meshtools.html?highlight=createpolygon#pygimli.meshtools.createCircle">createCircle</a></td>
+<td><div class="first last line-block">
+<div class="line">By clicking and dragging the cursor a circle is spanned.</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_spanLine.png"><img alt="polyLine" src="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_spanLine.png" style="width: 20px;" /></a></td>
+<td><a class="reference external" href="http://pygimli.org/pygimliapi/_generated/pygimli.meshtools.html?highlight=createpolygon#pygimli.meshtools.createLine">createLine</a></td>
+<td><div class="first last line-block">
+<div class="line">Creating a polyLine is simply done by clicking. No dragging or</div>
+<div class="line">whatsoever.</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="3"><div class="first last line-block">
+<div class="line">Marker handling</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="https://rawgit.com/frodo4fingers/gimod/master/icons/marker_check.svg"><img alt="marker" src="https://rawgit.com/frodo4fingers/gimod/master/icons/marker_check.svg" width="20px" /></a></td>
+<td>check marker</td>
+<td><div class="first last line-block">
+<div class="line">Since it is possible that some irregular polygons will be created</div>
+<div class="line">this tool might come in handy. Activated, each polygon gets a red</div>
+<div class="line">dot which will be draggable. By deactivating (clicking again) the</div>
+<div class="line">action the changes will be adopted.</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td colspan="3"><div class="first last line-block">
+<div class="line">Magnetize... (since it might be necessary to snap to specific points)</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="https://rawgit.com/frodo4fingers/gimod/master/icons/magnetize.svg"><img alt="magnetPoly" src="https://rawgit.com/frodo4fingers/gimod/master/icons/magnetize.svg" width="20px" /></a></td>
+<td>...Polygon</td>
+<td><div class="first last line-block">
+<div class="line">This feature allows to magnetize the nodes of a polygon. After</div>
+<div class="line">its activation hovering near to or over the nodes will color them</div>
+<div class="line">red. If a polyTool is active a clicking when a node is red will</div>
+<div class="line">catch the coordinates of that node.</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="property-table">
+<h2>Property Table<a class="headerlink" href="#property-table" title="Permalink to this headline">¶</a></h2>
+<p>The first tab on the left mainly holds the property table. On the bottom are a few more buttons to handle the model creation. The table stores the parameters for every polygon shown on the right. GIMLi&#8217;s polygons are holding various arguments which are adjustable in that table. The functions on the bottom are working as follows.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="15%" />
+<col width="14%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Symbol</th>
+<th class="head">Function</th>
+<th class="head">Descritption</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><a class="reference internal" href="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_undo_black_18px.svg"><img alt="undo" src="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_undo_black_18px.svg" width="20px" /></a></td>
+<td>Undo</td>
+<td>Undo the last polygon made.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_redo_black_18px.svg"><img alt="redo" src="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_redo_black_18px.svg" width="20px" /></a></td>
+<td>Redo</td>
+<td>Redo the undone polygons.</td>
+</tr>
+<tr class="row-even"><td><em>regions</em></td>
+<td>Plot</td>
+<td>Will plot the figure colored after a polygons assigned markers.</td>
+</tr>
+<tr class="row-odd"><td><em>attributes</em></td>
+<td>Plot</td>
+<td>Will plot the figure according to the polygons attributes from the
+table.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_refresh_black_24px.svg"><img alt="refresh" src="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_refresh_black_24px.svg" width="20px" /></a></td>
+<td>Refresh</td>
+<td>Reads the table and plot option and builds the polygon again.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_save_black_24px.svg"><img alt="save" src="https://rawgit.com/frodo4fingers/gimod/master/icons/ic_save_black_24px.svg" width="20px" /></a></td>
+<td>Save</td>
+<td>Saves the polygon as <code class="docutils literal"><span class="pre">*.poly</span></code>.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="mesh-options">
+<h2>Mesh Options<a class="headerlink" href="#mesh-options" title="Permalink to this headline">¶</a></h2>
+<p>The second tab on the left holds options for mesh generation. This aims at GIMLI&#8217;s <a class="reference external" href="http://pygimli.org/pygimliapi/_generated/pygimli.meshtools.html?highlight=createmesh#pygimli.meshtools.createMesh">createMesh</a>.</p>
+</div>
+<div class="section" id="plotting-area">
+<h2>Plotting Area<a class="headerlink" href="#plotting-area" title="Permalink to this headline">¶</a></h2>
+<p>The plotting area is the standard matplotlib plot with its toolbar...</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Welcome to GIMod’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Friedrich Dinsel.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'master-v0.2.118-6a7c3a1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
