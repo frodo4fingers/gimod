@@ -6,14 +6,14 @@
 Welcome to GIMod's documentation!
 =================================
 
+GIMod stands for **G**\ raphical **I**\ nterface for basic **Mod**\ el creation. It is intended to make the creation of your basic model with/for GIMLi easier. The result is a poly (.poly) or mesh (.bms) which can be further used in your own script. GIMod is written and tested with python 3.6.0, matplotlib 2.0.0 and Qt5.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    theGui
    examples.rst
-
-
 
 .. Indices and tables
 .. ==================
@@ -22,11 +22,6 @@ Welcome to GIMod's documentation!
 .. * :ref:`modindex`
 .. * :ref:`search`
 
-
-.. GIMod
-.. ========
-
-GIMod stands for **G**\ raphical **I**\ nterface for basic **Mod**\ el creation. It is intended to make the creation of your basic model with/for GIMLi easier. The result is a poly (.poly) or mesh (.bms) which can be further used in your own script. GIMod is written and tested with python 3.6.0, matplotlib 2.0.0 and Qt5.
 
 Prerequisities
 --------------
