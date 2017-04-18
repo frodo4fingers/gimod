@@ -35,7 +35,7 @@ class Builder():
         self.figure = parent.plotWidget
         self.toolBar = parent.toolBar
         self.statusBar = parent.statusBar
-        self.propertyTable = parent.propertyTable
+        self.propertyWidget = parent.propertyTable
         self.marker = 1  # 0
         self.newMarkers = []
         self.polys = []
@@ -130,7 +130,8 @@ class Builder():
     def imagery(self):
         if self.imageClicked is True:
             # FIXME: cheeky piece of shit... wont accept given formats
-            self.fname = QFileDialog.getOpenFileName(self, caption='choose sketch')[0]
+            # self.fname = QFileDialog.getOpenFileName(self, caption='choose sketch')[0]
+            self.fname = QFileDialog.getOpenFileName(caption='choose sketch')[0]
             if self.fname:
                 self.toolBar.widgetAction.setVisible(True)
                 self.toolBar.acn_polygonize.setVisible(True)
@@ -204,11 +205,12 @@ class Builder():
         self.span.connect()
 
     def formPolygonFromFigure(self):
-        self.propertyTable.clear()
+        self.propertyWidget.tw_polys.clear()
         self.polys.clear()
         self.marker = 1
         self.parent.setCursor(Qt.WaitCursor)
         for c in self.imageTools.contoursCutted:
+            # print(c)
             self.printPolygon(c)
         self.figure.axis.set_ylim(self.figure.axis.get_ylim()[::-1])
         self.figure.canvas.draw()
@@ -217,10 +219,10 @@ class Builder():
 
     def printCoordinates(self, x1, y1, x2, y2, form):
         print("construct")
-        self.x_p = x1
-        self.y_p = y1
-        self.x_r = x2
-        self.y_r = y2
+        self.xP = x1
+        self.yP = y1
+        self.xR = x2
+        self.yR = y2
         self.form = form
         self.constructPoly()
 
@@ -231,30 +233,30 @@ class Builder():
 
     def constructPoly(self):
         if self.form == 'World':
-            self.polys.append(plc.createWorld(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.marker))
+            self.polys.append(plc.createWorld(start=[self.xP, self.yP], end=[self.xR, self.yR], marker=self.marker))
 
         elif self.form == 'Rectangle':
             print("construct rectangle")
-            self.polys.append(plc.createRectangle(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], marker=self.marker))
+            self.polys.append(plc.createRectangle(start=[self.xP, self.yP], end=[self.xR, self.yR], marker=self.marker))
 
         elif self.form == 'Circle':
             self.polys.append(plc.createCircle(
-            pos=(self.x_p, self.y_p), segments=12, radius=self.x_r, marker=self.marker))
+            pos=(self.xP, self.yP), segments=12, radius=self.xR, marker=self.marker))
 
         elif self.form == 'Line':
-            self.polys.append(plc.createLine(start=[self.x_p, self.y_p], end=[self.x_r, self.y_r], segments=1))
+            self.polys.append(plc.createLine(start=[self.xP, self.yP], end=[self.xR, self.yR], segments=1))
 
         elif self.form == 'Polygon':
             self.polys.append(plc.createPolygon(self.polygon, marker=self.marker, isClosed=True))
 
-        self.propertyTable.btn_undo.setEnabled(True)
+        self.propertyWidget.btn_undo.setEnabled(True)
         self.drawPoly()
 
     def drawPoly(self, fillTable=True):
         self.poly = plc.mergePLC(self.polys)
         self.figure.axis.cla()
 
-        if self.propertyTable.rbtn_plotRegions.isChecked() is True:
+        if self.propertyWidget.rbtn_plotRegions.isChecked() is True:
             drawMesh(self.figure.axis, self.poly, fitView=False)
             self.figure.canvas.draw()
         else:
@@ -268,7 +270,7 @@ class Builder():
 
         if fillTable:
             print("fill table is true")
-            self.propertyTable.fill(self.x_p, self.y_p, self.x_r, self.y_r, self.marker, self.polygon, self.form)
+            self.propertyWidget.fill(self.xP, self.yP, self.xR, self.yR, self.marker, self.polygon, self.form)
             # iterate marker counter
             self.marker += 1
 
@@ -289,25 +291,25 @@ class Builder():
     #         xStart = QTreeWidgetItem()
     #         xStart.setFlags(xStart.flags() | Qt.ItemIsEditable)
     #         xStart.setText(0, "Start x:")
-    #         xStart.setText(1, str(self.x_p))
+    #         xStart.setText(1, str(self.xP))
     #         twItem.addChild(xStart)
     #         # start y
     #         yStart = QTreeWidgetItem()
     #         yStart.setFlags(yStart.flags() | Qt.ItemIsEditable)
     #         yStart.setText(0, "Start y:")
-    #         yStart.setText(1, str(self.y_p))
+    #         yStart.setText(1, str(self.yP))
     #         twItem.addChild(yStart)
     #         # end x
     #         xEnd = QTreeWidgetItem()
     #         xEnd.setFlags(xEnd.flags() | Qt.ItemIsEditable)
     #         xEnd.setText(0, "End x:")
-    #         xEnd.setText(1, str(self.x_r))
+    #         xEnd.setText(1, str(self.xR))
     #         twItem.addChild(xEnd)
     #         # end y
     #         yEnd = QTreeWidgetItem()
     #         yEnd.setFlags(yEnd.flags() | Qt.ItemIsEditable)
     #         yEnd.setText(0, "End y:")
-    #         yEnd.setText(1, str(self.y_r))
+    #         yEnd.setText(1, str(self.yR))
     #         twItem.addChild(yEnd)
     #
     #     if self.form == 'Circle':
@@ -315,7 +317,7 @@ class Builder():
     #         center = QTreeWidgetItem()
     #         center.setFlags(center.flags() | Qt.ItemIsEditable)
     #         center.setText(0, "Center:")
-    #         center.setText(1, (str(round(self.x_p, 2)) + ", " + str(round(self.y_p, 2))))
+    #         center.setText(1, (str(round(self.xP, 2)) + ", " + str(round(self.yP, 2))))
     #         twItem.addChild(center)
     #         # radius
     #         spx_radius = QDoubleSpinBox()
