@@ -39,7 +39,6 @@ class Builder():
         self.marker = 1  # 0
         self.newMarkers = []
         self.polys = []
-        self.undone = []
         self.imageClicked = True
         self.markersClicked = True
         self.gridClicked = True
@@ -156,6 +155,7 @@ class Builder():
             self.toolBar.acn_imagePolys.setEnabled(False)
             self.toolBar.acn_imageDensity.setEnabled(False)
             self.imageTools.setBackground()
+            self.propertyWidget.tw_polys.clear()
         else:
             self.updateImagery()
             self.toolBar.acn_imageThreshold1.setEnabled(True)
@@ -178,7 +178,6 @@ class Builder():
             pass
         self.span = SpanRectangle(self)
         self.span.connect()
-        print("rectangle")
 
     def formPolyCircle(self):
         try:
@@ -218,7 +217,7 @@ class Builder():
         self.parent.setCursor(Qt.ArrowCursor)
 
     def printCoordinates(self, x1, y1, x2, y2, form):
-        print("construct")
+        self.polygon = None
         self.xP = x1
         self.yP = y1
         self.xR = x2
@@ -228,6 +227,10 @@ class Builder():
 
     def printPolygon(self, polygon):
         self.polygon = polygon
+        self.xP = None
+        self.yP = None
+        self.xR = None
+        self.yR = None
         self.form = 'Polygon'
         self.constructPoly()
 
@@ -236,7 +239,6 @@ class Builder():
             self.polys.append(plc.createWorld(start=[self.xP, self.yP], end=[self.xR, self.yR], marker=self.marker))
 
         elif self.form == 'Rectangle':
-            print("construct rectangle")
             self.polys.append(plc.createRectangle(start=[self.xP, self.yP], end=[self.xR, self.yR], marker=self.marker))
 
         elif self.form == 'Circle':
@@ -258,7 +260,7 @@ class Builder():
 
         if self.propertyWidget.rbtn_plotRegions.isChecked() is True:
             drawMesh(self.figure.axis, self.poly, fitView=False)
-            self.figure.canvas.draw()
+            # self.figure.canvas.draw()
         else:
             attrMap = self.zipUpMarkerAndAttributes()
             meshTmp = createMesh(self.poly)
@@ -266,17 +268,18 @@ class Builder():
             attrMap = pg.solver.parseMapToCellArray(attrMap, meshTmp)
             drawMeshBoundaries(self.figure.axis, meshTmp, hideMesh=True)
             drawModel(self.figure.axis, meshTmp, tri=True, data=attrMap)
-            self.figure.canvas.draw()
+            # self.figure.canvas.draw()
 
         if fillTable:
-            print("fill table is true")
-            self.propertyWidget.fill(self.xP, self.yP, self.xR, self.yR, self.marker, self.polygon, self.form)
+            self.propertyWidget.fill(self.marker, self.form, self.polygon, self.xP, self.yP, self.xR, self.yR)
             # iterate marker counter
             self.marker += 1
 
         if not self.mPolyClicked:
             x, y = self.getNodes()
             self.mp.plotMagnets(x, y)
+
+        self.figure.canvas.draw()
 
     # def fillTable(self):
     #     # FIXME: marker is iterated to existent state. needs to be recounted AFTER table creation so all markers can be chosen for all polys
@@ -552,7 +555,8 @@ class Builder():
                 p.disconnect()
             self.markersClicked = True
             self.toolBar.acn_markerCheck.setChecked(False)
-            self.redrawTable()
+            self.propertyWidget.redrawTable(self.newMarkers)
+            self.drawPoly(fillTable=False)
             self.parent.setCursor(Qt.ArrowCursor)
 
     def markerSize(self):

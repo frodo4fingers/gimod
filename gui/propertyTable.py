@@ -22,6 +22,10 @@ class PropertyTable(QWidget):
 
     def __init__(self, parent=None):
         super(PropertyTable, self).__init__(parent)
+        self.drawPoly = parent.builder.drawPoly
+        self.statusBar = parent.statusBar
+        self.polys = []
+        self.undone = []
         self.setupWidget()
 
         ''' connect signals '''
@@ -30,8 +34,8 @@ class PropertyTable(QWidget):
         self.btn_redo.clicked.connect(self.redoPoly)
 
     def setupWidget(self):
-        # self.bold = QFont()
-        # self.bold.setBold(True)
+        self.bold = QFont()
+        self.bold.setBold(True)
         self.tw_polys = QTreeWidget()
         self.tw_polys.setAlternatingRowColors(True)
         self.tw_polys.setHeaderLabels(("Type", "Value"))
@@ -78,13 +82,13 @@ class PropertyTable(QWidget):
         # self.show()
         self.setLayout(vbox)
 
-    def fill(self, x_p, y_p, x_r, y_r, marker, polygon, form):
-        print("start filling")
+    def fill(self, marker, form, polygon=None, xP=None, yP=None, xR=None, yR=None):
         # FIXME: marker is iterated to existent state. needs to be recounted AFTER table creation so all markers can be chosen for all polys
         # HACK: maybe with redrawTable, bc the marker counter wont change within that process
         twItem = QTreeWidgetItem()
         twItem.setText(0, form)
-        twItem.setFont(0, QFont().setBold(True))
+        twItem.setFont(0, self.bold)
+        self.marker = marker
 
         if form == 'World' or form == 'Rectangle' or form == 'Line':
             # twItem.setBackgroundColor(0, QColor(0, 255, 0))
@@ -92,25 +96,25 @@ class PropertyTable(QWidget):
             xStart = QTreeWidgetItem()
             xStart.setFlags(xStart.flags() | Qt.ItemIsEditable)
             xStart.setText(0, "Start x:")
-            xStart.setText(1, str(x_p))
+            xStart.setText(1, str(xP))
             twItem.addChild(xStart)
             # start y
             yStart = QTreeWidgetItem()
             yStart.setFlags(yStart.flags() | Qt.ItemIsEditable)
             yStart.setText(0, "Start y:")
-            yStart.setText(1, str(y_p))
+            yStart.setText(1, str(yP))
             twItem.addChild(yStart)
             # end x
             xEnd = QTreeWidgetItem()
             xEnd.setFlags(xEnd.flags() | Qt.ItemIsEditable)
             xEnd.setText(0, "End x:")
-            xEnd.setText(1, str(x_r))
+            xEnd.setText(1, str(xR))
             twItem.addChild(xEnd)
             # end y
             yEnd = QTreeWidgetItem()
             yEnd.setFlags(yEnd.flags() | Qt.ItemIsEditable)
             yEnd.setText(0, "End y:")
-            yEnd.setText(1, str(y_r))
+            yEnd.setText(1, str(yR))
             twItem.addChild(yEnd)
 
         if form == 'Circle':
@@ -118,12 +122,12 @@ class PropertyTable(QWidget):
             center = QTreeWidgetItem()
             center.setFlags(center.flags() | Qt.ItemIsEditable)
             center.setText(0, "Center:")
-            center.setText(1, (str(round(x_p, 2)) + ", " + str(round(y_p, 2))))
+            center.setText(1, (str(round(xP, 2)) + ", " + str(round(yP, 2))))
             twItem.addChild(center)
             # radius
             spx_radius = QDoubleSpinBox()
             spx_radius.setSingleStep(0.01)
-            spx_radius.setValue(x_r)
+            spx_radius.setValue(xR)
             radius = QTreeWidgetItem()
             radius.setText(0, "Radius:")
             twItem.addChild(radius)
@@ -172,8 +176,8 @@ class PropertyTable(QWidget):
             # insert marker
             # for k in range(self.marker):
             a = QComboBox()
-            [a.addItem(str(m + 1)) for m in range(self.marker)]
-            a.setCurrentIndex(self.marker - 1)
+            [a.addItem(str(m + 1)) for m in range(marker)]
+            a.setCurrentIndex(marker - 1)
             marker = QTreeWidgetItem()
             marker.setText(0, "Marker:")
             twItem.addChild(marker)
@@ -246,12 +250,10 @@ class PropertyTable(QWidget):
             self.tw_polys.setCurrentItem(self.tw_polys.topLevelItem(0))
             self.tw_polys.setEnabled(True)
         self.tw_polys.resizeColumnToContents(0)
-        print("finished table")
 
-    def redrawTable(self):
+    def redrawTable(self, newMarkers):
         # BUG: line misses first half after redraw
         # BUG: after redraw marker might be lost: control mechanism and/or possible manual adding of a marker
-        self.parent.setCursor(Qt.WaitCursor)
         self.statusBar.showMessage("updating...")
         self.polys.clear()
         polyMeta = []
@@ -306,9 +308,10 @@ class PropertyTable(QWidget):
                 verts = [[float(vertStr[i]), float(vertStr[i+1])] for i in range(0, len(vertStr), 2)]
                 poly = plc.createPolygon(
                 verts=verts, area=float(p[2]), boundaryMarker=int(p[3]), isClosed=int(p[6]))  # leftDirection=int(p[4])
-
-                if len(self.newMarkers) != 0:
-                    markerPos = self.newMarkers[i][0]
+                print(newMarkers)
+                if len(newMarkers) != 0:
+                    markerPos = newMarkers[i][0]
+                    print(markerPos)
                 else:
                     markerPos = pg.center(verts)
 
@@ -321,8 +324,7 @@ class PropertyTable(QWidget):
                 self.polyMarkers.append(int(p[1]))
 
         self.statusBar.clearMessage()
-        self.drawPoly(fillTable=False)
-        self.parent.setCursor(Qt.ArrowCursor)
+        # self.drawPoly(fillTable=False)
 
     def undoPoly(self):
         """
