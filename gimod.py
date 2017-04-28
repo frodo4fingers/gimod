@@ -158,6 +158,7 @@ class GIMod(QMainWindow):
         self.plotWidget = PlotWidget(self)
         self.plotWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.builder = Builder(self)
+        self.propertyTable.setParent(self)
 
 
         tabBox = QTabWidget(self)

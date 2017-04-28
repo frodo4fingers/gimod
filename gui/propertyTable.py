@@ -22,7 +22,7 @@ class PropertyTable(QWidget):
 
     def __init__(self, parent=None):
         super(PropertyTable, self).__init__(parent)
-        self.drawPoly = parent.builder.drawPoly
+        # self.drawPoly = parent.builder.drawPoly
         self.statusBar = parent.statusBar
         self.polys = []
         self.undone = []
@@ -32,6 +32,9 @@ class PropertyTable(QWidget):
         self.btn_redraw.clicked.connect(self.redrawTable)
         self.btn_undo.clicked.connect(self.undoPoly)
         self.btn_redo.clicked.connect(self.redoPoly)
+
+    def setParent(self, newParent):
+        self.parent = newParent
 
     def setupWidget(self):
         self.bold = QFont()
