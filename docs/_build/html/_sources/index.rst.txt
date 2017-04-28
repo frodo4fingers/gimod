@@ -37,7 +37,7 @@ Install `GIMod <https://github.com/frodo4fingers/gimod>`_ from `GitHub <https://
 
 Contribute
 ----------
-If you are having issues, please feel free to write a `ticket <https://github.com/frodo4fingers/gimod/issues>`_.
+If you are having issues, please feel free to write a `ticket <https://github.com/frodo4fingers/gimod/issues>`_ or go **Fork** yourself ;-).
 
 License
 -------
