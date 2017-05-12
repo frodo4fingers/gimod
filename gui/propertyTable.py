@@ -35,6 +35,7 @@ class PropertyTable(QWidget):
 
     def setParent(self, newParent):
         self.parent = newParent
+        self.drawPoly = self.parent.builder.drawPoly
 
     def setupWidget(self):
         self.bold = QFont()
@@ -311,10 +312,8 @@ class PropertyTable(QWidget):
                 verts = [[float(vertStr[i]), float(vertStr[i+1])] for i in range(0, len(vertStr), 2)]
                 poly = plc.createPolygon(
                 verts=verts, area=float(p[2]), boundaryMarker=int(p[3]), isClosed=int(p[6]))  # leftDirection=int(p[4])
-                print(newMarkers)
                 if len(newMarkers) != 0:
                     markerPos = newMarkers[i][0]
-                    print(markerPos)
                 else:
                     markerPos = pg.center(verts)
 

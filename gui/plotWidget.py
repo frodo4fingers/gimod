@@ -6,7 +6,7 @@ try:
     matplotlib.use("Qt5Agg")
     from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
     from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-    from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout
+    from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QFrame
     from PyQt5.QtCore import QSize
     from PyQt5.QtGui import QIcon
 
@@ -14,7 +14,7 @@ except ImportError:
     matplotlib.use("Qt4Agg")
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
     from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
-    from PyQt4.QtGui import QWidget, QApplication, QVBoxLayout, QIcon
+    from PyQt4.QtGui import QWidget, QApplication, QVBoxLayout, QIcon, QFrame
     from PyQt4.QtCore import QSize
 
 from matplotlib.figure import Figure
@@ -36,7 +36,7 @@ from matplotlib.figure import Figure
 #         NavigationToolbar.__init__(self, plot, parent=None, coordinates=False)
 
 
-class PlotWidget(QWidget):
+class PlotWidget(QFrame):
     """
         Provides the standard matplotlib plot
     """
@@ -79,6 +79,7 @@ class PlotWidget(QWidget):
         layout.addWidget(self.toolbar)
         # layout.setMargin(0)
         self.setLayout(layout)
+        # self.setFrameStyle(QFrame.Raised | QFrame.Raised)
 
     # def zoomOut(self):
     #     """

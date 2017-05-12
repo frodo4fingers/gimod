@@ -28,7 +28,7 @@ class SpanLine(object):
         if event.button is 1:
             self.xP = event.xdata
             self.yP = event.ydata
-            if self.parent.acn_magnetizePoly.isChecked() is True:
+            if self.parent.toolBar.acn_magnetizePoly.isChecked() is True:
                 if self.parent.mp.xP is not None:
                     self.xP = self.parent.mp.xP
                     self.yP = self.parent.mp.yP

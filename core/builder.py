@@ -556,6 +556,7 @@ class Builder():
             self.markersClicked = True
             self.toolBar.acn_markerCheck.setChecked(False)
             self.propertyWidget.redrawTable(self.newMarkers)
+            self.polys = self.propertyWidget.polys
             self.drawPoly(fillTable=False)
             self.parent.setCursor(Qt.ArrowCursor)
 
@@ -592,8 +593,11 @@ class Builder():
             self.mp = MagnetizePolygons(self, x, y)
             self.mp.connect()
             # HACK: against flickering and false data while spanning:
-            self.span.disconnect()
-            self.span.connect()
+            try:
+                self.span.disconnect()
+                self.span.connect()
+            except AttributeError:
+                pass
             self.mPolyClicked = False
         else:
             self.mp.disconnect()

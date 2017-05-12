@@ -101,8 +101,8 @@ class PolyToolBar(QToolBar):
         self.addSeparator()
         self.addAction(self.acn_markerCheck)
         self.addSeparator()
-        self.addAction(self.acn_gridToggle)
-        self.addAction(self.acn_magnetizeGrid)
+        # self.addAction(self.acn_gridToggle)
+        # self.addAction(self.acn_magnetizeGrid)
         self.addAction(self.acn_magnetizePoly)
 
         self.setIconSize(QSize(18, 18))

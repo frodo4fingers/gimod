@@ -9,11 +9,12 @@ class MagnetizePolygons():
         this class provides the graphical visualization of the list with dots to magnetize
         and takes care that the click-sensitive area will return the correct value to
         the magnetized coordinate. this will help to create polygons directly to one another.
+        PARENT: builder.py
     """
 
     def __init__(self, parent, x, y):
         self.figure = parent.figure
-        self.span = parent.span
+        # self.span = parent.span
         self.statusBar = parent.statusBar
         self.x = x
         self.y = y
@@ -99,4 +100,5 @@ class MagnetizePolygons():
             # distance:
             dist = np.sqrt((pos[0] - pixel[0])**2 + (pos[1] - pixel[1])**2)
             if dist <= picker:  # to say if it IS in the vicinity of a node
+                self.statusBar.showMessage("Snapped!", 1000)
                 return self.figure.axis.transData.inverted().transform(pos)

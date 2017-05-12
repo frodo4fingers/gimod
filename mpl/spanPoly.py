@@ -22,7 +22,7 @@ class SpanPoly(object):
         self.cidP = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
         self.cidDP = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
         self.cidM = self.figure.canvas.mpl_connect('motion_notify_event', self.onMotion)
-        self.cid_r = self.figure.canvas.mpl_connect('button_release_event', self.onRelease)
+        self.cidR = self.figure.canvas.mpl_connect('button_release_event', self.onRelease)
 
     def disconnect(self):
         self.figure.canvas.mpl_disconnect(self.cidP)
@@ -46,7 +46,7 @@ class SpanPoly(object):
             else:  # append point to polygon
                 self.xP = event.xdata
                 self.yP = event.ydata
-                if self.parent.acn_magnetizePoly.isChecked() is True:
+                if self.parent.toolBar.acn_magnetizePoly.isChecked() is True:
                     if self.parent.mp.xP is not None:
                         self.xP = self.parent.mp.xP
                         self.yP = self.parent.mp.yP

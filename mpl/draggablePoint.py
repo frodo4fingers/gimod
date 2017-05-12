@@ -89,7 +89,7 @@ class DraggablePoint():
 
     def returnValue(self):
         """
-            added by myself to get the final marker position after movement out of the class objects
+        added by myself to get the final marker position after movement out of the class objects
         """
         self.dict[self.marker] = self.point.center
         return self.dict
