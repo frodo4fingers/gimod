@@ -14,7 +14,7 @@ except ImportError:
 from matplotlib import patches
 
 from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly, DraggablePoint, MagnetizePolygons
-from core import ImageTools
+# from core import ImageTools
 import numpy as np
 
 import pygimli as pg
@@ -33,7 +33,7 @@ class Builder(QWidget):
         super(Builder, self).__init__(parent)
         self.parent = parent
         self.figure = parent.plotWidget
-        self.toolBar = parent.toolBar
+        # self.toolBar = parent.toolBar
         self.statusBar = parent.statusBar
         self.marker = 1  # 0
         self.newMarkers = []
@@ -49,24 +49,24 @@ class Builder(QWidget):
         self.setupUI()
 
         ''' connect signals '''
-        self.acn_image.triggered.connect(self.imagery)
-        self.acn_imageAsBackground.stateChanged.connect(self.imageryBackground)
-        self.acn_imageThreshold1.valueChanged.connect(self.updateImagery)
-        self.acn_imageThreshold2.valueChanged.connect(self.updateImagery)
-        self.acn_imageDensity.valueChanged.connect(self.updateImagery)
-        self.acn_imagePolys.valueChanged.connect(self.updateImagery)
-        self.acn_polygonize.triggered.connect(self.formPolygonFromFigure)
-
-        self.acn_world.triggered.connect(self.formPolyWorld)
-        self.acn_rectangle.triggered.connect(self.formPolyRectangle)
-        self.acn_circle.triggered.connect(self.formPolyCircle)
-        self.acn_line.triggered.connect(self.formPolyLine)
-        self.acn_polygon.triggered.connect(self.formPolygon)
-        self.acn_markerCheck.triggered.connect(self.markersMove)
-
-        self.acn_gridToggle.triggered.connect(self.toggleGrid)
-        self.acn_magnetizeGrid.triggered.connect(self.magnetizeGrid)
-        self.acn_magnetizePoly.triggered.connect(self.magnetizePoly)
+        # self.acn_image.triggered.connect(self.imagery)
+        # self.acn_imageAsBackground.stateChanged.connect(self.imageryBackground)
+        # self.acn_imageThreshold1.valueChanged.connect(self.updateImagery)
+        # self.acn_imageThreshold2.valueChanged.connect(self.updateImagery)
+        # self.acn_imageDensity.valueChanged.connect(self.updateImagery)
+        # self.acn_imagePolys.valueChanged.connect(self.updateImagery)
+        # self.acn_polygonize.triggered.connect(self.formPolygonFromFigure)
+        #
+        # self.acn_world.triggered.connect(self.formPolyWorld)
+        # self.acn_rectangle.triggered.connect(self.formPolyRectangle)
+        # self.acn_circle.triggered.connect(self.formPolyCircle)
+        # self.acn_line.triggered.connect(self.formPolyLine)
+        # self.acn_polygon.triggered.connect(self.formPolygon)
+        # self.acn_markerCheck.triggered.connect(self.markersMove)
+        #
+        # self.acn_gridToggle.triggered.connect(self.toggleGrid)
+        # self.acn_magnetizeGrid.triggered.connect(self.magnetizeGrid)
+        # self.acn_magnetizePoly.triggered.connect(self.magnetizePoly)
 
         self.btn_redraw.clicked.connect(self.redrawTable)
 
@@ -81,87 +81,87 @@ class Builder(QWidget):
         self.bold.setBold(True)
         # polytool buttons
 
-        self.grp_imageTools = QActionGroup(self)
-        self.acn_image = QAction(QIcon('icons/ic_image.svg'), 'image', self.grp_imageTools)
-        self.acn_image.setToolTip("Load image to set as model background or try to extract polygons from")
-        self.acn_image.setCheckable(True)
-
-        self.acn_polygonize = QAction(QIcon('icons/ic_polygonize.svg'), 'image', self.grp_imageTools)
-        self.acn_polygonize.setToolTip("polygonize the contours")
-        self.acn_polygonize.setVisible(False)
-
-        self.acn_imageAsBackground = QCheckBox('as background')
-        # self.acn_imageAsBackground.setEnabled(False)
-        self.acn_imageAsBackground.setToolTip("set the chosen image as background to paint your model")
-        self.acn_imageThreshold1 = QSpinBox()
-        self.acn_imageThreshold1.setRange(0, 254)
-        self.acn_imageThreshold1.setValue(200)
-        self.acn_imageThreshold1.setToolTip("bottom value for threshold")
-        self.acn_imageThreshold2 = QSpinBox()
-        self.acn_imageThreshold2.setRange(1, 255)
-        self.acn_imageThreshold2.setValue(255)
-        self.acn_imageThreshold2.setToolTip("top value for threshold")
-        self.acn_imageDensity = QSpinBox()
-        self.acn_imageDensity.setToolTip("set density of dots in polygon")
-        self.acn_imagePolys = QSpinBox()
-        self.acn_imagePolys.setToolTip("set the number of polygons used for model creation")
-        acnBox = QHBoxLayout()
-        acnBox.addWidget(self.acn_imageAsBackground)
-        acnBox.addWidget(self.acn_imageThreshold1)
-        acnBox.addWidget(self.acn_imageThreshold2)
-        acnBox.addWidget(self.acn_imageDensity)
-        acnBox.addWidget(self.acn_imagePolys)
-        acnBox.setContentsMargins(0, 0, 0, 1)
-        acnWidget = QWidget()
-        acnWidget.setLayout(acnBox)
-
-        self.grp_polyTools = QActionGroup(self)
-        self.acn_world = QAction(QIcon('icons/ic_spanWorld.svg'), 'world', self.grp_polyTools, checkable=True)
-        self.acn_world.setToolTip("Create your model world where everything happens")
-
-        self.acn_rectangle = QAction(QIcon('icons/ic_spanRectangle.svg'), 'rectangle', self.grp_polyTools, checkable=True)
-        self.acn_rectangle.setToolTip("Create a rectangle body")
-
-        self.acn_circle = QAction(QIcon('icons/ic_spanCircle.svg'), 'circle', self.grp_polyTools, checkable=True)
-        self.acn_circle.setToolTip("Create a circle body")
-
-        self.acn_line = QAction(QIcon('icons/ic_spanLine.png'), 'line', self.grp_polyTools, checkable=True)
-        self.acn_line.setToolTip("Create a line by clicking")
-
-        self.acn_polygon = QAction(QIcon('icons/ic_spanPoly.svg'), 'polygon', self.grp_polyTools, checkable=True)
-        self.acn_polygon.setToolTip("Create a polygon by clicking, finish with double click")
-
-        self.acn_markerCheck = QAction(QIcon('icons/marker_check.svg'), 'marker', self.grp_polyTools, checkable=True)
-        self.acn_markerCheck.setToolTip("check and reset marker positions")
-
-        # self.grp_gridTools = QActionGroup(self)
-        self.acn_gridToggle = QAction(QIcon('icons/grid.svg'), 'grid', None, checkable=True)
-        self.acn_gridToggle.setToolTip("turn on and off a grid")
-        self.acn_gridToggle.setEnabled(False)
-
-        self.acn_magnetizeGrid = QAction(QIcon('icons/grid_magnetize.svg'), 'magnetizeGrid', None, checkable=True)
-        self.acn_magnetizeGrid.setToolTip("magnetize the grid junctions")
-        self.acn_magnetizeGrid.setEnabled(False)
-
-        self.acn_magnetizePoly = QAction(QIcon('icons/magnetize.svg'), 'magnetizePoly', None, checkable=True)
-        self.acn_magnetizePoly.setToolTip("magnetize the polygons")
-
-        self.toolBar.addAction(self.acn_image)
-        self.widgetAction = self.toolBar.addWidget(acnWidget)
-        self.widgetAction.setVisible(False)
-        self.toolBar.addAction(self.acn_polygonize)
-        self.toolBar.addSeparator()
-        self.toolBar.addAction(self.acn_world)
-        self.toolBar.addAction(self.acn_polygon)
-        self.toolBar.addAction(self.acn_rectangle)
-        self.toolBar.addAction(self.acn_circle)
-        self.toolBar.addAction(self.acn_line)
-        self.toolBar.addSeparator()
-        self.toolBar.addAction(self.acn_markerCheck)
-        self.toolBar.addSeparator()
-        self.toolBar.addAction(self.acn_gridToggle)
-        self.toolBar.addAction(self.acn_magnetizeGrid)
-        self.toolBar.addAction(self.acn_magnetizePoly)
+        # self.grp_imageTools = QActionGroup(self)
+        # self.acn_image = QAction(QIcon('icons/ic_image.svg'), 'image', self.grp_imageTools)
+        # self.acn_image.setToolTip("Load image to set as model background or try to extract polygons from")
+        # self.acn_image.setCheckable(True)
+        #
+        # self.acn_polygonize = QAction(QIcon('icons/ic_polygonize.svg'), 'image', self.grp_imageTools)
+        # self.acn_polygonize.setToolTip("polygonize the contours")
+        # self.acn_polygonize.setVisible(False)
+        #
+        # self.acn_imageAsBackground = QCheckBox('as background')
+        # # self.acn_imageAsBackground.setEnabled(False)
+        # self.acn_imageAsBackground.setToolTip("set the chosen image as background to paint your model")
+        # self.acn_imageThreshold1 = QSpinBox()
+        # self.acn_imageThreshold1.setRange(0, 254)
+        # self.acn_imageThreshold1.setValue(200)
+        # self.acn_imageThreshold1.setToolTip("bottom value for threshold")
+        # self.acn_imageThreshold2 = QSpinBox()
+        # self.acn_imageThreshold2.setRange(1, 255)
+        # self.acn_imageThreshold2.setValue(255)
+        # self.acn_imageThreshold2.setToolTip("top value for threshold")
+        # self.acn_imageDensity = QSpinBox()
+        # self.acn_imageDensity.setToolTip("set density of dots in polygon")
+        # self.acn_imagePolys = QSpinBox()
+        # self.acn_imagePolys.setToolTip("set the number of polygons used for model creation")
+        # acnBox = QHBoxLayout()
+        # acnBox.addWidget(self.acn_imageAsBackground)
+        # acnBox.addWidget(self.acn_imageThreshold1)
+        # acnBox.addWidget(self.acn_imageThreshold2)
+        # acnBox.addWidget(self.acn_imageDensity)
+        # acnBox.addWidget(self.acn_imagePolys)
+        # acnBox.setContentsMargins(0, 0, 0, 1)
+        # acnWidget = QWidget()
+        # acnWidget.setLayout(acnBox)
+        #
+        # self.grp_polyTools = QActionGroup(self)
+        # self.acn_world = QAction(QIcon('icons/ic_spanWorld.svg'), 'world', self.grp_polyTools, checkable=True)
+        # self.acn_world.setToolTip("Create your model world where everything happens")
+        #
+        # self.acn_rectangle = QAction(QIcon('icons/ic_spanRectangle.svg'), 'rectangle', self.grp_polyTools, checkable=True)
+        # self.acn_rectangle.setToolTip("Create a rectangle body")
+        #
+        # self.acn_circle = QAction(QIcon('icons/ic_spanCircle.svg'), 'circle', self.grp_polyTools, checkable=True)
+        # self.acn_circle.setToolTip("Create a circle body")
+        #
+        # self.acn_line = QAction(QIcon('icons/ic_spanLine.png'), 'line', self.grp_polyTools, checkable=True)
+        # self.acn_line.setToolTip("Create a line by clicking")
+        #
+        # self.acn_polygon = QAction(QIcon('icons/ic_spanPoly.svg'), 'polygon', self.grp_polyTools, checkable=True)
+        # self.acn_polygon.setToolTip("Create a polygon by clicking, finish with double click")
+        #
+        # self.acn_markerCheck = QAction(QIcon('icons/marker_check.svg'), 'marker', self.grp_polyTools, checkable=True)
+        # self.acn_markerCheck.setToolTip("check and reset marker positions")
+        #
+        # # self.grp_gridTools = QActionGroup(self)
+        # self.acn_gridToggle = QAction(QIcon('icons/grid.svg'), 'grid', None, checkable=True)
+        # self.acn_gridToggle.setToolTip("turn on and off a grid")
+        # self.acn_gridToggle.setEnabled(False)
+        #
+        # self.acn_magnetizeGrid = QAction(QIcon('icons/grid_magnetize.svg'), 'magnetizeGrid', None, checkable=True)
+        # self.acn_magnetizeGrid.setToolTip("magnetize the grid junctions")
+        # self.acn_magnetizeGrid.setEnabled(False)
+        #
+        # self.acn_magnetizePoly = QAction(QIcon('icons/magnetize.svg'), 'magnetizePoly', None, checkable=True)
+        # self.acn_magnetizePoly.setToolTip("magnetize the polygons")
+        #
+        # self.toolBar.addAction(self.acn_image)
+        # self.widgetAction = self.toolBar.addWidget(acnWidget)
+        # self.widgetAction.setVisible(False)
+        # self.toolBar.addAction(self.acn_polygonize)
+        # self.toolBar.addSeparator()
+        # self.toolBar.addAction(self.acn_world)
+        # self.toolBar.addAction(self.acn_polygon)
+        # self.toolBar.addAction(self.acn_rectangle)
+        # self.toolBar.addAction(self.acn_circle)
+        # self.toolBar.addAction(self.acn_line)
+        # self.toolBar.addSeparator()
+        # self.toolBar.addAction(self.acn_markerCheck)
+        # self.toolBar.addSeparator()
+        # self.toolBar.addAction(self.acn_gridToggle)
+        # self.toolBar.addAction(self.acn_magnetizeGrid)
+        # self.toolBar.addAction(self.acn_magnetizePoly)
 
         self.tw_polys = QTreeWidget()
         self.tw_polys.setAlternatingRowColors(True)
@@ -209,40 +209,40 @@ class Builder(QWidget):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
-    def imagery(self):
-        if self.imageClicked is True:
-            # FIXME: cheeky piece of shit... wont accept given formats
-            self.fname = QFileDialog.getOpenFileName(self, caption='choose sketch')[0]
-            if self.fname:
-                self.widgetAction.setVisible(True)
-                self.acn_polygonize.setVisible(True)
-                self.imageClicked = False
-                # instanciate the imageTools class
-                self.imageTools = ImageTools(self)
-                self.imageTools.getContours()
-
-        else:
-            self.widgetAction.setVisible(False)
-            self.acn_polygonize.setVisible(False)
-            self.acn_image.setChecked(False)
-            self.imageClicked = True
-
-    def updateImagery(self):
-        self.imageTools.getContours()
-
-    def imageryBackground(self):
-        if self.acn_imageAsBackground.isChecked() is True:
-            self.acn_imageThreshold1.setEnabled(False)
-            self.acn_imageThreshold2.setEnabled(False)
-            self.acn_imagePolys.setEnabled(False)
-            self.acn_imageDensity.setEnabled(False)
-            self.imageTools.setBackground()
-        else:
-            self.updateImagery()
-            self.acn_imageThreshold1.setEnabled(True)
-            self.acn_imageThreshold2.setEnabled(True)
-            self.acn_imagePolys.setEnabled(True)
-            self.acn_imageDensity.setEnabled(True)
+    # def imagery(self):
+    #     if self.imageClicked is True:
+    #         # FIXME: cheeky piece of shit... wont accept given formats
+    #         self.fname = QFileDialog.getOpenFileName(self, caption='choose sketch')[0]
+    #         if self.fname:
+    #             self.widgetAction.setVisible(True)
+    #             self.acn_polygonize.setVisible(True)
+    #             self.imageClicked = False
+    #             # instanciate the imageTools class
+    #             self.imageTools = ImageTools(self)
+    #             self.imageTools.getContours()
+    #
+    #     else:
+    #         self.widgetAction.setVisible(False)
+    #         self.acn_polygonize.setVisible(False)
+    #         self.acn_image.setChecked(False)
+    #         self.imageClicked = True
+    #
+    # def updateImagery(self):
+    #     self.imageTools.getContours()
+    #
+    # def imageryBackground(self):
+    #     if self.acn_imageAsBackground.isChecked() is True:
+    #         self.acn_imageThreshold1.setEnabled(False)
+    #         self.acn_imageThreshold2.setEnabled(False)
+    #         self.acn_imagePolys.setEnabled(False)
+    #         self.acn_imageDensity.setEnabled(False)
+    #         self.imageTools.setBackground()
+    #     else:
+    #         self.updateImagery()
+    #         self.acn_imageThreshold1.setEnabled(True)
+    #         self.acn_imageThreshold2.setEnabled(True)
+    #         self.acn_imagePolys.setEnabled(True)
+    #         self.acn_imageDensity.setEnabled(True)
 
     def formPolyWorld(self):
         try:
@@ -635,51 +635,51 @@ class Builder(QWidget):
         m, n = self.figure.axis.get_xlim()
         return abs(m - n)/50
 
-    def toggleGrid(self):
-        if self.gridClicked is True:
-            self.figure.axis.grid()
-            self.gridClicked = False
-        else:
-            self.figure.axis.grid(False)
-            self.gridClicked = True
-            self.acn_gridToggle.setChecked(False)
-        self.figure.canvas.draw()
-
-    def magnetizeGrid(self):
-        if self.magnetize is True:
-            self.figure.axis.grid()
-            self.magnetize = False
-        else:
-            self.figure.axis.grid(False)
-            self.magnetize = True
-            self.acn_magnetizeGrid.setChecked(False)
-        self.figure.canvas.draw()
-
-    def magnetizePoly(self):
-        if self.mPolyClicked is True:
-            x = []
-            y = []
-            x, y = self.getNodes()
-
-            self.mp = MagnetizePolygons(self, x, y)
-            self.mp.connect()
-            # HACK: against flickering and false data while spanning:
-            self.span.disconnect()
-            self.span.connect()
-            self.mPolyClicked = False
-        else:
-            self.mp.disconnect()
-            self.figure.axis.grid(False)
-            self.mPolyClicked = True
-            self.acn_magnetizeGrid.setChecked(False)
-        self.figure.canvas.draw()
-
-    def getNodes(self):
-        arr = self.poly.positions()
-        x = list(pg.x(arr))
-        y = list(pg.y(arr))
-
-        return x, y
+    # def toggleGrid(self):
+    #     if self.gridClicked is True:
+    #         self.figure.axis.grid()
+    #         self.gridClicked = False
+    #     else:
+    #         self.figure.axis.grid(False)
+    #         self.gridClicked = True
+    #         self.acn_gridToggle.setChecked(False)
+    #     self.figure.canvas.draw()
+    #
+    # def magnetizeGrid(self):
+    #     if self.magnetize is True:
+    #         self.figure.axis.grid()
+    #         self.magnetize = False
+    #     else:
+    #         self.figure.axis.grid(False)
+    #         self.magnetize = True
+    #         self.acn_magnetizeGrid.setChecked(False)
+    #     self.figure.canvas.draw()
+    #
+    # def magnetizePoly(self):
+    #     if self.mPolyClicked is True:
+    #         x = []
+    #         y = []
+    #         x, y = self.getNodes()
+    #
+    #         self.mp = MagnetizePolygons(self, x, y)
+    #         self.mp.connect()
+    #         # HACK: against flickering and false data while spanning:
+    #         self.span.disconnect()
+    #         self.span.connect()
+    #         self.mPolyClicked = False
+    #     else:
+    #         self.mp.disconnect()
+    #         self.figure.axis.grid(False)
+    #         self.mPolyClicked = True
+    #         self.acn_magnetizeGrid.setChecked(False)
+    #     self.figure.canvas.draw()
+    #
+    # def getNodes(self):
+    #     arr = self.poly.positions()
+    #     x = list(pg.x(arr))
+    #     y = list(pg.y(arr))
+    #
+    #     return x, y
 
     def undoPoly(self):
         """
