@@ -8,7 +8,6 @@ from matplotlib.patches import Rectangle
 class SpanWorld(object):
 
     def __init__(self, parent=None):
-        # self.ax = plt.gca()
         self.parent = parent
         self.figure = self.parent.figure
         # empty rectangle
