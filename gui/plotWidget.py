@@ -52,7 +52,7 @@ class PlotWidget(QWidget):
 
         self.axis.set_xlabel('x')
         self.axis.set_ylabel('z')
-        self.axis.set_ylim(self.axis.get_ylim()[::-1])
+        # self.axis.set_ylim(self.axis.get_ylim()[::-1])
         self.axis.set_aspect('equal')
         self.canvas = FigureCanvas(self.figure)
 
