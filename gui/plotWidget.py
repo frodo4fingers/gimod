@@ -58,6 +58,7 @@ class PlotWidget(QWidget):
 
         # self.toolbar = PlotToolbar(self.canvas, self)
         self.toolbar = NavigationToolbar(self.canvas, self)
+        self.toolbar.setFixedHeight(30)
         self.toolbar.setIconSize(QSize(18, 18))
         self.toolbar.setContentsMargins(0, 0, 0, 0)
 
