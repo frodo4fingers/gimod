@@ -14,13 +14,13 @@ class ImageTools():
     def __init__(self, parent=None):
         self.parent = parent
         self.statusBar = parent.statusBar
-        self.threshold1 = parent.acn_imageThreshold1.value()
-        self.threshold2 = parent.acn_imageThreshold2.value()
-        self.imagePolys = parent.acn_imagePolys
-        self.polyDensity = parent.acn_imageDensity
-        self.fname = parent.fname
-        self.figure = parent.figure
-        self.background = parent.acn_imageAsBackground
+        self.threshold1 = parent.toolBar.acn_imageThreshold1.value()
+        self.threshold2 = parent.toolBar.acn_imageThreshold2.value()
+        self.imagePolys = parent.toolBar.acn_imagePolys
+        self.polyDensity = parent.toolBar.acn_imageDensity
+        self.background = parent.toolBar.acn_imageAsBackground
+        # self.fname = parent.toolBar.fname
+        self.figure = parent.plotWidget
 
     def getContours(self):
         try:
@@ -87,6 +87,41 @@ class ImageTools():
         img = plt.imread(self.fname)
         self.figure.axis.imshow(img, alpha=0.6)
         self.figure.canvas.draw()
+
+    def imagery(self):
+        if self.imageClicked is True:
+            # FIXME: cheeky piece of shit... wont accept given formats
+            self.fname = QFileDialog.getOpenFileName(self, caption='choose sketch')[0]
+            if self.fname:
+                self.widgetAction.setVisible(True)
+                self.acn_polygonize.setVisible(True)
+                self.imageClicked = False
+                # instanciate the imageTools class
+                # self.imageTools = ImageTools(self)
+                self.getContours()
+
+        else:
+            self.widgetAction.setVisible(False)
+            self.acn_polygonize.setVisible(False)
+            self.acn_image.setChecked(False)
+            self.imageClicked = True
+
+    def updateImagery(self):
+        self.getContours()
+
+    def imageryBackground(self):
+        if self.acn_imageAsBackground.isChecked() is True:
+            self.acn_imageThreshold1.setEnabled(False)
+            self.acn_imageThreshold2.setEnabled(False)
+            self.acn_imagePolys.setEnabled(False)
+            self.acn_imageDensity.setEnabled(False)
+            self.setBackground()
+        else:
+            self.updateImagery()
+            self.acn_imageThreshold1.setEnabled(True)
+            self.acn_imageThreshold2.setEnabled(True)
+            self.acn_imagePolys.setEnabled(True)
+            self.acn_imageDensity.setEnabled(True)
 
 
 if __name__ == '__main__':
