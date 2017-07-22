@@ -2,6 +2,10 @@
 # encoding: UTF-8
 
 import matplotlib.pyplot as plt
+try:
+    from PyQt5.QtWidgets import QFileDialog
+except ImportError:
+    from PyQt4.QtGui import QFileDialog
 
 
 class ImageTools():
@@ -22,6 +26,8 @@ class ImageTools():
         # self.fname = parent.toolBar.fname
         self.figure = parent.plotWidget
 
+        self.imageClicked = True
+
     def getContours(self):
         try:
             import cv2
@@ -37,7 +43,7 @@ class ImageTools():
             paths = sorted(contours, key=cv2.contourArea)[::-1]
             # sort out those structures that are smaller than 6 dots, first one is frame
             self.paths = [i for i in paths if len(i) > 5][1:]
-            self.statusBar.showMessage("there are {} possible polygons with current settings".format(len(self.paths)))
+            self.statusBar.showMessage("{} possible polygons found".format(len(self.paths)))
 
             # adjust the spinbox with number of polygons
             self.imagePolys.setRange(1, len(self.paths))
@@ -91,37 +97,39 @@ class ImageTools():
     def imagery(self):
         if self.imageClicked is True:
             # FIXME: cheeky piece of shit... wont accept given formats
-            self.fname = QFileDialog.getOpenFileName(self, caption='choose sketch')[0]
+            self.fname = QFileDialog.getOpenFileName(None, caption='choose sketch')[0]
             if self.fname:
-                self.widgetAction.setVisible(True)
-                self.acn_polygonize.setVisible(True)
+                self.parent.toolBar.widgetAction.setVisible(True)
+                self.parent.toolBar.acn_polygonize.setEnabled(True)
+                self.parent.toolBar.acn_reset_figure.setEnabled(True)
                 self.imageClicked = False
                 # instanciate the imageTools class
                 # self.imageTools = ImageTools(self)
                 self.getContours()
 
         else:
-            self.widgetAction.setVisible(False)
-            self.acn_polygonize.setVisible(False)
-            self.acn_image.setChecked(False)
+            self.parent.toolBar.widgetAction.setVisible(False)
+            self.parent.toolBar.acn_polygonize.setEnabled(False)
+            self.parent.toolBar.acn_image.setChecked(False)
             self.imageClicked = True
 
     def updateImagery(self):
         self.getContours()
 
     def imageryBackground(self):
-        if self.acn_imageAsBackground.isChecked() is True:
-            self.acn_imageThreshold1.setEnabled(False)
-            self.acn_imageThreshold2.setEnabled(False)
-            self.acn_imagePolys.setEnabled(False)
-            self.acn_imageDensity.setEnabled(False)
+        if self.parent.toolBar.acn_imageAsBackground.isChecked() is True:
+            self.parent.toolBar.acn_imageThreshold1.setEnabled(False)
+            self.parent.toolBar.acn_imageThreshold2.setEnabled(False)
+            self.parent.toolBar.acn_imagePolys.setEnabled(False)
+            self.parent.toolBar.acn_imageDensity.setEnabled(False)
+            self.parent.toolBar.acn_polygonize.setEnabled(False)
             self.setBackground()
         else:
             self.updateImagery()
-            self.acn_imageThreshold1.setEnabled(True)
-            self.acn_imageThreshold2.setEnabled(True)
-            self.acn_imagePolys.setEnabled(True)
-            self.acn_imageDensity.setEnabled(True)
+            self.parent.toolBar.acn_imageThreshold1.setEnabled(True)
+            self.parent.toolBar.acn_imageThreshold2.setEnabled(True)
+            self.parent.toolBar.acn_imagePolys.setEnabled(True)
+            self.parent.toolBar.acn_imageDensity.setEnabled(True)
 
 
 if __name__ == '__main__':
