@@ -3,13 +3,13 @@
 
 ''' model builder components '''
 try:
-    from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QHBoxLayout, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QPushButton, QAction, QActionGroup, QTreeWidget, QTreeWidgetItem, QRadioButton, QFileDialog
-    from PyQt5.QtCore import Qt
+    from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QHBoxLayout, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QPushButton, QAction, QActionGroup, QTreeWidget, QTreeWidgetItem, QRadioButton, QFileDialog, QMessageBox
+    from PyQt5.QtCore import Qt, QSize
     from PyQt5.QtGui import QIcon, QFont
 
 except ImportError:
-    from PyQt4.QtGui import QWidget, QApplication, QVBoxLayout, QHBoxLayout, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QPushButton, QAction, QIcon, QFont, QActionGroup, QTreeWidget, QTreeWidgetItem, QRadioButton, QFileDialog
-    from PyQt4.QtCore import Qt
+    from PyQt4.QtGui import QWidget, QApplication, QVBoxLayout, QHBoxLayout, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QPushButton, QAction, QIcon, QFont, QActionGroup, QTreeWidget, QTreeWidgetItem, QRadioButton, QFileDialog, QMessageBox
+    from PyQt4.QtCore import Qt, QSize
 
 from matplotlib import patches
 
@@ -39,7 +39,7 @@ class Builder(QWidget):
         self.newMarkers = []
         self.polys = []
         self.undone = []
-        self.imageClicked = True
+        # self.imageClicked = True
         self.markersClicked = True
         self.gridClicked = True
         self.magnetizeClicked = True
@@ -165,6 +165,7 @@ class Builder(QWidget):
 
         self.tw_polys = QTreeWidget()
         self.tw_polys.setAlternatingRowColors(True)
+        self.tw_polys.setUniformRowHeights(True)
         self.tw_polys.setHeaderLabels(("Type", "Value"))
         # TODO: stretch that darn first column to content!
         # self.tw_polys.header().hide()
@@ -173,10 +174,12 @@ class Builder(QWidget):
 
         # redraw table button
         self.btn_undo = QPushButton()
+        self.btn_undo.setIconSize(QSize(18, 18))
         self.btn_undo.setToolTip("undo last poly")
         self.btn_undo.setIcon(QIcon('icons/ic_undo_black_18px.svg'))
         self.btn_undo.setEnabled(False)
         self.btn_redo = QPushButton()
+        self.btn_redo.setIconSize(QSize(18, 18))
         self.btn_redo.setToolTip("redo last poly")
         self.btn_redo.setIcon(QIcon('icons/ic_redo_black_18px.svg'))
         self.btn_redo.setEnabled(False)
@@ -184,10 +187,12 @@ class Builder(QWidget):
         self.rbtn_plotRegions.setChecked(True)
         self.rbtn_plotAttributes = QRadioButton('attributes')
         self.btn_export = QPushButton()
+        self.btn_export.setIconSize(QSize(18, 18))
         self.btn_export.setIcon(QIcon("icons/ic_save_black_24px.svg"))
         self.btn_export.setToolTip("save as *.poly")
         self.btn_export.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         self.btn_redraw = QPushButton()
+        self.btn_redraw.setIconSize(QSize(18, 18))
         self.btn_redraw.setToolTip("redraw whole table after changes were made")
         self.btn_redraw.setIcon(QIcon('icons/ic_refresh_black_24px.svg'))
 
@@ -289,7 +294,7 @@ class Builder(QWidget):
         self.polys.clear()
         self.marker = 1
         self.parent.setCursor(Qt.WaitCursor)
-        for c in self.imageTools.contoursCutted:
+        for c in self.parent.image_tools.contoursCutted:
             self.printPolygon(c)
         self.figure.axis.set_ylim(self.figure.axis.get_ylim()[::-1])
         self.figure.canvas.draw()
@@ -327,6 +332,7 @@ class Builder(QWidget):
             self.polys.append(plc.createPolygon(self.polygon, marker=self.marker, isClosed=True))
 
         self.btn_undo.setEnabled(True)
+        self.parent.toolBar.acn_reset_figure.setEnabled(True)
         self.drawPoly()
 
     def drawPoly(self, fillTable=True):
@@ -353,6 +359,22 @@ class Builder(QWidget):
         if not self.mPolyClicked:
             x,y =self.getNodes()
             self.mp.plotMagnets(x, y)
+
+    def resetFigure(self):
+        """
+        When clicked the user is asked if all achievements should really be discarded, since this method will clear the figure, the info tree and everything that has been stored.
+        """
+        reply = QMessageBox.question(None, 'Careful there!' , "You are about to delete your project.. proceed?", QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        if reply == QMessageBox.Yes:
+            self.figure.axis.cla()
+            self.figure.canvas.draw()
+            self.undone = []
+            self.polys = []
+            self.tw_polys.clear()
+            self.btn_undo.setEnabled(False)
+            self.parent.toolBar.acn_reset_figure.setEnabled(False)
+        else:
+            pass
 
     def fillTable(self):
         # FIXME: marker is iterated to existent state. needs to be recounted AFTER table creation so all markers can be chosen for all polys
@@ -627,7 +649,7 @@ class Builder(QWidget):
                 self.newMarkers.append(list(val.values()))
                 p.disconnect()
             self.markersClicked = True
-            self.acn_markerCheck.setChecked(False)
+            self.parent.toolBar.acn_markerCheck.setChecked(False)
             self.redrawTable()
             self.parent.setCursor(Qt.ArrowCursor)
 
@@ -635,51 +657,51 @@ class Builder(QWidget):
         m, n = self.figure.axis.get_xlim()
         return abs(m - n)/50
 
-    # def toggleGrid(self):
-    #     if self.gridClicked is True:
-    #         self.figure.axis.grid()
-    #         self.gridClicked = False
-    #     else:
-    #         self.figure.axis.grid(False)
-    #         self.gridClicked = True
-    #         self.acn_gridToggle.setChecked(False)
-    #     self.figure.canvas.draw()
-    #
-    # def magnetizeGrid(self):
-    #     if self.magnetize is True:
-    #         self.figure.axis.grid()
-    #         self.magnetize = False
-    #     else:
-    #         self.figure.axis.grid(False)
-    #         self.magnetize = True
-    #         self.acn_magnetizeGrid.setChecked(False)
-    #     self.figure.canvas.draw()
-    #
-    # def magnetizePoly(self):
-    #     if self.mPolyClicked is True:
-    #         x = []
-    #         y = []
-    #         x, y = self.getNodes()
-    #
-    #         self.mp = MagnetizePolygons(self, x, y)
-    #         self.mp.connect()
-    #         # HACK: against flickering and false data while spanning:
-    #         self.span.disconnect()
-    #         self.span.connect()
-    #         self.mPolyClicked = False
-    #     else:
-    #         self.mp.disconnect()
-    #         self.figure.axis.grid(False)
-    #         self.mPolyClicked = True
-    #         self.acn_magnetizeGrid.setChecked(False)
-    #     self.figure.canvas.draw()
-    #
-    # def getNodes(self):
-    #     arr = self.poly.positions()
-    #     x = list(pg.x(arr))
-    #     y = list(pg.y(arr))
-    #
-    #     return x, y
+    def toggleGrid(self):
+        if self.gridClicked is True:
+            self.figure.axis.grid()
+            self.gridClicked = False
+        else:
+            self.figure.axis.grid(False)
+            self.gridClicked = True
+            self.acn_gridToggle.setChecked(False)
+        self.figure.canvas.draw()
+
+    def magnetizeGrid(self):
+        if self.magnetize is True:
+            self.figure.axis.grid()
+            self.magnetize = False
+        else:
+            self.figure.axis.grid(False)
+            self.magnetize = True
+            self.parent.toolBarself.acn_magnetizeGrid.setChecked(False)
+        self.figure.canvas.draw()
+
+    def magnetizePoly(self):
+        if self.mPolyClicked is True:
+            x = []
+            y = []
+            x, y = self.getNodes()
+
+            self.mp = MagnetizePolygons(self, x, y)
+            self.mp.connect()
+            # HACK: against flickering and false data while spanning:
+            self.span.disconnect()
+            self.span.connect()
+            self.mPolyClicked = False
+        else:
+            self.mp.disconnect()
+            self.figure.axis.grid(False)
+            self.mPolyClicked = True
+            self.parent.toolBar.acn_magnetizeGrid.setChecked(False)
+        self.figure.canvas.draw()
+
+    def getNodes(self):
+        arr = self.poly.positions()
+        x = list(pg.x(arr))
+        y = list(pg.y(arr))
+
+        return x, y
 
     def undoPoly(self):
         """
