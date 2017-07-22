@@ -2,6 +2,7 @@
 # encoding: UTF-8
 
 from . import MagnetizePolygons
+import pygimli as pg
 
 class Helper():
     """
@@ -10,7 +11,17 @@ class Helper():
 
     def __init__(self, parent=None):
         """."""
+        self.parent = parent
         self.figure = parent.plotWidget
+        # self.poly = parent.builder.poly
+
+        # variables to detemrine activity of functions
+        self.mPolyClicked = True
+
+    def setParent(self, parent):
+        """Reset the parent after the figure was updated."""
+        print("yay")
+        # self.parent = parent
 
     def toggleGrid(self):
         if self.gridClicked is True:
@@ -52,7 +63,7 @@ class Helper():
         self.figure.canvas.draw()
 
     def getNodes(self):
-        arr = self.poly.positions()
+        arr = self.parent.builder.poly.positions()
         x = list(pg.x(arr))
         y = list(pg.y(arr))
 
