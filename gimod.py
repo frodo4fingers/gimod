@@ -29,7 +29,7 @@ class MainWindow(QMainWindow):
 
         self.initUI()
         self.image_tools = ImageTools(self)
-        self.mpl_helper = Helper(self)
+        # self.mpl_helper = Helper(self)
 
         ''' connect the buttons with their functions '''
 
@@ -51,6 +51,9 @@ class MainWindow(QMainWindow):
         self.toolBar.acn_imagePolys.valueChanged.connect(self.image_tools.updateImagery)
 
         self.toolBar.acn_polygonize.triggered.connect(self.builder.formPolygonFromFigure)
+
+        self.toolBar.acn_reset_figure.triggered.connect(self.builder.resetFigure)
+
         self.toolBar.acn_world.triggered.connect(self.builder.formPolyWorld)
         self.toolBar.acn_rectangle.triggered.connect(self.builder.formPolyRectangle)
         self.toolBar.acn_circle.triggered.connect(self.builder.formPolyCircle)
@@ -58,9 +61,9 @@ class MainWindow(QMainWindow):
         self.toolBar.acn_polygon.triggered.connect(self.builder.formPolygon)
         self.toolBar.acn_markerCheck.triggered.connect(self.builder.markersMove)
 
-        self.toolBar.acn_gridToggle.triggered.connect(self.mpl_helper.toggleGrid)
-        self.toolBar.acn_magnetizeGrid.triggered.connect(self.mpl_helper.magnetizeGrid)
-        self.toolBar.acn_magnetizePoly.triggered.connect(self.mpl_helper.magnetizePoly)
+        self.toolBar.acn_gridToggle.triggered.connect(self.builder.toggleGrid)
+        self.toolBar.acn_magnetizeGrid.triggered.connect(self.builder.magnetizeGrid)
+        self.toolBar.acn_magnetizePoly.triggered.connect(self.builder.magnetizePoly)
 
 
     def initUI(self):
