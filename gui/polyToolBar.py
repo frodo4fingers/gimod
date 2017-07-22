@@ -26,13 +26,16 @@ class PolyToolBar(QToolBar):
         """Implement functionality to the toolbar."""
 
         self.grp_imageTools = QActionGroup(self)
-        self.acn_image = QAction(QIcon('icons/ic_image.svg'), 'image', self.grp_imageTools)
+        self.acn_image = QAction(QIcon('icons/ic_image.svg'), 'image', self.grp_imageTools, checkable=True)
         self.acn_image.setToolTip("Load image to set as model background or try to extract polygons from")
-        self.acn_image.setCheckable(True)
+
+        self.acn_reset_figure = QAction(QIcon('icons/ic_reset.svg'), 'image', self.grp_imageTools)
+        self.acn_reset_figure.setToolTip("Reset everything to nothing")
+        self.acn_reset_figure.setEnabled(False)
 
         self.acn_polygonize = QAction(QIcon('icons/ic_polygonize.svg'), 'image', self.grp_imageTools)
         self.acn_polygonize.setToolTip("polygonize the contours")
-        self.acn_polygonize.setVisible(False)
+        self.acn_polygonize.setEnabled(False)
 
         self.acn_imageAsBackground = QCheckBox('as background')
         # self.acn_imageAsBackground.setEnabled(False)
@@ -94,6 +97,8 @@ class PolyToolBar(QToolBar):
         self.widgetAction = self.addWidget(acnWidget)
         self.widgetAction.setVisible(False)
         self.addAction(self.acn_polygonize)
+        self.addSeparator()
+        self.addAction(self.acn_reset_figure)
         self.addSeparator()
         self.addAction(self.acn_world)
         self.addAction(self.acn_polygon)
