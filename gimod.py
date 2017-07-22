@@ -15,8 +15,9 @@ import pygimli as pg
 from pygimli.meshtools import createMesh, writePLC
 from pygimli.mplviewer import drawMeshBoundaries, drawMesh, drawPLC, drawModel
 
-from core import Builder
+from core import Builder, ImageTools
 from gui import PlotWidget, PolyToolBar
+from mpl import Helper
 
 # TODO: CLEAAAAAAAAAAAAAN THIS!!!!
 
@@ -27,6 +28,8 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__(parent)
 
         self.initUI()
+        self.image_tools = ImageTools(self)
+        self.mpl_helper = Helper(self)
 
         ''' connect the buttons with their functions '''
 
@@ -38,6 +41,27 @@ class MainWindow(QMainWindow):
         self.btn_mesh_export.clicked.connect(self.meshExport)
         # menu actions
         self.acn_aboutVerison.triggered.connect(self.aboutVersion)
+
+        # toolbar actions
+        self.toolBar.acn_image.triggered.connect(self.image_tools.imagery)
+        self.toolBar.acn_imageAsBackground.stateChanged.connect(self.image_tools.imageryBackground)
+        self.toolBar.acn_imageThreshold1.valueChanged.connect(self.image_tools.updateImagery)
+        self.toolBar.acn_imageThreshold2.valueChanged.connect(self.image_tools.updateImagery)
+        self.toolBar.acn_imageDensity.valueChanged.connect(self.image_tools.updateImagery)
+        self.toolBar.acn_imagePolys.valueChanged.connect(self.image_tools.updateImagery)
+
+        self.toolBar.acn_polygonize.triggered.connect(self.builder.formPolygonFromFigure)
+        self.toolBar.acn_world.triggered.connect(self.builder.formPolyWorld)
+        self.toolBar.acn_rectangle.triggered.connect(self.builder.formPolyRectangle)
+        self.toolBar.acn_circle.triggered.connect(self.builder.formPolyCircle)
+        self.toolBar.acn_line.triggered.connect(self.builder.formPolyLine)
+        self.toolBar.acn_polygon.triggered.connect(self.builder.formPolygon)
+        self.toolBar.acn_markerCheck.triggered.connect(self.builder.markersMove)
+
+        self.toolBar.acn_gridToggle.triggered.connect(self.mpl_helper.toggleGrid)
+        self.toolBar.acn_magnetizeGrid.triggered.connect(self.mpl_helper.magnetizeGrid)
+        self.toolBar.acn_magnetizePoly.triggered.connect(self.mpl_helper.magnetizePoly)
+
 
     def initUI(self):
 
@@ -151,9 +175,9 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.statusBar)
 
         # instanciate empty toolbar that will be equipped elsewhere
-        self.toolBar = QToolBar(self)
-        # self.toolBar = PolyToolBar(self)
-        self.toolBar.setIconSize(QSize(18, 18))
+        # self.toolBar = QToolBar(self)
+        self.toolBar = PolyToolBar(self)
+        # self.toolBar.setIconSize(QSize(18, 18))
         self.addToolBar(self.toolBar)
 
         # initialize the plot widget
