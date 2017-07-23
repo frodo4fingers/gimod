@@ -16,8 +16,8 @@ from pygimli.meshtools import createMesh, writePLC
 from pygimli.mplviewer import drawMeshBoundaries, drawMesh, drawPLC, drawModel
 
 from core import Builder, ImageTools
-from gui import PlotWidget, PolyToolBar
-from mpl import Helper
+from gui import PlotWidget, PolyToolBar, InfoTree
+# from mpl import Helper
 
 # TODO: CLEAAAAAAAAAAAAAN THIS!!!!
 
@@ -64,6 +64,10 @@ class MainWindow(QMainWindow):
         self.toolBar.acn_gridToggle.triggered.connect(self.builder.toggleGrid)
         self.toolBar.acn_magnetizeGrid.triggered.connect(self.builder.magnetizeGrid)
         self.toolBar.acn_magnetizePoly.triggered.connect(self.builder.magnetizePoly)
+
+        self.info_tree.btn_redraw.clicked.connect(self.info_tree.redrawTable)
+        self.info_tree.btn_undo.clicked.connect(self.builder.undoPoly)
+        self.info_tree.btn_redo.clicked.connect(self.builder.redoPoly)
 
 
     def initUI(self):
@@ -187,10 +191,12 @@ class MainWindow(QMainWindow):
         self.plotWidget = PlotWidget(self)
         self.plotWidget.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         self.builder = Builder(self)
+        self.info_tree = InfoTree(self)
         tabBox = QTabWidget(self)
         tabBox.setTabPosition(QTabWidget.West)
         # tabBox.addTab(file_widget, "start with sketch")
-        tabBox.addTab(self.builder, "poly properties")
+        # tabBox.addTab(self.builder, "poly properties")
+        tabBox.addTab(self.info_tree, "poly properties")
         tabBox.addTab(mesh_widget, "mesh options")
         tabBox.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         v_plotWidget = QVBoxLayout()
