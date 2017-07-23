@@ -78,6 +78,7 @@ class PlotWidget(QWidget):
         layout = QVBoxLayout()
         layout.addWidget(self.canvas)
         layout.addWidget(self.toolbar)
+        layout.setContentsMargins(0, 0, 0, 0)
         # layout.setMargin(0)
         self.setLayout(layout)
 

@@ -166,6 +166,7 @@ class Builder(QWidget):
         self.tw_polys = QTreeWidget()
         self.tw_polys.setAlternatingRowColors(True)
         self.tw_polys.setUniformRowHeights(True)
+        self.tw_polys.setContentsMargins(0, 0, 0, 0)
         self.tw_polys.setHeaderLabels(("Type", "Value"))
         # TODO: stretch that darn first column to content!
         # self.tw_polys.header().hide()
@@ -206,12 +207,13 @@ class Builder(QWidget):
         hbox.addWidget(self.btn_redraw)
         hbox.addStretch(1)
         hbox.addWidget(self.btn_export)
-        # hbox.setMargin(0)
+        hbox.setContentsMargins(0, 0, 0, 0)
 
         # form the layout
         vbox = QVBoxLayout()
         vbox.addWidget(self.tw_polys)
         vbox.addLayout(hbox)
+        vbox.setContentsMargins(0, 0, 0, 0)
         self.setLayout(vbox)
 
     # def imagery(self):
