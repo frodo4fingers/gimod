@@ -130,6 +130,7 @@ class ImageTools():
             self.parent.toolBar.acn_imageThreshold2.setEnabled(True)
             self.parent.toolBar.acn_imagePolys.setEnabled(True)
             self.parent.toolBar.acn_imageDensity.setEnabled(True)
+            self.parent.toolBar.acn_polygonize.setEnabled(True)
 
 
 if __name__ == '__main__':
