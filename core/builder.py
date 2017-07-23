@@ -98,12 +98,15 @@ class Builder():
         self.polys.clear()
         self.marker = 1
         self.parent.setCursor(Qt.WaitCursor)
-        for c in self.parent.image_tools.contoursCutted:
-            self.printPolygon(c)
+        cont_ = len(self.parent.image_tools.contoursCutted)
+        for i, contour in enumerate(self.parent.image_tools.contoursCutted):
+            self.parent.statusBar.showMessage("processing found polygons {}/{}".format(i, cont_))
+            self.printPolygon(contour)
         self.figure.axis.set_ylim(self.figure.axis.get_ylim()[::-1])
-        self.figure.canvas.draw()
+        # self.figure.canvas.draw()
         self.statusBar.showMessage(str(self.poly))
         self.parent.setCursor(Qt.ArrowCursor)
+        self.parent.statusBar.clearMessage()
 
     def printCoordinates(self, x1, y1, x2, y2, form):
         self.x_p = x1
