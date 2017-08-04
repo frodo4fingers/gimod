@@ -5,14 +5,15 @@
 try:
     from PyQt5.QtWidgets import QWidget, QTreeWidget, QTreeWidgetItem, QPushButton, QRadioButton, QSizePolicy, QHBoxLayout, QVBoxLayout, QComboBox, QSpinBox, QDoubleSpinBox
     from PyQt5.QtCore import Qt, QSize
-    from PyQt5.QtGui import QIcon, QFont
+    from PyQt5.QtGui import QIcon, QFont, QColor
 
 except ImportError:
-    from PyQt4.QtGui import QWidget, QTreeWidget, QTreeWidgetItem, QPushButton, QRadioButton, QSizePolicy, QHBoxLayout, QVBoxLayout, QComboBox, QSpinBox, QDoubleSpinBox, QIcon, QFont
+    from PyQt4.QtGui import QWidget, QTreeWidget, QTreeWidgetItem, QPushButton, QRadioButton, QSizePolicy, QHBoxLayout, QVBoxLayout, QComboBox, QSpinBox, QDoubleSpinBox, QIcon, QFont, QColor
     from PyQt4.QtCore import Qt, QSize
 
 import numpy as np
 from pygimli.meshtools import polytools as plc
+import matplotlib.pyplot as plt
 
 
 class InfoTree(QWidget):
@@ -23,9 +24,9 @@ class InfoTree(QWidget):
     def __init__(self, parent=None):
         super(InfoTree, self).__init__(parent)
         self.parent = parent
+        self.figure = parent.plotWidget
 
         self.setup()
-
 
     def setup(self):
         """
@@ -89,11 +90,16 @@ class InfoTree(QWidget):
         self.setLayout(vbox)
 
     def fillTable(self, form, x_p=None, y_p=None, x_r=None, y_r=None, polygon=None, parent_marker=None):
+        # test case for retrieving the colorbar from figure
+        # print(self.figure.gci().colorbar)
         # FIXME: marker is iterated to existent state. needs to be recounted AFTER table creation so all markers can be chosen for all polys
         # HACK: maybe with redrawTable, bc the marker counter wont change within that process
         twItem = QTreeWidgetItem()
         twItem.setText(0, form)
         twItem.setFont(0, self.bold)
+        # twItem.setBackgroundColor(0, QColor('green'))
+        # twItem.setData(0, Qt.BackgroundRole, QColor('green'))
+        # twItem.setData(1, Qt.BackgroundRole, QColor('green'))
 
         if form == 'World' or form == 'Rectangle' or form == 'Line':
             # twItem.setBackgroundColor(0, QColor(0, 255, 0))
@@ -255,6 +261,30 @@ class InfoTree(QWidget):
             self.tw_polys.setCurrentItem(self.tw_polys.topLevelItem(0))
             self.tw_polys.setEnabled(True)
         self.tw_polys.resizeColumnToContents(0)
+        self.colorizeTreeItemHeaders()
+
+    def colorizeTreeItemHeaders(self):
+        """
+        Colorize the line that describes which polygon is described with the children listed below. Needs to happen afterwards by iterating through the content since the color range changes with the amount of ppolygons drawn.
+
+        Todo
+        ----
+        Extract the used colormap from the current figure
+        """
+        items = self.tw_polys.topLevelItemCount()
+        cmap = plt.cm.get_cmap('plasma', items)
+        colors = []
+        for i in range(cmap.N):
+            # will return rgba
+            rgba = cmap(i)[:3]
+            # convert to int (0..255) values for qt
+            colors.append([int(k*255) for k in rgba])
+
+        for i in range(items):
+            # use the splatter (*) operator to extract from list directly
+            self.tw_polys.topLevelItem(i).setData(0, Qt.BackgroundRole, QColor(*colors[i], 100))
+            self.tw_polys.topLevelItem(i).setData(1, Qt.BackgroundRole, QColor(*colors[i], 100))
+            # TODO: the dropdown indicator is not colored!!
 
     def redrawTable(self):
         # BUG: line misses first half after redraw
