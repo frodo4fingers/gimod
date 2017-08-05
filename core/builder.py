@@ -151,10 +151,7 @@ class Builder():
 
         # check for the region plot option in treeview functions below the table
         if self.parent.info_tree.rbtn_plotRegions.isChecked() is True:
-            # drawMesh(self.figure.axis, self.poly, fitView=False, cMap='plasma')
-            drawPLC(self.figure.axis, self.poly, cmap='plasma')
-            drawMeshBoundaries(self.figure.axis, createMesh(self.poly), hideMesh=True)
-            # drawModel(self.figure.axis, createMesh(self.poly), fitView=False)
+            drawMesh(self.figure.axis, self.poly, fitView=False)
             self.figure.canvas.draw()
         else:
             attrMap = self.zipUpMarkerAndAttributes()
