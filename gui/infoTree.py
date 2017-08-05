@@ -272,7 +272,8 @@ class InfoTree(QWidget):
         Extract the used colormap from the current figure
         """
         items = self.tw_polys.topLevelItemCount()
-        cmap = plt.cm.get_cmap('plasma', items)
+        # 'None' to get the default colormap
+        cmap = plt.cm.get_cmap(None, items)
         colors = []
         for i in range(cmap.N):
             # will return rgba
@@ -282,8 +283,9 @@ class InfoTree(QWidget):
 
         for i in range(items):
             # use the splatter (*) operator to extract from list directly
-            self.tw_polys.topLevelItem(i).setData(0, Qt.BackgroundRole, QColor(*colors[i], 100))
-            self.tw_polys.topLevelItem(i).setData(1, Qt.BackgroundRole, QColor(*colors[i], 100))
+            self.tw_polys.topLevelItem(i).setData(0, Qt.BackgroundRole, QColor(*colors[i], 255/2))
+            self.tw_polys.topLevelItem(i).setData(1, Qt.BackgroundRole, QColor(*colors[i], 255/2))
+            # 255/2 to receive alpha=0.5 as it is hard coded is gimli's meshview
             # TODO: the dropdown indicator is not colored!!
 
     def redrawTable(self):
