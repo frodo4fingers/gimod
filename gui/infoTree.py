@@ -188,8 +188,8 @@ class InfoTree(QWidget):
             # insert marker
             # for k in range(self.marker):
             a = QComboBox()
-            [a.addItem(str(m + 1)) for m in range(parent_marker)]
-            a.setCurrentIndex(parent_marker - 1)
+            [a.addItem(str(m + 1)) for m in range(self.parent.builder.marker)]
+            a.setCurrentIndex(parent_marker)
             marker = QTreeWidgetItem()
             marker.setText(0, "Marker:")
             twItem.addChild(marker)

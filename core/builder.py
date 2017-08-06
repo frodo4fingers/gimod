@@ -98,11 +98,25 @@ class Builder():
         self.polys.clear()
         self.marker = 1
         self.parent.setCursor(Qt.WaitCursor)
-        cont_ = len(self.parent.image_tools.contoursCutted)
+
+        n_contours = len(self.parent.image_tools.contoursCutted)
+        self.form = 'Polygon'
         for i, contour in enumerate(self.parent.image_tools.contoursCutted):
-            self.parent.statusBar.showMessage("processing found polygons {}/{}".format(i, cont_))
-            self.printPolygon(contour)
-        self.figure.axis.set_ylim(self.figure.axis.get_ylim()[::-1])
+            self.parent.statusBar.showMessage("processing found polygons {}/{}".format(i, n_contours))
+            # self.printPolygon(contour)
+            self.polygon = contour
+            self.constructPoly()
+            self.marker += 1
+
+        # draw created polygon
+        self.drawPoly(fillTable=False)
+        # fill the info tree as bulk
+        for i, contour in enumerate(self.parent.image_tools.contoursCutted):
+            self.parent.statusBar.showMessage("processing found polygons {}/{}".format(i, n_contours))
+            self.parent.info_tree.fillTable(form=self.form, polygon=contour, parent_marker=i)
+        # fill the info tree as bulk
+        # # iterate marker counter
+        # self.figure.axis.set_ylim(self.figure.axis.get_ylim()[::-1])
         # self.figure.canvas.draw()
         self.statusBar.showMessage(str(self.poly))
         self.parent.setCursor(Qt.ArrowCursor)
@@ -115,11 +129,21 @@ class Builder():
         self.y_r = y2
         self.form = form
         self.constructPoly()
+        # turn on buttons to reset figure or delete last build polygon
+        self.parent.info_tree.btn_undo.setEnabled(True)
+        self.parent.toolBar.acn_reset_figure.setEnabled(True)
+        # draw the created polygon
+        self.drawPoly()
 
     def printPolygon(self, polygon):
         self.polygon = polygon
         self.form = 'Polygon'
         self.constructPoly()
+        # turn on buttons to reset figure or delete last build polygon
+        self.parent.info_tree.btn_undo.setEnabled(True)
+        self.parent.toolBar.acn_reset_figure.setEnabled(True)
+        # draw the created polygon
+        self.drawPoly()
 
     def constructPoly(self):
         if self.form == 'World':
@@ -138,14 +162,15 @@ class Builder():
         elif self.form == 'Polygon':
             self.polys.append(plc.createPolygon(self.polygon, marker=self.marker, isClosed=True))
 
-        self.parent.info_tree.btn_undo.setEnabled(True)
-        self.parent.toolBar.acn_reset_figure.setEnabled(True)
-        self.drawPoly()
+        # self.parent.info_tree.btn_undo.setEnabled(True)
+        # self.parent.toolBar.acn_reset_figure.setEnabled(True)
+        # self.drawPoly()
 
     def drawPoly(self, fillTable=True, polys=None):
         if polys is None:
             self.poly = plc.mergePLC(self.polys)
         else:
+            # REVIEW: why did i do this??:.. document all stuff and link all stuff, boi!
             self.poly = plc.mergePLC(polys)
         self.figure.axis.cla()
 
