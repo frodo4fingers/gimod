@@ -10,14 +10,27 @@ GIMod stands for **G**\ raphical **I**\ nterface for basic **Mod**\ el creation.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Readme's:
 
-   theGui
-   examples.rst
+   _static/theGui
+   _static/examples
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Content:
+
+   gimod/gimod
+   gimod/core
+   gimod/mpl
+   gimod/gui
+
+Todo
+----
+Currently fixing stuff and trying a heavy documentation!!
 
 .. Indices and tables
 .. ==================
-..
+
 .. * :ref:`genindex`
 .. * :ref:`modindex`
 .. * :ref:`search`
@@ -29,6 +42,7 @@ Prerequisities
     + `Qt4/Qt5 <https://www.qt.io/download/>`_
     + `GIMLi <http://www.pygimli.org/installation.html>`_
     + (`OpenCV <http://opencv.org/downloads.html>`_)
+    + (`PIL <https://python-pillow.org/>`_)
 
 
 Installation
