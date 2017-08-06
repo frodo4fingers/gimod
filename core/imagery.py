@@ -16,9 +16,7 @@ except ModuleNotFoundError:
 
 class ImageTools():
     """
-        Provides the tools for contrast recognition with OpenCV and the
-        algorithms to split that into multiple paths or set chosen picture
-        as background
+    Provides the tools for contrast recognition with OpenCV and the algorithms to split that into multiple paths or set chosen picture as background.
     """
 
     def __init__(self, parent=None):
