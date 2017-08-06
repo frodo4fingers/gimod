@@ -76,7 +76,7 @@ class SpanCircle(object):
             pass
 
     def sendToBuilder(self):
-        # TOD: IF necessary the circle needs to be rotated, so that the point where the click is released lies on the edge!
+        # TODO: IF necessary the circle needs to be rotated, so that the point where the click is released lies on the edge!
         # if self.parent.acn_magnetizePoly.isChecked() is True:
         #     if self.parent.mp.xM is not None:
         #         self.xM = self.parent.mp.xM
