@@ -11,3 +11,5 @@ from .spanPoly import SpanPoly
 from .draggablePoint import DraggablePoint
 
 from .magnetizePolys import MagnetizePolygons
+
+from .helper import Helper

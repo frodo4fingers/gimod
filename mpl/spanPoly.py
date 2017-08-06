@@ -46,7 +46,7 @@ class SpanPoly(object):
             else:  # append point to polygon
                 self.xP = event.xdata
                 self.yP = event.ydata
-                if self.parent.acn_magnetizePoly.isChecked() is True:
+                if self.parent.parent.toolBar.acn_magnetizePoly.isChecked() is True:
                     if self.parent.mp.xP is not None:
                         self.xP = self.parent.mp.xP
                         self.yP = self.parent.mp.yP
