@@ -49,6 +49,7 @@ class PolyToolBar(QToolBar):
         self.acn_imageThreshold2.setValue(255)
         self.acn_imageThreshold2.setToolTip("top value for threshold")
         self.acn_imageDensity = QSpinBox()
+        self.acn_imageDensity.setRange(1, 10)
         self.acn_imageDensity.setToolTip("set density of dots in polygon")
         self.acn_imagePolys = QSpinBox()
         self.acn_imagePolys.setToolTip("set the number of polygons used for model creation")
