@@ -12,6 +12,7 @@ except ImportError:
     from PyQt4.QtCore import Qt, QSize
 
 import numpy as np
+import pygimli as pg
 from pygimli.meshtools import polytools as plc
 import matplotlib.pyplot as plt
 
