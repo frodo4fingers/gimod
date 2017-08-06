@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
         self.toolBar.acn_imageThreshold1.valueChanged.connect(self.image_tools.updateImagery)
         self.toolBar.acn_imageThreshold2.valueChanged.connect(self.image_tools.updateImagery)
         self.toolBar.acn_imageDensity.valueChanged.connect(self.image_tools.updateImagery)
-        self.toolBar.acn_imagePolys.valueChanged.connect(self.image_tools.updateImagery)
+        self.toolBar.acn_imagePolys.valueChanged.connect(self.image_tools.polysFromImage)
 
         self.toolBar.acn_polygonize.triggered.connect(self.builder.formPolygonFromFigure)
 
