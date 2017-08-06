@@ -7,6 +7,12 @@ try:
 except ImportError:
     from PyQt4.QtGui import QFileDialog
 
+try:
+    import cv2
+except ModuleNotFoundError:
+    self.parent.acn_imageAsBackground.setChecked(True)
+    self.parent.acn_imageAsBackground.setEnabled(False)
+
 
 class ImageTools():
     """
@@ -29,32 +35,27 @@ class ImageTools():
         self.imageClicked = True
 
     def getContours(self):
-        try:
-            import cv2
-            # read image
-            src = cv2.imread(self.fname)
-            img = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
-            # basic threshold
-            th, dst = cv2.threshold(img, float(self.threshold1), float(
-            self.threshold2), cv2.THRESH_BINARY)
-            # find Contours
-            image, contours, hierarchy = cv2.findContours(dst, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-            # sort after polygon area and start with largest area
-            paths = sorted(contours, key=cv2.contourArea)[::-1]
-            # sort out those structures that are smaller than 6 dots, first one is frame
-            self.paths = [i for i in paths if len(i) > 5][1:]
-            self.statusBar.showMessage("{} possible polygons found".format(len(self.paths)))
+        # read image
+        src = cv2.imread(self.fname)
+        img = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
+        # basic threshold
+        th, dst = cv2.threshold(img, float(self.threshold1), float(
+        self.threshold2), cv2.THRESH_BINARY)
+        # find Contours
+        image, contours, hierarchy = cv2.findContours(dst, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+        # sort after polygon area and start with largest area
+        paths = sorted(contours, key=cv2.contourArea)[::-1]
+        # sort out those structures that are smaller than 6 dots, first one is frame
+        self.paths = [i for i in paths if len(i) > 5][1:]
+        self.statusBar.showMessage("{} possible polygons found".format(len(self.paths)))
 
-            # adjust the spinbox with number of polygons
-            self.imagePolys.setRange(1, len(self.paths))
-            self.polyDensity.setRange(1, 10)
+        # adjust the spinbox with number of polygons
+        self.imagePolys.setRange(1, len(self.paths))
+        self.polyDensity.setRange(1, 10)
 
-            # draw initially
-            self.polysFromImage()
+        # draw initially
+        self.polysFromImage()
 
-        except ModuleNotFoundError:
-            self.parent.acn_imageAsBackground.setChecked(True)
-            self.parent.acn_imageAsBackground.setEnabled(False)
 
     def polysFromImage(self):
         """
