@@ -38,6 +38,7 @@ class Builder():
         self.marker = 1  # 0
         self.newMarkers = []
         self.polys = []
+        self.hand_drawn_polys = []
         self.undone = []
         # self.imageClicked = True
         self.markersClicked = True
@@ -102,22 +103,26 @@ class Builder():
         n_contours = len(self.parent.image_tools.contoursCutted)
         self.form = 'Polygon'
         for i, contour in enumerate(self.parent.image_tools.contoursCutted):
+            # show progress in statusbar
             self.parent.statusBar.showMessage("processing found polygons {}/{}".format(i, n_contours))
-            # self.printPolygon(contour)
+            # construct poly
             self.polygon = contour
             self.constructPoly()
-            self.marker += 1
+            # self.marker += 1
 
         # draw created polygon
-        self.drawPoly(fillTable=False)
+        self.drawPoly()
         # fill the info tree as bulk
         for i, contour in enumerate(self.parent.image_tools.contoursCutted):
-            self.parent.statusBar.showMessage("processing found polygons {}/{}".format(i, n_contours))
-            self.parent.info_tree.fillTable(form=self.form, polygon=contour, parent_marker=i)
-        # fill the info tree as bulk
-        # # iterate marker counter
-        # self.figure.axis.set_ylim(self.figure.axis.get_ylim()[::-1])
-        # self.figure.canvas.draw()
+            # show progress in statusbar
+            self.parent.statusBar.showMessage("processing table entries {}/{}".format(i, n_contours))
+            # fill the info tree as bulk
+            self.parent.info_tree.fillTable(form=self.form, polygon=contour, parent_marker=i+1)
+
+        # turn on buttons to reset figure or delete last build polygon
+        self.parent.info_tree.btn_undo.setEnabled(True)
+        self.parent.toolBar.acn_reset_figure.setEnabled(True)
+        # change message in statusbar to info about the polygon
         self.statusBar.showMessage(str(self.poly))
         self.parent.setCursor(Qt.ArrowCursor)
         self.parent.statusBar.clearMessage()
@@ -128,22 +133,30 @@ class Builder():
         self.x_r = x2
         self.y_r = y2
         self.form = form
+        self.hand_drawn_polys.append((self.form, x1, y1, x2, y2, None, self.marker))
         self.constructPoly()
         # turn on buttons to reset figure or delete last build polygon
         self.parent.info_tree.btn_undo.setEnabled(True)
         self.parent.toolBar.acn_reset_figure.setEnabled(True)
         # draw the created polygon
         self.drawPoly()
+        # bulk fill the info tree
+        self.fillInfoTree()
+        self.marker += 1
 
     def printPolygon(self, polygon):
         self.polygon = polygon
         self.form = 'Polygon'
+        self.hand_drawn_polys.append((self.form, None, None, None, None, polygon, self.marker))
         self.constructPoly()
         # turn on buttons to reset figure or delete last build polygon
         self.parent.info_tree.btn_undo.setEnabled(True)
         self.parent.toolBar.acn_reset_figure.setEnabled(True)
         # draw the created polygon
         self.drawPoly()
+        # bulk fill the info tree
+        self.fillInfoTree()
+        self.marker += 1
 
     def constructPoly(self):
         if self.form == 'World':
@@ -162,11 +175,7 @@ class Builder():
         elif self.form == 'Polygon':
             self.polys.append(plc.createPolygon(self.polygon, marker=self.marker, isClosed=True))
 
-        # self.parent.info_tree.btn_undo.setEnabled(True)
-        # self.parent.toolBar.acn_reset_figure.setEnabled(True)
-        # self.drawPoly()
-
-    def drawPoly(self, fillTable=True, polys=None):
+    def drawPoly(self, polys=None):
         if polys is None:
             self.poly = plc.mergePLC(self.polys)
         else:
@@ -190,14 +199,18 @@ class Builder():
             else:  # empty
                 QMessageBox.question(None, 'Whoops..' , "Your regions don't have any attributes to plot!", QMessageBox.Ok)
 
-        if fillTable:
-            self.parent.info_tree.fillTable(self.form, self.x_p, self.y_p, self.x_r, self.y_r, self.polygon, self.marker)
-            # iterate marker counter
-            self.marker += 1
-
         if not self.mPolyClicked:
             x,y =self.getNodes()
             self.mp.plotMagnets(x, y)
+
+    def fillInfoTree(self):
+        """
+        Fill the tree view to the left that holds information about every polygon. Always fill from beginning so the marker gets set right with every new made polygon.
+        """
+        self.parent.info_tree.tw_polys.clear()
+        for entry in self.hand_drawn_polys:
+            # form, x_p, y_p, x_r, y_r, polygon, marker
+            self.parent.info_tree.fillTable(entry[0], entry[1], entry[2], entry[3], entry[4], entry[5], entry[6])
 
     def resetFigure(self):
         """
@@ -216,7 +229,6 @@ class Builder():
             self.parent.toolBar.acn_reset_figure.setEnabled(False)
         else:
             pass
-
 
     def markersMove(self):
         """
@@ -303,7 +315,12 @@ class Builder():
 
     def undoPoly(self):
         """
-            remove last made polygon from list and store it so it won't be lost
+        Remove last made polygon from list and store it so it won't be lost completely.
+
+        Todo
+        ----
+        + undoing should redraw the table with the present data and present cmap
+        + same goes for the existent marker range
         """
         self.undone.append(self.polys.pop())
         self.parent.info_tree.tw_polys.takeTopLevelItem(self.parent.info_tree.tw_polys.topLevelItemCount() - 1)
@@ -317,6 +334,14 @@ class Builder():
             self.parent.info_tree.btn_undo.setEnabled(False)
 
     def redoPoly(self):
+        """
+        Redo the undone. Every undone polygon is stored and can be recalled.
+
+        Todo
+        ----
+        + redoing should redraw the table with the present data and present cmap
+        + same goes for the existent marker range
+        """
         if len(self.undone) > 0:
             self.polys.append(self.undone.pop())
             self.marker += 1
