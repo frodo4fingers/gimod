@@ -50,20 +50,19 @@ class ImageTools():
         self.statusBar.showMessage("{} possible polygons found".format(len(self.paths)))
 
         # adjust the spinbox with number of polygons
+        # TODO: get this out of here!!
         self.imagePolys.setRange(1, len(self.paths))
-        self.polyDensity.setRange(1, 10)
+        # self.polyDensity.setRange(1, 10)
 
         # draw initially
         self.polysFromImage()
 
 
     def polysFromImage(self):
-        """
-            take only the number of polys chosen in the spinbox
-        """
-        cutDown = self.paths[:self.imagePolys.value()]
+        """Take only the number of polys chosen in the spinbox."""
+        cut_down = self.paths[:self.imagePolys.value()]
         self.contours = []
-        for path in cutDown:
+        for path in cut_down:
             tuples = []
             for tup in path:
                 tuples.append([float(tup[0][0]), float(tup[0][1])])
