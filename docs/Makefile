@@ -13,9 +13,6 @@ help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 api:
-	sphinx-apidoc -fMT --output-dir=core ../core
-	sphinx-apidoc -fMT --output-dir=gui ../gui
-	sphinx-apidoc -fMT --output-dir=mpl ../mpl
 	sphinx-apidoc -fMT --output-dir=gimod ..
 
 .PHONY: help Makefile
