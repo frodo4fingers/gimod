@@ -6,7 +6,7 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = GIMod
 SOURCEDIR     = .
-BUILDDIR      = _build/html
+BUILDDIR      = _build/
 
 # Put it first so that "make" without argument is like "make help".
 help:
