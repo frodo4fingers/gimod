@@ -170,7 +170,7 @@
 <span class="c1"># encoding: UTF-8</span>
 
 
-<div class="viewcode-block" id="DraggablePoint"><a class="viewcode-back" href="../../mpl/mpl.html#mpl.draggablePoint.DraggablePoint">[docs]</a><span class="k">class</span> <span class="nc">DraggablePoint</span><span class="p">():</span>
+<div class="viewcode-block" id="DraggablePoint"><a class="viewcode-back" href="../../gimod/mpl.html#mpl.draggablePoint.DraggablePoint">[docs]</a><span class="k">class</span> <span class="nc">DraggablePoint</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    thank you very much:</span>
 <span class="sd">    http://stackoverflow.com/questions/21654008/matplotlib-drag-overlapping-points-interactively</span>
@@ -188,7 +188,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">on_press</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_press</span>
 
-<div class="viewcode-block" id="DraggablePoint.connect"><a class="viewcode-back" href="../../mpl/mpl.html#mpl.draggablePoint.DraggablePoint.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="DraggablePoint.connect"><a class="viewcode-back" href="../../gimod/mpl.html#mpl.draggablePoint.DraggablePoint.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            connect to all the events we need</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -196,7 +196,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cidrelease</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s1">&#39;button_release_event&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_release</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cidmotion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s1">&#39;motion_notify_event&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">on_motion</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DraggablePoint.on_press"><a class="viewcode-back" href="../../mpl/mpl.html#mpl.draggablePoint.DraggablePoint.on_press">[docs]</a>    <span class="k">def</span> <span class="nf">on_press</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<div class="viewcode-block" id="DraggablePoint.on_press"><a class="viewcode-back" href="../../gimod/mpl.html#mpl.draggablePoint.DraggablePoint.on_press">[docs]</a>    <span class="k">def</span> <span class="nf">on_press</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="c1"># if press out ouf point boundary</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">axes</span><span class="p">:</span>
             <span class="k">return</span>
@@ -219,7 +219,7 @@
         <span class="c1"># and blit just the redrawn area</span>
         <span class="n">canvas</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">bbox</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DraggablePoint.on_motion"><a class="viewcode-back" href="../../mpl/mpl.html#mpl.draggablePoint.DraggablePoint.on_motion">[docs]</a>    <span class="k">def</span> <span class="nf">on_motion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<div class="viewcode-block" id="DraggablePoint.on_motion"><a class="viewcode-back" href="../../gimod/mpl.html#mpl.draggablePoint.DraggablePoint.on_motion">[docs]</a>    <span class="k">def</span> <span class="nf">on_motion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">DraggablePoint</span><span class="o">.</span><span class="n">lock</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">inaxes</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">axes</span><span class="p">:</span>
@@ -238,7 +238,7 @@
         <span class="c1"># blit just the redrawn area</span>
         <span class="n">canvas</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">bbox</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DraggablePoint.on_release"><a class="viewcode-back" href="../../mpl/mpl.html#mpl.draggablePoint.DraggablePoint.on_release">[docs]</a>    <span class="k">def</span> <span class="nf">on_release</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<div class="viewcode-block" id="DraggablePoint.on_release"><a class="viewcode-back" href="../../gimod/mpl.html#mpl.draggablePoint.DraggablePoint.on_release">[docs]</a>    <span class="k">def</span> <span class="nf">on_release</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            on release we reset the press data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -255,14 +255,14 @@
         <span class="c1"># return self.marker, self.center</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">returnValue</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="DraggablePoint.returnValue"><a class="viewcode-back" href="../../mpl/mpl.html#mpl.draggablePoint.DraggablePoint.returnValue">[docs]</a>    <span class="k">def</span> <span class="nf">returnValue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="DraggablePoint.returnValue"><a class="viewcode-back" href="../../gimod/mpl.html#mpl.draggablePoint.DraggablePoint.returnValue">[docs]</a>    <span class="k">def</span> <span class="nf">returnValue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            added by myself to get the final marker position after movement out of the class objects</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">marker</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">center</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict</span></div>
 
-<div class="viewcode-block" id="DraggablePoint.disconnect"><a class="viewcode-back" href="../../mpl/mpl.html#mpl.draggablePoint.DraggablePoint.disconnect">[docs]</a>    <span class="k">def</span> <span class="nf">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="DraggablePoint.disconnect"><a class="viewcode-back" href="../../gimod/mpl.html#mpl.draggablePoint.DraggablePoint.disconnect">[docs]</a>    <span class="k">def</span> <span class="nf">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            disconnect all the stored connection ids</span>
 <span class="sd">        &quot;&quot;&quot;</span>

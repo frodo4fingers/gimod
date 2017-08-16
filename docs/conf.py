@@ -20,9 +20,9 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../'))
-sys.path.insert(0, os.path.abspath('../core/'))
-sys.path.insert(0, os.path.abspath('../gui/'))
-sys.path.insert(0, os.path.abspath('../mpl/'))
+# sys.path.insert(0, os.path.abspath('../core/'))
+# sys.path.insert(0, os.path.abspath('../gui/'))
+# sys.path.insert(0, os.path.abspath('../mpl/'))
 
 
 # -- General configuration ------------------------------------------------

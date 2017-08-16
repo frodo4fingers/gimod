@@ -13,7 +13,7 @@ help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 api:
-	sphinx-apidoc -fMT --output-dir=gimod ..
+	sphinx-apidoc -fMT --output-dir=gimod ../*
 
 .PHONY: help Makefile
 

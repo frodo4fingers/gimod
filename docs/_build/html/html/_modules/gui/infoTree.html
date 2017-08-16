@@ -185,7 +185,7 @@
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
 
-<div class="viewcode-block" id="InfoTree"><a class="viewcode-back" href="../../gui/gui.html#gui.infoTree.InfoTree">[docs]</a><span class="k">class</span> <span class="nc">InfoTree</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+<div class="viewcode-block" id="InfoTree"><a class="viewcode-back" href="../../gimod/gui.html#gui.infoTree.InfoTree">[docs]</a><span class="k">class</span> <span class="nc">InfoTree</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class resembles the information tree on the left side. It contains the parameters of every drawn polygon and holds some more widgets to edit and redraw these.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -197,7 +197,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
 
-<div class="viewcode-block" id="InfoTree.setup"><a class="viewcode-back" href="../../gui/gui.html#gui.infoTree.InfoTree.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="InfoTree.setup"><a class="viewcode-back" href="../../gimod/gui.html#gui.infoTree.InfoTree.setup">[docs]</a>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set up the QTreeWidget. Every Polygon holds some specs that are editable through QSpinBox and XXX</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -258,7 +258,7 @@
         <span class="n">vbox</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">vbox</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="InfoTree.fillTable"><a class="viewcode-back" href="../../gui/gui.html#gui.infoTree.InfoTree.fillTable">[docs]</a>    <span class="k">def</span> <span class="nf">fillTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">x_p</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_p</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_r</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_r</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">polygon</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent_marker</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="InfoTree.fillTable"><a class="viewcode-back" href="../../gimod/gui.html#gui.infoTree.InfoTree.fillTable">[docs]</a>    <span class="k">def</span> <span class="nf">fillTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">x_p</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_p</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_r</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_r</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">polygon</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent_marker</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># test case for retrieving the colorbar from figure</span>
         <span class="c1"># print(self.figure.gci().colorbar)</span>
         <span class="c1"># FIXME: marker is iterated to existent state. needs to be recounted AFTER table creation so all markers can be chosen for all polys</span>
@@ -431,7 +431,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">tw_polys</span><span class="o">.</span><span class="n">resizeColumnToContents</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">colorizeTreeItemHeaders</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="InfoTree.colorizeTreeItemHeaders"><a class="viewcode-back" href="../../gui/gui.html#gui.infoTree.InfoTree.colorizeTreeItemHeaders">[docs]</a>    <span class="k">def</span> <span class="nf">colorizeTreeItemHeaders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="InfoTree.colorizeTreeItemHeaders"><a class="viewcode-back" href="../../gimod/gui.html#gui.infoTree.InfoTree.colorizeTreeItemHeaders">[docs]</a>    <span class="k">def</span> <span class="nf">colorizeTreeItemHeaders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Colorize the line that describes which polygon is described with the children listed below. Needs to happen afterwards by iterating through the content since the color range changes with the amount of ppolygons drawn.</span>
 
@@ -456,7 +456,7 @@
             <span class="c1"># 255/2 to receive alpha=0.5 as it is hard coded is gimli&#39;s meshview</span>
             <span class="c1"># TODO: the dropdown indicator is not colored!!</span>
 
-<div class="viewcode-block" id="InfoTree.redrawTable"><a class="viewcode-back" href="../../gui/gui.html#gui.infoTree.InfoTree.redrawTable">[docs]</a>    <span class="k">def</span> <span class="nf">redrawTable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="InfoTree.redrawTable"><a class="viewcode-back" href="../../gimod/gui.html#gui.infoTree.InfoTree.redrawTable">[docs]</a>    <span class="k">def</span> <span class="nf">redrawTable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># BUG: line misses first half after redraw</span>
         <span class="c1"># BUG: after redraw marker might be lost: control mechanism and/or possible manual adding of a marker</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">setCursor</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">WaitCursor</span><span class="p">)</span>

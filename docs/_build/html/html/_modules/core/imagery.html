@@ -182,7 +182,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">acn_imageAsBackground</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="ImageTools"><a class="viewcode-back" href="../../core/core.html#core.imagery.ImageTools">[docs]</a><span class="k">class</span> <span class="nc">ImageTools</span><span class="p">():</span>
+<div class="viewcode-block" id="ImageTools"><a class="viewcode-back" href="../../gimod/core.html#core.imagery.ImageTools">[docs]</a><span class="k">class</span> <span class="nc">ImageTools</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Provides the tools for contrast recognition with OpenCV and the algorithms to split that into multiple paths or set chosen picture as background.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -200,7 +200,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">imageClicked</span> <span class="o">=</span> <span class="kc">True</span>
 
-<div class="viewcode-block" id="ImageTools.getContours"><a class="viewcode-back" href="../../core/core.html#core.imagery.ImageTools.getContours">[docs]</a>    <span class="k">def</span> <span class="nf">getContours</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageTools.getContours"><a class="viewcode-back" href="../../gimod/core.html#core.imagery.ImageTools.getContours">[docs]</a>    <span class="k">def</span> <span class="nf">getContours</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># read image</span>
         <span class="n">src</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fname</span><span class="p">)</span>
         <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
@@ -224,7 +224,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">polysFromImage</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="ImageTools.polysFromImage"><a class="viewcode-back" href="../../core/core.html#core.imagery.ImageTools.polysFromImage">[docs]</a>    <span class="k">def</span> <span class="nf">polysFromImage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageTools.polysFromImage"><a class="viewcode-back" href="../../gimod/core.html#core.imagery.ImageTools.polysFromImage">[docs]</a>    <span class="k">def</span> <span class="nf">polysFromImage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Take only the number of polys chosen in the spinbox.&quot;&quot;&quot;</span>
         <span class="n">cut_down</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">imagePolys</span><span class="o">.</span><span class="n">value</span><span class="p">()]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">contours</span> <span class="o">=</span> <span class="p">[]</span>
@@ -235,7 +235,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">contours</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tuples</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dotDensityOfPolygons</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="ImageTools.dotDensityOfPolygons"><a class="viewcode-back" href="../../core/core.html#core.imagery.ImageTools.dotDensityOfPolygons">[docs]</a>    <span class="k">def</span> <span class="nf">dotDensityOfPolygons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageTools.dotDensityOfPolygons"><a class="viewcode-back" href="../../gimod/core.html#core.imagery.ImageTools.dotDensityOfPolygons">[docs]</a>    <span class="k">def</span> <span class="nf">dotDensityOfPolygons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            takes every n-th tuple specified by imageDensity spinbox</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -245,13 +245,13 @@
         <span class="c1"># self.findMinMax()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">imagePlot</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="ImageTools.imagePlot"><a class="viewcode-back" href="../../core/core.html#core.imagery.ImageTools.imagePlot">[docs]</a>    <span class="k">def</span> <span class="nf">imagePlot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageTools.imagePlot"><a class="viewcode-back" href="../../gimod/core.html#core.imagery.ImageTools.imagePlot">[docs]</a>    <span class="k">def</span> <span class="nf">imagePlot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">axis</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">contoursCutted</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">axis</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="o">*</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">p</span><span class="p">),</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="ImageTools.setBackground"><a class="viewcode-back" href="../../core/core.html#core.imagery.ImageTools.setBackground">[docs]</a>    <span class="k">def</span> <span class="nf">setBackground</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageTools.setBackground"><a class="viewcode-back" href="../../gimod/core.html#core.imagery.ImageTools.setBackground">[docs]</a>    <span class="k">def</span> <span class="nf">setBackground</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            set chosen image file as background to draw over</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -260,7 +260,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">axis</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="ImageTools.imagery"><a class="viewcode-back" href="../../core/core.html#core.imagery.ImageTools.imagery">[docs]</a>    <span class="k">def</span> <span class="nf">imagery</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageTools.imagery"><a class="viewcode-back" href="../../gimod/core.html#core.imagery.ImageTools.imagery">[docs]</a>    <span class="k">def</span> <span class="nf">imagery</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageClicked</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="c1"># FIXME: cheeky piece of shit... wont accept given formats</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fname</span> <span class="o">=</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">getOpenFileName</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">caption</span><span class="o">=</span><span class="s1">&#39;choose sketch&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -279,10 +279,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">toolBar</span><span class="o">.</span><span class="n">acn_image</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">imageClicked</span> <span class="o">=</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="ImageTools.updateImagery"><a class="viewcode-back" href="../../core/core.html#core.imagery.ImageTools.updateImagery">[docs]</a>    <span class="k">def</span> <span class="nf">updateImagery</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageTools.updateImagery"><a class="viewcode-back" href="../../gimod/core.html#core.imagery.ImageTools.updateImagery">[docs]</a>    <span class="k">def</span> <span class="nf">updateImagery</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">getContours</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="ImageTools.imageryBackground"><a class="viewcode-back" href="../../core/core.html#core.imagery.ImageTools.imageryBackground">[docs]</a>    <span class="k">def</span> <span class="nf">imageryBackground</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageTools.imageryBackground"><a class="viewcode-back" href="../../gimod/core.html#core.imagery.ImageTools.imageryBackground">[docs]</a>    <span class="k">def</span> <span class="nf">imageryBackground</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">toolBar</span><span class="o">.</span><span class="n">acn_imageAsBackground</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">toolBar</span><span class="o">.</span><span class="n">acn_imageThreshold1</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">toolBar</span><span class="o">.</span><span class="n">acn_imageThreshold2</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
