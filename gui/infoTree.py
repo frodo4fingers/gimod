@@ -266,10 +266,6 @@ class InfoTree(QWidget):
     def colorizeTreeItemHeaders(self):
         """
         Colorize the line that describes which polygon is described with the children listed below. Needs to happen afterwards by iterating through the content since the color range changes with the amount of ppolygons drawn.
-
-        Todo
-        ----
-        Extract the used colormap from the current figure
         """
         items = self.tw_polys.topLevelItemCount()
         # 'None' to get the default colormap
@@ -362,5 +358,5 @@ class InfoTree(QWidget):
                 self.polyMarkers.append(int(p[1]))
 
         self.parent.statusBar.clearMessage()
-        self.parent.builder.drawPoly(fillTable=False, polys=polys)
+        self.parent.builder.drawPoly(polys=polys)
         self.parent.setCursor(Qt.ArrowCursor)

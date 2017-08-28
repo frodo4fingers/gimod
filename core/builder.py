@@ -108,7 +108,7 @@ class Builder():
             # construct poly
             self.polygon = contour
             self.constructPoly()
-            # self.marker += 1
+            self.marker += 1
 
         # draw created polygon
         self.drawPoly()
