@@ -69,18 +69,23 @@ class PolyToolBar(QToolBar):
 
         self.acn_rectangle = QAction(QIcon('icons/ic_spanRectangle.svg'), 'rectangle', self.grp_polyTools, checkable=True)
         self.acn_rectangle.setToolTip("Create a rectangle body")
+        self.acn_rectangle.setEnabled(False)
 
         self.acn_circle = QAction(QIcon('icons/ic_spanCircle.svg'), 'circle', self.grp_polyTools, checkable=True)
         self.acn_circle.setToolTip("Create a circle body")
+        self.acn_circle.setEnabled(False)
 
         self.acn_line = QAction(QIcon('icons/ic_spanLine.png'), 'line', self.grp_polyTools, checkable=True)
         self.acn_line.setToolTip("Create a line by clicking")
+        self.acn_line.setEnabled(False)
 
         self.acn_polygon = QAction(QIcon('icons/ic_spanPoly.svg'), 'polygon', self.grp_polyTools, checkable=True)
         self.acn_polygon.setToolTip("Create a polygon by clicking, finish with double click")
+        self.acn_polygon.setEnabled(False)
 
         self.acn_markerCheck = QAction(QIcon('icons/marker_check.svg'), 'marker', self.grp_polyTools, checkable=True)
         self.acn_markerCheck.setToolTip("check and reset marker positions")
+        self.acn_markerCheck.setEnabled(False)
 
         # self.grp_gridTools = QActionGroup(self)
         self.acn_gridToggle = QAction(QIcon('icons/grid.svg'), 'grid', None, checkable=True)
@@ -93,6 +98,7 @@ class PolyToolBar(QToolBar):
 
         self.acn_magnetizePoly = QAction(QIcon('icons/magnetize.svg'), 'magnetizePoly', None, checkable=True)
         self.acn_magnetizePoly.setToolTip("magnetize the polygons")
+        self.acn_magnetizePoly.setEnabled(False)
 
         self.addAction(self.acn_image)
         self.widgetAction = self.addWidget(acnWidget)

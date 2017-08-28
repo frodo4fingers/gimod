@@ -33,7 +33,7 @@ class Builder():
         # super(Builder, self).__init__(parent)
         self.parent = parent
         self.figure = parent.plotWidget
-        # self.toolBar = parent.toolBar
+        self.toolbar = parent.toolBar
         self.statusBar = parent.statusBar
         self.marker = 1  # 0
         self.newMarkers = []
@@ -200,8 +200,32 @@ class Builder():
                 QMessageBox.question(None, 'Whoops..' , "Your regions don't have any attributes to plot!", QMessageBox.Ok)
 
         if not self.mPolyClicked:
-            x,y =self.getNodes()
+            x, y =self.getNodes()
             self.mp.plotMagnets(x, y)
+
+        self.enabelingToolBarFunctions()
+
+    def enabelingToolBarFunctions(self):
+        """After drawing a polygon check whether the ``world`` needs to be disabled after creation or the other tools if no world exists."""
+        # get the poly form as first position from every tuple
+        existence = [poly[0] for poly in self.hand_drawn_polys]
+
+        if 'World' in existence:
+            self.toolbar.acn_world.setEnabled(False)
+            self.toolbar.acn_rectangle.setEnabled(True)
+            self.toolbar.acn_circle.setEnabled(True)
+            self.toolbar.acn_line.setEnabled(True)
+            self.toolbar.acn_polygon.setEnabled(True)
+            self.toolbar.acn_markerCheck.setEnabled(True)
+            self.toolbar.acn_magnetizePoly.setEnabled(True)
+        else:
+            self.toolbar.acn_world.setEnabled(True)
+            self.toolbar.acn_rectangle.setEnabled(False)
+            self.toolbar.acn_circle.setEnabled(False)
+            self.toolbar.acn_line.setEnabled(False)
+            self.toolbar.acn_polygon.setEnabled(False)
+            self.toolbar.acn_markerCheck.setEnabled(False)
+            self.toolbar.acn_magnetizePoly.setEnabled(False)
 
     def fillInfoTree(self):
         """
@@ -216,7 +240,7 @@ class Builder():
         """
         When clicked the user is asked if all achievements should really be discarded, since this method will clear the figure, the info tree and everything that has been stored.
         """
-        reply = QMessageBox.question(None, 'Careful there!' , "You are about to delete your project.. proceed?", QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        reply = QMessageBox.question(None, 'Careful there!', "You are about to delete your project.. proceed?", QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             # clear everything
             self.figure.axis.cla()
@@ -319,15 +343,17 @@ class Builder():
 
         Todo
         ----
-        + undoing should redraw the table with the present data and present cmap
-        + same goes for the existent marker range
+            + undoing should redraw the table with the present data and present cmap
+            + same goes for the existent marker range
+            + the hand drawn poly stuff needs to be respected too!!!
         """
         self.undone.append(self.polys.pop())
+        # self.hand_drawn_polys.pop()
         self.parent.info_tree.tw_polys.takeTopLevelItem(self.parent.info_tree.tw_polys.topLevelItemCount() - 1)
         self.marker -= 1
         self.parent.info_tree.btn_redo.setEnabled(True)
         if not len(self.polys) == 0:
-            self.drawPoly(fillTable=False)
+            self.drawPoly()
         else:
             self.figure.axis.cla()
             self.figure.canvas.draw()
@@ -339,13 +365,16 @@ class Builder():
 
         Todo
         ----
-        + redoing should redraw the table with the present data and present cmap
-        + same goes for the existent marker range
+            + redoing should redraw the table with the present data and present cmap
+            + same goes for the existent marker range
+            + the hand drawn poly stuff needs to be respected too!!!
         """
         if len(self.undone) > 0:
             self.polys.append(self.undone.pop())
+            # self.hand_drawn_polys.pop()
             self.marker += 1
-            self.drawPoly(fillTable=True)
+            self.drawPoly()
+            self.fillInfoTree()
         if len(self.undone) == 0:
             self.parent.info_tree.btn_redo.setEnabled(False)
 

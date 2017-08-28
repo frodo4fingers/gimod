@@ -33,6 +33,13 @@ class ImageTools():
         self.imageClicked = True
 
     def getContours(self):
+        """
+        Take the passed image, b/w the image and make paths out of the contours.
+
+        Todo
+        ----
+        http://scikit-learn.org/stable/auto_examples/cluster/plot_face_ward_segmentation.html
+        """
         # read image
         src = cv2.imread(self.fname)
         img = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
@@ -54,7 +61,6 @@ class ImageTools():
 
         # draw initially
         self.polysFromImage()
-
 
     def polysFromImage(self):
         """Take only the number of polys chosen in the spinbox."""
