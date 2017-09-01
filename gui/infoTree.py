@@ -362,5 +362,5 @@ class InfoTree(QWidget):
                 self.polyMarkers.append(int(p[1]))
 
         self.parent.statusBar.clearMessage()
-        self.parent.builder.drawPoly(fillTable=False, polys=polys)
+        self.parent.builder.drawPoly(polys=polys)
         self.parent.setCursor(Qt.ArrowCursor)
