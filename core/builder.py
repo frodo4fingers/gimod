@@ -108,7 +108,7 @@ class Builder():
             # construct poly
             self.polygon = contour
             self.constructPoly()
-            # self.marker += 1
+            self.marker += 1
 
         # draw created polygon
         self.drawPoly()
@@ -327,7 +327,7 @@ class Builder():
         self.marker -= 1
         self.parent.info_tree.btn_redo.setEnabled(True)
         if not len(self.polys) == 0:
-            self.drawPoly(fillTable=False)
+            self.drawPoly()
         else:
             self.figure.axis.cla()
             self.figure.canvas.draw()
@@ -345,7 +345,7 @@ class Builder():
         if len(self.undone) > 0:
             self.polys.append(self.undone.pop())
             self.marker += 1
-            self.drawPoly(fillTable=True)
+            self.drawPoly()
         if len(self.undone) == 0:
             self.parent.info_tree.btn_redo.setEnabled(False)
 
