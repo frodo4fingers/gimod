@@ -55,7 +55,6 @@ class ImageTools():
         # draw initially
         self.polysFromImage()
 
-
     def polysFromImage(self):
         """Take only the number of polys chosen in the spinbox."""
         cut_down = self.paths[:self.imagePolys.value()]
