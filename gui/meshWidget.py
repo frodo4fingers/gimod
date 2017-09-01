@@ -8,6 +8,9 @@ except ImportError:
     from PyQt4.QtGui import QMainWindow, QWidget, QApplication, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QLineEdit,  QPushButton, QStatusBar, QToolBar, QTabWidget, QSplitter, QAction, QMessageBox, QIcon
     from PyQt4.QtCore import QSize, Qt
 
+from pygimli.meshtools import createMesh, writePLC
+from pygimli.mplviewer import drawMeshBoundaries, drawMesh, drawPLC, drawModel
+
 
 class MeshOptions(QWidget):
     """Graphical access to the options for meshing a poly file."""
@@ -23,7 +26,16 @@ class MeshOptions(QWidget):
         """
         # call the super class to establish the functionality of a QWidget
         super(MeshOptions, self).__init__(parent)
+        self.parent = parent
         self.setupWidget()
+
+        # connect the signals to theri functions
+        self.chbx_mesh_refine.stateChanged.connect(self.changedChbxMeshRefine)
+        self.chbx_smooth.stateChanged.connect(self.changedChbxSmooth)
+        self.chbx_switches.stateChanged.connect(self.changedChbxSwitches)
+        self.chbx_mesh_attr.stateChanged.connect(self.showMesh)
+        self.btn_mesh.clicked.connect(self.clickedBtnMesh)
+        self.btn_mesh_export.clicked.connect(self.meshExport)
 
     def setupWidget(self):
         """Design the layout of the tab that holds the options for tetgen."""
@@ -197,18 +209,18 @@ class MeshOptions(QWidget):
             # TODO make th switches work -->
             # http://pygimli.org/_examples_auto/modelling/plot_hybrid-mesh-2d.html?highlight=switches
 
-        self.statusBar.showMessage("generating mesh...")
-        self.mesh = createMesh(self.builder.getPoly(), quality=self.spb_mesh_quality.value(
+        self.parent.statusBar.showMessage("generating mesh...")
+        self.mesh = createMesh(self.parent.builder.getPoly(), quality=self.spb_mesh_quality.value(
         ), area=self.spb_cell_area.value(), smooth=self.smooth_method, switches=self.switches)
 
         if self.mesh_refine is True and self.cbx_mesh_refine.currentText() == "quadratic":
-            self.statusBar.showMessage("create quadratic...")
+            self.parent.statusBar.showMessage("create quadratic...")
             self.mesh = self.mesh.createP2()
         elif self.mesh_refine is True and self.cbx_mesh_refine.currentText() == "spatially":
-            self.statusBar.showMessage("create spatially...")
+            self.parent.statusBar.showMessage("create spatially...")
             self.mesh = self.mesh.createH2()
 
-        self.statusBar.showMessage(str(self.mesh))
+        self.parent.statusBar.showMessage(str(self.mesh))
         self.btn_mesh_export.setEnabled(True)
         self.showMesh()
 
