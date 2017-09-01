@@ -30,14 +30,6 @@ class GIMod(QMainWindow):
         self.initUI()
         self.image_tools = ImageTools(self)
 
-        # connect meshing options with their functions
-        self.mesh_options.chbx_mesh_refine.stateChanged.connect(self.changedChbxMeshRefine)
-        self.mesh_options.chbx_smooth.stateChanged.connect(self.changedChbxSmooth)
-        self.mesh_options.chbx_switches.stateChanged.connect(self.changedChbxSwitches)
-        self.mesh_options.chbx_mesh_attr.stateChanged.connect(self.showMesh)
-        self.mesh_options.btn_mesh.clicked.connect(self.clickedBtnMesh)
-        self.mesh_options.btn_mesh_export.clicked.connect(self.meshExport)
-
         # menu actions
         self.acn_aboutVerison.triggered.connect(self.aboutVersion)
 
