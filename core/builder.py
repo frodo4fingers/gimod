@@ -210,7 +210,13 @@ class Builder():
         self.enabelingToolBarFunctions()
 
     def enabelingToolBarFunctions(self):
-        """After drawing a polygon check whether the ``world`` needs to be disabled after creation or the other tools if no world exists."""
+        """
+        After drawing a polygon check whether the ``world`` needs to be disabled after creation or the other tools if no world exists.
+
+        Todo
+        ----
+        After resetting the figure the connected signal from any polytool remains. Thats obviously a problem if one hits the canvas by accident.
+        """
         # get the poly form as first position from every tuple
         existence = [poly[0] for poly in self.hand_drawn_polys]
 
@@ -256,6 +262,8 @@ class Builder():
             # and disable functions that are only accessible if a poly is there
             self.parent.info_tree.btn_undo.setEnabled(False)
             self.parent.toolBar.acn_reset_figure.setEnabled(False)
+            # enable/disable polytools
+            self.enabelingToolBarFunctions()
             # set marker to begin with 1
             self.marker = 1
         else:
