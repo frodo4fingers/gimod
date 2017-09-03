@@ -55,12 +55,13 @@ class PlotWidget(QWidget):
         # self.axis.set_ylim(self.axis.get_ylim()[::-1])
         self.axis.set_aspect('equal')
         self.canvas = FigureCanvas(self.figure)
+        self.resetFigure()
 
         # self.toolbar = PlotToolbar(self.canvas, self)
         self.toolbar = NavigationToolbar(self.canvas, self)
         self.toolbar.setFixedHeight(30)
         self.toolbar.setIconSize(QSize(18, 18))
-        self.toolbar.setContentsMargins(0, 0, 0, 0)
+        # self.toolbar.setContentsMargins(0, 0, 0, 0)
 
         # add buttons
         # self.btn_zoom_in = QToolButton()
@@ -107,6 +108,12 @@ class PlotWidget(QWidget):
     #     self.axis.set_xlim(x_dim[0] + 0.1*x_dist, x_dim[1] - 0.1*x_dist)
     #     self.axis.set_ylim(y_dim[0] + 0.1*y_dist, y_dim[1] - 0.1*y_dist)
     #     self.canvas.draw()
+
+    def resetFigure(self):
+        """Set contents margin to start layout after clearing the figures contents."""
+        self.axis.cla()
+        self.axis.set_xlim(-1, 1)
+        self.axis.set_ylim(-1, 1)
 
 
 if __name__ == '__main__':
