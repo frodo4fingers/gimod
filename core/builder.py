@@ -244,7 +244,6 @@ class Builder():
         reply = QMessageBox.question(None, 'Careful there!', "You are about to delete your project.. proceed?", QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             # clear everything
-            self.figure.axis.cla()
             self.figure.canvas.draw()
             self.undone = []
             self.polys = []
@@ -252,6 +251,8 @@ class Builder():
             # and disable functions that are only accessible if a poly is there
             self.parent.info_tree.btn_undo.setEnabled(False)
             self.parent.toolBar.acn_reset_figure.setEnabled(False)
+            # set marker to begin with 1
+            self.marker = 1
         else:
             pass
 
