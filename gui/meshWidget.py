@@ -8,6 +8,7 @@ except ImportError:
     from PyQt4.QtGui import QMainWindow, QWidget, QApplication, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QLineEdit,  QPushButton, QStatusBar, QToolBar, QTabWidget, QSplitter, QAction, QMessageBox, QIcon
     from PyQt4.QtCore import QSize, Qt
 
+from pygimli import show
 from pygimli.meshtools import createMesh, writePLC
 from pygimli.mplviewer import drawMeshBoundaries, drawMesh, drawPLC, drawModel
 
@@ -225,18 +226,20 @@ class MeshOptions(QWidget):
         self.showMesh()
 
     def showMesh(self):
-        self.plotWidget.axis.cla()
+        self.parent.plotWidget.axis.cla()
         if self.chbx_mesh_attr.isChecked() is True:
             self.regionGetAttributes()
-            pg.show(self.mesh, pg.solver.parseArgToArray(self.attr_map, self.mesh.cellCount(
-            ), self.mesh), ax=self.plotWidget.axis)
-            pg.show(drawMeshBoundaries(self.plotWidget.axis, self.mesh,
-                                       hideMesh=False), ax=self.plotWidget.axis, fillRegion=False)
+            show(self.mesh, pg.solver.parseArgToArray(self.attr_map, self.mesh.cellCount(
+            ), self.mesh), ax=self.parent.plotWidget.axis)
+            show(drawMeshBoundaries(self.parent.plotWidget.axis, self.mesh,
+                hideMesh=False),
+                ax=self.parent.plotWidget.axis,
+                fillRegion=False)
         else:
-            pg.show(self.mesh, ax=self.plotWidget.axis)
+            show(self.mesh, ax=self.parent.plotWidget.axis)
 
-        self.plotWidget.axis.set_ylim(self.plotWidget.axis.get_ylim()[::-1])
-        self.plotWidget.canvas.draw()
+        self.parent.plotWidget.axis.set_ylim(self.parent.plotWidget.axis.get_ylim()[::-1])
+        self.parent.plotWidget.canvas.draw()
 
     def meshExport(self):
         """
