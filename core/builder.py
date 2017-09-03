@@ -218,6 +218,7 @@ class Builder():
             self.toolbar.acn_polygon.setEnabled(True)
             self.toolbar.acn_markerCheck.setEnabled(True)
             self.toolbar.acn_magnetizePoly.setEnabled(True)
+            self.toolbar.acn_world.setChecked(False)
         else:
             self.toolbar.acn_world.setEnabled(True)
             self.toolbar.acn_rectangle.setEnabled(False)
