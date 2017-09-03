@@ -114,6 +114,7 @@ class PlotWidget(QWidget):
         self.axis.cla()
         self.axis.set_xlim(-1, 1)
         self.axis.set_ylim(-1, 1)
+        self.figure.canvas.draw()
 
 
 if __name__ == '__main__':

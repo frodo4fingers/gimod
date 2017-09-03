@@ -247,8 +247,9 @@ class Builder():
         """
         reply = QMessageBox.question(None, 'Careful there!', "You are about to delete your project.. proceed?", QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
-            # clear everything
-            self.figure.canvas.draw()
+            # clear everything from plot
+            self.parent.plotWidget.resetFigure()
+            self.hand_drawn_polys = []
             self.undone = []
             self.polys = []
             self.parent.info_tree.tw_polys.clear()
