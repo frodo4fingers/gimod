@@ -133,16 +133,20 @@ class Builder():
         self.x_r = x2
         self.y_r = y2
         self.form = form
-        self.hand_drawn_polys.append((self.form, x1, y1, x2, y2, None, self.marker))
-        self.constructPoly()
-        # turn on buttons to reset figure or delete last build polygon
-        self.parent.info_tree.btn_undo.setEnabled(True)
-        self.parent.toolBar.acn_reset_figure.setEnabled(True)
-        # draw the created polygon
-        self.drawPoly()
-        # bulk fill the info tree
-        self.fillInfoTree()
-        self.marker += 1
+        try:
+            self.constructPoly()
+        except TypeError:
+            pass
+        else:
+            self.hand_drawn_polys.append((self.form, x1, y1, x2, y2, None, self.marker))
+            # turn on buttons to reset figure or delete last build polygon
+            self.parent.info_tree.btn_undo.setEnabled(True)
+            self.parent.toolBar.acn_reset_figure.setEnabled(True)
+            # draw the created polygon
+            self.drawPoly()
+            # bulk fill the info tree
+            self.fillInfoTree()
+            self.marker += 1
 
     def printPolygon(self, polygon):
         self.polygon = polygon
