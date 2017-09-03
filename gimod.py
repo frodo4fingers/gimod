@@ -17,16 +17,12 @@ from pygimli.mplviewer import drawMeshBoundaries, drawMesh, drawPLC, drawModel
 
 from core import Builder, ImageTools
 from gui import InfoTree, MeshOptions, PlotWidget, PolyToolBar
-# from mpl import Helper
-
-# TODO: move meshing methods to MeshOptions
 
 
 class GIMod(QMainWindow):
 
     def __init__(self, parent=None):
         super(GIMod, self).__init__(parent)
-        print(self)
         self.initUI()
         self.image_tools = ImageTools(self)
 
