@@ -434,10 +434,6 @@
 <div class="viewcode-block" id="InfoTree.colorizeTreeItemHeaders"><a class="viewcode-back" href="../../gimod/gui.html#gui.infoTree.InfoTree.colorizeTreeItemHeaders">[docs]</a>    <span class="k">def</span> <span class="nf">colorizeTreeItemHeaders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Colorize the line that describes which polygon is described with the children listed below. Needs to happen afterwards by iterating through the content since the color range changes with the amount of ppolygons drawn.</span>
-
-<span class="sd">        Todo</span>
-<span class="sd">        ----</span>
-<span class="sd">        Extract the used colormap from the current figure</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tw_polys</span><span class="o">.</span><span class="n">topLevelItemCount</span><span class="p">()</span>
         <span class="c1"># &#39;None&#39; to get the default colormap</span>
@@ -530,7 +526,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">polyMarkers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">statusBar</span><span class="o">.</span><span class="n">clearMessage</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">drawPoly</span><span class="p">(</span><span class="n">fillTable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">polys</span><span class="o">=</span><span class="n">polys</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">drawPoly</span><span class="p">(</span><span class="n">polys</span><span class="o">=</span><span class="n">polys</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">setCursor</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">ArrowCursor</span><span class="p">)</span></div></div>
 </pre></div>
 

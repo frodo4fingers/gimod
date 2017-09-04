@@ -201,6 +201,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">imageClicked</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="ImageTools.getContours"><a class="viewcode-back" href="../../gimod/core.html#core.imagery.ImageTools.getContours">[docs]</a>    <span class="k">def</span> <span class="nf">getContours</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Take the passed image, b/w the image and make paths out of the contours.</span>
+
+<span class="sd">        Todo</span>
+<span class="sd">        ----</span>
+<span class="sd">        http://scikit-learn.org/stable/auto_examples/cluster/plot_face_ward_segmentation.html</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># read image</span>
         <span class="n">src</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fname</span><span class="p">)</span>
         <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
@@ -222,7 +229,6 @@
 
         <span class="c1"># draw initially</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">polysFromImage</span><span class="p">()</span></div>
-
 
 <div class="viewcode-block" id="ImageTools.polysFromImage"><a class="viewcode-back" href="../../gimod/core.html#core.imagery.ImageTools.polysFromImage">[docs]</a>    <span class="k">def</span> <span class="nf">polysFromImage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Take only the number of polys chosen in the spinbox.&quot;&quot;&quot;</span>
