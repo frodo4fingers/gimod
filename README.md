@@ -9,7 +9,8 @@ GIMod stands for **G**raphical **I**nterface for basic **Mod**el creation. It is
 + [OpenCV](http://opencv.org/downloads.html)
 
 ## HOWTO
-To see how it is used please read [http://gimod.readthedocs.io/en/latest/](http://gimod.readthedocs.io/en/latest/)
++ To see how it is used please read [http://gimod.readthedocs.io/en/latest/](http://gimod.readthedocs.io/en/latest/)
++ **BUT** I am currently not able to get all stuff to **rtfd**/**githubpages**.. so the Makefile will take care of that and you can use ``make doc`` and ``make show`` instead
 
 ## TODOs
 There are a lot. GIMod still is buggy at a few lines and i am on to that.
