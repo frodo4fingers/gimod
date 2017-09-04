@@ -17,6 +17,14 @@ gui\.infoTree module
     :undoc-members:
     :show-inheritance:
 
+gui\.meshWidget module
+----------------------
+
+.. automodule:: gui.meshWidget
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 gui\.plotWidget module
 ----------------------
 

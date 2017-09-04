@@ -5,25 +5,23 @@
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
 SPHINXPROJ    = GIMod
-SOURCEDIR     = ./doc
-BUILDDIR      = ./doc/_build
+SOURCEDIR     = docs
+BUILDDIR      = docs/_build
 
 # Put it first so that "make" without argument is like "make help".
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 api:
-	sphinx-apidoc -fMT --output-dir=doc/gui ./gimod
-	sphinx-apidoc -fMT --output-dir=doc/mpl ./gimod
-	sphinx-apidoc -fMT --output-dir=doc/core ./gimod
+	sphinx-apidoc -fMT --output-dir=$(SOURCEDIR)/gimod/ ./gui
+	sphinx-apidoc -fMT --output-dir=$(SOURCEDIR)/gimod/ ./mpl
+	sphinx-apidoc -fMT --output-dir=$(SOURCEDIR)/gimod/ ./core
 
 doc: FORCE
-	make clean
 	make api
-	make html
 
 show:
-	xdg-open "$(SOURCEDIR)"/_build/html/index.html
+	xdg-open $(SOURCEDIR)/_build/html/index.html
 
 .PHONY: help Makefile
 .PHONY: FORCE

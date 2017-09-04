@@ -19,7 +19,6 @@ GIMod stands for **G**\ raphical **I**\ nterface for basic **Mod**\ el creation.
    :maxdepth: 2
    :caption: Content:
 
-   gimod/gimod
    gimod/core
    gimod/mpl
    gimod/gui
