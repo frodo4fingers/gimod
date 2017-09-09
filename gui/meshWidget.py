@@ -211,7 +211,7 @@ class MeshOptions(QWidget):
             # http://pygimli.org/_examples_auto/modelling/plot_hybrid-mesh-2d.html?highlight=switches
 
         self.parent.statusBar.showMessage("generating mesh...")
-        self.mesh = createMesh(self.parent.builder.getPoly(), quality=self.spb_mesh_quality.value(
+        self.mesh = createMesh(self.parent.builder.polys(), quality=self.spb_mesh_quality.value(
         ), area=self.spb_cell_area.value(), smooth=self.smooth_method, switches=self.switches)
 
         if self.mesh_refine is True and self.cbx_mesh_refine.currentText() == "quadratic":
