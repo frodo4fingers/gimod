@@ -110,6 +110,17 @@ class GIMod(QMainWindow):
             content = v.read()
         QMessageBox.information(self, "About", content)
 
+    def exportPoly(self):
+        """Export the poly figure."""
+        export_poly = QFileDialog.getSaveFileName(
+            self, caption='Save Poly Figure')
+
+        # if export_poly:
+        if export_poly.endswith('.poly'):
+            writePLC(self.poly, export_poly)
+        else:
+            writePLC(self.poly, export_poly + '.poly')
+
 
 if __name__ == "__main__":
 

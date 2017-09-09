@@ -27,9 +27,9 @@ class InfoTree(QWidget):
         self.parent = parent
         self.figure = parent.plotWidget
 
-        self.setup()
+        self.setupWidget()
 
-    def setup(self):
+    def setupWidget(self):
         """
         Set up the QTreeWidget. Every Polygon holds some specs that are editable through QSpinBox and other widgets
         """
