@@ -29,11 +29,6 @@ class InfoTree(QWidget):
 
         self.setupWidget()
 
-        # connect the button signals
-        self.btn_redraw.clicked.connect(self.redrawTable)
-        self.btn_undo.clicked.connect(self.parent.builder.undoPoly)
-        self.btn_redo.clicked.connect(self.parent.builder.redoPoly)
-
     def setupWidget(self):
         """
         Set up the QTreeWidget. Every Polygon holds some specs that are

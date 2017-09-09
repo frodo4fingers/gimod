@@ -29,6 +29,34 @@ class GIMod(QMainWindow):
         # menu actions
         self.acn_aboutVerison.triggered.connect(self.aboutVersion)
 
+        # toolbar actions
+        self.toolBar.acn_image.triggered.connect(self.image_tools.imagery)
+        self.toolBar.acn_imageAsBackground.stateChanged.connect(self.image_tools.imageryBackground)
+        self.toolBar.acn_imageThreshold1.valueChanged.connect(self.image_tools.updateImagery)
+        self.toolBar.acn_imageThreshold2.valueChanged.connect(self.image_tools.updateImagery)
+        self.toolBar.acn_imageDensity.valueChanged.connect(self.image_tools.updateImagery)
+        self.toolBar.acn_imagePolys.valueChanged.connect(self.image_tools.polysFromImage)
+
+        self.toolBar.acn_polygonize.triggered.connect(self.builder.formPolygonFromFigure)
+
+        self.toolBar.acn_reset_figure.triggered.connect(self.builder.resetFigure)
+
+        self.toolBar.acn_world.triggered.connect(self.builder.formPolyWorld)
+        self.toolBar.acn_rectangle.triggered.connect(self.builder.formPolyRectangle)
+        self.toolBar.acn_circle.triggered.connect(self.builder.formPolyCircle)
+        self.toolBar.acn_line.triggered.connect(self.builder.formPolyLine)
+        self.toolBar.acn_polygon.triggered.connect(self.builder.formPolygon)
+        self.toolBar.acn_markerCheck.triggered.connect(self.builder.markersMove)
+
+        self.toolBar.acn_gridToggle.triggered.connect(self.builder.toggleGrid)
+        self.toolBar.acn_magnetizeGrid.triggered.connect(self.builder.magnetizeGrid)
+        self.toolBar.acn_magnetizePoly.triggered.connect(self.builder.magnetizePoly)
+
+
+        self.info_tree.btn_redraw.clicked.connect(self.info_tree.redrawTable)
+        self.info_tree.btn_undo.clicked.connect(self.builder.undoPoly)
+        self.info_tree.btn_redo.clicked.connect(self.builder.redoPoly)
+
     def initUI(self):
         """Set the GUI together from the other widgets."""
         # instanciate the status bar to prompt some information of what is
