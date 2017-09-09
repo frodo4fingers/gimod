@@ -27,11 +27,17 @@ class InfoTree(QWidget):
         self.parent = parent
         self.figure = parent.plotWidget
 
-        self.setup()
+        self.setupWidget()
 
-    def setup(self):
+        # connect the button signals
+        self.btn_redraw.clicked.connect(self.redrawTable)
+        self.btn_undo.clicked.connect(self.parent.builder.undoPoly)
+        self.btn_redo.clicked.connect(self.parent.builder.redoPoly)
+
+    def setupWidget(self):
         """
-        Set up the QTreeWidget. Every Polygon holds some specs that are editable through QSpinBox and other widgets
+        Set up the QTreeWidget. Every Polygon holds some specs that are
+        editable through QSpinBox and other widgets
         """
         # set up bold font for the list entry 'headers'
         self.bold = QFont()
@@ -344,8 +350,8 @@ class InfoTree(QWidget):
                 poly = plc.createPolygon(
                 verts=verts, area=float(p[2]), boundaryMarker=int(p[3]), isClosed=int(p[6]))  # leftDirection=int(p[4])
 
-                if len(self.parent.builder.newMarkers) != 0:
-                    markerPos = self.parent.builder.newMarkers[i][0]
+                if len(self.parent.builder.new_markers) != 0:
+                    markerPos = self.parent.builder.new_markers[i][0]
                 else:
                     markerPos = pg.center(verts)
 

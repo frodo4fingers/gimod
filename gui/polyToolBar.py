@@ -13,7 +13,7 @@ except ImportError:
 
 class PolyToolBar(QToolBar):
     """
-        Provides the toolbar with all actions to load, build, correct etc. a polygon
+    Provides the toolbar with all actions to load, build, correct etc. a polygon
     """
 
     def __init__(self, parent=None):
@@ -21,6 +21,29 @@ class PolyToolBar(QToolBar):
         self.parent = parent
 
         self.setupTools()
+
+        # connect actiosn to their functions
+        self.acn_image.triggered.connect(self.parent.image_tools.imagery)
+        self.acn_imageAsBackground.stateChanged.connect(self.parent.image_tools.imageryBackground)
+        self.acn_imageThreshold1.valueChanged.connect(self.parent.image_tools.updateImagery)
+        self.acn_imageThreshold2.valueChanged.connect(self.parent.image_tools.updateImagery)
+        self.acn_imageDensity.valueChanged.connect(self.parent.image_tools.updateImagery)
+        self.acn_imagePolys.valueChanged.connect(self.parent.image_tools.polysFromImage)
+
+        self.acn_polygonize.triggered.connect(self.parent.builder.formPolygonFromFigure)
+
+        self.acn_reset_figure.triggered.connect(self.parent.builder.resetFigure)
+
+        self.acn_world.triggered.connect(self.parent.builder.formPolyWorld)
+        self.acn_rectangle.triggered.connect(self.parent.builder.formPolyRectangle)
+        self.acn_circle.triggered.connect(self.parent.builder.formPolyCircle)
+        self.acn_line.triggered.connect(self.parent.builder.formPolyLine)
+        self.acn_polygon.triggered.connect(self.parent.builder.formPolygon)
+        self.acn_markerCheck.triggered.connect(self.parent.builder.markersMove)
+
+        self.acn_gridToggle.triggered.connect(self.parent.builder.toggleGrid)
+        self.acn_magnetizeGrid.triggered.connect(self.parent.builder.magnetizeGrid)
+        self.acn_magnetizePoly.triggered.connect(self.parent.builder.magnetizePoly)
 
     def setupTools(self):
         """Implement functionality to the toolbar."""
