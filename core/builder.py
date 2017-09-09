@@ -24,7 +24,6 @@ from pygimli.meshtools import createMesh, writePLC
 
 # TODO: skizze laden und verändern können im model builder
 # TODO: bild als hintergrund einstellen zum nachmalen
-# TODO: disable world after creation  # pun intended
 
 
 class Builder():
@@ -35,11 +34,12 @@ class Builder():
         self.figure = parent.plotWidget
         self.toolbar = parent.toolBar
         self.statusBar = parent.statusBar
-        self.marker = 1  # 0
+        self.marker = -1
         self.newMarkers = []
         self.polys = []
         self.hand_drawn_polys = []
         self.undone = []
+        self.undone_hand_drawn = []
         # self.imageClicked = True
         self.markersClicked = True
         self.gridClicked = True
@@ -128,6 +128,8 @@ class Builder():
         self.parent.statusBar.clearMessage()
 
     def printCoordinates(self, x1, y1, x2, y2, form):
+        # add to the marker for each created polygon
+        self.marker += 1
         self.x_p = x1
         self.y_p = y1
         self.x_r = x2
@@ -146,9 +148,10 @@ class Builder():
             self.drawPoly()
             # bulk fill the info tree
             self.fillInfoTree()
-            self.marker += 1
 
     def printPolygon(self, polygon):
+        # add to the marker for each created polygon
+        self.marker += 1
         self.polygon = polygon
         self.form = 'Polygon'
         self.hand_drawn_polys.append((self.form, None, None, None, None, polygon, self.marker))
@@ -160,7 +163,6 @@ class Builder():
         self.drawPoly()
         # bulk fill the info tree
         self.fillInfoTree()
-        self.marker += 1
 
     def constructPoly(self):
         if self.form == 'World':
@@ -191,6 +193,7 @@ class Builder():
         if self.parent.info_tree.rbtn_plotRegions.isChecked() is True:
             drawMesh(self.figure.axis, self.poly, fitView=False)
             self.figure.canvas.draw()
+        # if the attribute one is checked the mesh view is slightly more complicated:
         else:
             attrMap = self.zipUpMarkerAndAttributes()
             if attrMap:  # not empty
@@ -201,10 +204,10 @@ class Builder():
                 drawModel(self.figure.axis, meshTmp, tri=True, data=attrMap)
                 self.figure.canvas.draw()
             else:  # empty
-                QMessageBox.question(None, 'Whoops..' , "Your regions don't have any attributes to plot!", QMessageBox.Ok)
+                QMessageBox.question(None, 'Whoops..', "Your regions don't have any attributes to plot!", QMessageBox.Ok)
 
         if not self.mPolyClicked:
-            x, y =self.getNodes()
+            x, y = self.getNodes()
             self.mp.plotMagnets(x, y)
 
         self.enabelingToolBarFunctions()
@@ -240,7 +243,9 @@ class Builder():
 
     def fillInfoTree(self):
         """
-        Fill the tree view to the left that holds information about every polygon. Always fill from beginning so the marker gets set right with every new made polygon.
+        Fill the tree view to the left that holds information about every
+        polygon. Always fill from beginning so the marker gets set right with
+        every new made polygon.
         """
         self.parent.info_tree.tw_polys.clear()
         for entry in self.hand_drawn_polys:
@@ -362,17 +367,24 @@ class Builder():
             + same goes for the existent marker range
             + the hand drawn poly stuff needs to be respected too!!!
         """
-        self.undone.append(self.polys.pop())
-        # self.hand_drawn_polys.pop()
-        self.parent.info_tree.tw_polys.takeTopLevelItem(self.parent.info_tree.tw_polys.topLevelItemCount() - 1)
+        # set the marker down
         self.marker -= 1
+        # remove the last created polygon
+        self.undone.append(self.polys.pop())
+        # remove the parameters of the last created polygon
+        self.undone_hand_drawn.append(self.hand_drawn_polys.pop())
+        # remove last added entry from treewidget
+        self.parent.info_tree.tw_polys.takeTopLevelItem(self.parent.info_tree.tw_polys.topLevelItemCount() - 1)
+        # since the one removed wandered into the redo list, the button can now be enabled
         self.parent.info_tree.btn_redo.setEnabled(True)
         if not len(self.polys) == 0:
             self.drawPoly()
+            self.fillInfoTree()
         else:
             self.figure.axis.cla()
             self.figure.canvas.draw()
             self.parent.info_tree.btn_undo.setEnabled(False)
+            self.enabelingToolBarFunctions()
 
     def redoPoly(self):
         """
@@ -385,11 +397,14 @@ class Builder():
             + the hand drawn poly stuff needs to be respected too!!!
         """
         if len(self.undone) > 0:
+            # append the last undone back to the original
             self.polys.append(self.undone.pop())
+            self.hand_drawn_polys.append(self.undone_hand_drawn.pop())
             # self.hand_drawn_polys.pop()
             self.marker += 1
             self.drawPoly()
             self.fillInfoTree()
+
         if len(self.undone) == 0:
             self.parent.info_tree.btn_redo.setEnabled(False)
 
@@ -427,9 +442,6 @@ class Builder():
                     self.statusBar.showMessage("ERROR: some values seem to be string. int or float is needed")
 
         return attrMap
-
-    def getPoly(self):
-        return self.poly
 
 
 if __name__ == '__main__':

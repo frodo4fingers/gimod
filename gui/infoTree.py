@@ -31,7 +31,7 @@ class InfoTree(QWidget):
 
     def setup(self):
         """
-        Set up the QTreeWidget. Every Polygon holds some specs that are editable through QSpinBox and XXX
+        Set up the QTreeWidget. Every Polygon holds some specs that are editable through QSpinBox and other widgets
         """
         # set up bold font for the list entry 'headers'
         self.bold = QFont()
@@ -187,8 +187,8 @@ class InfoTree(QWidget):
         if form != 'Line':
             # insert marker
             a = QComboBox()
-            [a.addItem(str(m + 1)) for m in range(self.parent.builder.marker)]
-            a.setCurrentIndex(parent_marker - 1)
+            [a.addItem(str(m + 1)) for m in range(-1, self.parent.builder.marker)]
+            a.setCurrentIndex(parent_marker)
             marker = QTreeWidgetItem()
             marker.setText(0, "Marker:")
             twItem.addChild(marker)
