@@ -2,13 +2,13 @@
 # encoding: UTF-8
 
 try:
-    from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QLineEdit,  QPushButton, QStatusBar, QToolBar, QTabWidget, QSplitter, QAction, QMessageBox, QFileDialog, QMenu
-    from PyQt5.QtCore import QSize, Qt
+    from PyQt5.QtWidgets import QMainWindow, QApplication, QVBoxLayout, QSizePolicy, QStatusBar, QTabWidget, QSplitter, QAction, QMessageBox, QFileDialog, QMenu
+    from PyQt5.QtCore import Qt
     from PyQt5.QtGui import QIcon
 
 except ImportError:
-    from PyQt4.QtGui import QMainWindow, QWidget, QApplication, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QLineEdit,  QPushButton, QStatusBar, QToolBar, QTabWidget, QSplitter, QAction, QMessageBox, QIcon, QFileDialog, QMenu
-    from PyQt4.QtCore import QSize, Qt
+    from PyQt4.QtGui import QMainWindow, QApplication, QVBoxLayout, QSizePolicy, QStatusBar, QTabWidget, QSplitter, QAction, QMessageBox, QIcon, QFileDialog, QMenu
+    from PyQt4.QtCore import Qt
 
 import sys
 import pygimli as pg
@@ -20,8 +20,13 @@ from gui import InfoTree, MeshOptions, PlotWidget, PolyToolBar
 
 
 class GIMod(QMainWindow):
+    """The main class that holds all subclasses and design GIMod."""
 
     def __init__(self, parent=None):
+        """
+        Call parent class to receive full functionality, initialize the
+        layout of GIMod and connect all signals to their respective methods.
+        """
         super(GIMod, self).__init__(parent)
         self.initUI()
         self.image_tools = ImageTools(self)
@@ -59,7 +64,6 @@ class GIMod(QMainWindow):
         self.info_tree.btn_redraw.clicked.connect(self.info_tree.redrawTable)
         self.info_tree.btn_undo.clicked.connect(self.builder.undoPoly)
         self.info_tree.btn_redo.clicked.connect(self.builder.redoPoly)
-        # self.info_tree.btn_export.clicked.connect(self.exportPoly)
 
     def initUI(self):
         """Set the GUI together from the other widgets."""
@@ -90,9 +94,10 @@ class GIMod(QMainWindow):
         menu_about = self.menubar.addMenu("&About")
         menu_about.addAction(self.mb_aboutVerison)
 
-        # initialize the plot widget where everything will be drawn
+        # instanciate the plot widget where everything will be drawn
         self.plotWidget = PlotWidget(self)
-        # self.plotWidget.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+
+        # instanciate all the core functions
         self.builder = Builder(self)
 
         # instanciate the info table for the polygons
@@ -138,8 +143,16 @@ class GIMod(QMainWindow):
         # action to open a file
         self.mb_open_file = QAction(QIcon('icons/ic_open.svg'), "&Open File", self)
         self.mb_open_file.setStatusTip("Open a file and lets see if GIMod can handle it")
+        self.mb_open_file.setEnabled(False)
 
     def aboutVersion(self):
+        """
+        Read the file where the version script puts the version number.
+
+        Todo
+        ----
+        + just generate it on the fly instead of an extra file?!
+        """
         with open('version.json') as v:
             content = v.read()
         QMessageBox.information(self, "About", content)
@@ -157,16 +170,21 @@ class GIMod(QMainWindow):
 
     def exportMesh(self):
         """
-            export the final mesh
+        Export the final mesh.
+
+        Todo
+        ----
+        + implement submenus to mesh save for different formats
         """
-        export_mesh = QFileDialog.getSaveFileName(
+        filename = QFileDialog.getSaveFileName(
             self, caption="Save Mesh")[0]
-        print(export_mesh)
         # if export_poly:
-        if export_mesh.endswith(".bms"):
-            exportFenicsHDF5Mesh(self.mesh_opt.mesh, export_mesh)
+        if filename.endswith(".bms"):
+            self.mesh_opt.mesh.save(filename)
+            # exportFenicsHDF5Mesh(self.mesh_opt.mesh, filename)
         else:
-            exportFenicsHDF5Mesh(self.mesh_opt.mesh, export_mesh + ".bms")
+            self.mesh_opt.mesh.save(filename + '.bms')
+            # exportFenicsHDF5Mesh(self.mesh_opt.mesh, filename + ".bms")
 
     def openAnyFile(self):
         """
@@ -187,7 +205,7 @@ class GIMod(QMainWindow):
             pass
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     app.setApplicationName("GIMod")
