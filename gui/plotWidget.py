@@ -37,9 +37,7 @@ from matplotlib.figure import Figure
 
 
 class PlotWidget(QWidget):
-    """
-        Provides the standard matplotlib plot
-    """
+    """Provide the standard matplotlib plot."""
 
     def __init__(self, parent=None):
         super(PlotWidget, self).__init__(parent)
@@ -84,9 +82,7 @@ class PlotWidget(QWidget):
         self.setLayout(layout)
 
     # def zoomOut(self):
-    #     """
-    #         zoom Out of the current dimension
-    #     """
+    #     """Zoom Out of the current dimension."""
     #     x_dim = self.axis.get_xlim()
     #     x_dist = abs(x_dim[1] - x_dim[0])
     #     y_dim = self.axis.get_ylim()
@@ -97,9 +93,7 @@ class PlotWidget(QWidget):
     #     self.canvas.draw()
     #
     # def zoomIn(self):
-    #     """
-    #         zoom In of the current dimension
-    #     """
+    #     """Zoom In of the current dimension."""
     #     x_dim = self.axis.get_xlim()
     #     x_dist = abs(x_dim[1] - x_dim[0])
     #     y_dim = self.axis.get_ylim()
@@ -118,10 +112,4 @@ class PlotWidget(QWidget):
 
 
 if __name__ == '__main__':
-
-    import sys
-
-    app = QApplication(sys.argv)
-    ex = PlotWidget()
-    ex.show()
-    sys.exit(app.exec_())
+    pass

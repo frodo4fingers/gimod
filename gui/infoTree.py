@@ -19,7 +19,9 @@ import matplotlib.pyplot as plt
 
 class InfoTree(QWidget):
     """
-    This class resembles the information tree on the left side. It contains the parameters of every drawn polygon and holds some more widgets to edit and redraw these.
+    This class resembles the information tree on the left side. It contains the
+    parameters of every drawn polygon and holds some more widgets to edit and
+    redraw these.
     """
 
     def __init__(self, parent=None):
@@ -323,7 +325,10 @@ class InfoTree(QWidget):
 
     def colorizeTreeItemHeaders(self):
         """
-        Colorize the line that describes which polygon is described with the children listed below. Needs to happen afterwards by iterating through the content since the color range changes with the amount of ppolygons drawn.
+        Colorize the line that describes which polygon is described with the
+        children listed below. Needs to happen afterwards by iterating through
+        the content since the color range changes with the amount of ppolygons
+        drawn.
         """
         items = self.tw_polys.topLevelItemCount()
         # 'None' to get the default colormap
@@ -430,3 +435,7 @@ class InfoTree(QWidget):
         self.parent.statusbar.clearMessage()
         self.parent.builder.drawPoly(polys=polys)
         self.parent.setCursor(Qt.ArrowCursor)
+
+
+if __name__ == '__main__':
+    pass

@@ -1,16 +1,12 @@
-# TODO: current state of development... needs to be sorted out
 try:
-    from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QLineEdit,  QPushButton, QStatusBar, QToolBar, QTabWidget, QSplitter, QAction, QMessageBox
-    from PyQt5.QtCore import QSize, Qt
-    from PyQt5.QtGui import QIcon
+    from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QLineEdit,  QPushButton, QMessageBox
 
 except ImportError:
-    from PyQt4.QtGui import QMainWindow, QWidget, QApplication, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QLineEdit,  QPushButton, QStatusBar, QToolBar, QTabWidget, QSplitter, QAction, QMessageBox, QIcon
-    from PyQt4.QtCore import QSize, Qt
+    from PyQt4.QtGui import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QLineEdit,  QPushButton, QMessageBox
 
 from pygimli import show
-from pygimli.meshtools import createMesh, writePLC
-from pygimli.mplviewer import drawMeshBoundaries, drawMesh, drawPLC, drawModel
+from pygimli.meshtools import createMesh
+from pygimli.mplviewer import drawMeshBoundaries
 
 
 class MeshOptions(QWidget):
@@ -232,3 +228,7 @@ class MeshOptions(QWidget):
         self.parent.plotWidget.axis.set_ylim(
             self.parent.plotWidget.axis.get_ylim()[::-1])
         self.parent.plotWidget.canvas.draw()
+
+
+if __name__ == '__main__':
+    pass
