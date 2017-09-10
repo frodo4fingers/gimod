@@ -19,16 +19,16 @@ class SpanPoly(object):
         self.onPress = self.onPress
 
     def connect(self):
-        self.cidP = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
-        self.cidDP = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
-        self.cidM = self.figure.canvas.mpl_connect('motion_notify_event', self.onMotion)
+        self.cid_p = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
+        self.cid_dp = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
+        self.cid_m = self.figure.canvas.mpl_connect('motion_notify_event', self.onMotion)
         self.cid_r = self.figure.canvas.mpl_connect('button_release_event', self.onRelease)
 
     def disconnect(self):
-        self.figure.canvas.mpl_disconnect(self.cidP)
-        self.figure.canvas.mpl_disconnect(self.cidDP)
-        self.figure.canvas.mpl_disconnect(self.cidM)
-        self.figure.canvas.mpl_disconnect(self.cidR)
+        self.figure.canvas.mpl_disconnect(self.cid_p)
+        self.figure.canvas.mpl_disconnect(self.cid_dp)
+        self.figure.canvas.mpl_disconnect(self.cid_m)
+        self.figure.canvas.mpl_disconnect(self.cid_r)
 
     def onPress(self, event):
         # reset line for next click
@@ -44,14 +44,14 @@ class SpanPoly(object):
                 self.x = []
                 self.y = []
             else:  # append point to polygon
-                self.xP = event.xdata
-                self.yP = event.ydata
+                self.x_p = event.xdata
+                self.y_p = event.ydata
                 if self.parent.parent.toolBar.acn_magnetizePoly.isChecked() is True:
-                    if self.parent.mp.xP is not None:
-                        self.xP = self.parent.mp.xP
-                        self.yP = self.parent.mp.yP
-                self.x.append(self.xP)
-                self.y.append(self.yP)
+                    if self.parent.mp.x_p is not None:
+                        self.x_p = self.parent.mp.x_p
+                        self.y_p = self.parent.mp.y_p
+                self.x.append(self.x_p)
+                self.y.append(self.y_p)
                 self.line.set_data(self.x, self.y)
                 # self.line.axes.draw_artist(self.line)
                 self.figure.canvas.draw()
