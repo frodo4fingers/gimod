@@ -1,26 +1,22 @@
 #!/usr/bin/env python
 # encoding: UTF-8
 
-''' model builder components '''
 try:
-    from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QHBoxLayout, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QPushButton, QAction, QActionGroup, QTreeWidget, QTreeWidgetItem, QRadioButton, QFileDialog, QMessageBox
-    from PyQt5.QtCore import Qt, QSize
-    from PyQt5.QtGui import QIcon, QFont
+    from PyQt5.QtWidgets import QMessageBox
+    from PyQt5.QtCore import Qt
 
 except ImportError:
-    from PyQt4.QtGui import QWidget, QApplication, QVBoxLayout, QHBoxLayout, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QPushButton, QAction, QIcon, QFont, QActionGroup, QTreeWidget, QTreeWidgetItem, QRadioButton, QFileDialog, QMessageBox
-    from PyQt4.QtCore import Qt, QSize
+    from PyQt4.QtGui import QMessageBox
+    from PyQt4.QtCore import Qt
 
 from matplotlib import patches
 
 from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly, DraggablePoint, MagnetizePolygons
-# from core import ImageTools
-import numpy as np
 
 import pygimli as pg
-from pygimli.mplviewer import drawMesh, drawMeshBoundaries, drawModel, drawPLC
+from pygimli.mplviewer import drawMesh, drawMeshBoundaries, drawModel
 from pygimli.meshtools import polytools as plc
-from pygimli.meshtools import createMesh, writePLC
+from pygimli.meshtools import createMesh
 
 # TODO: skizze laden und verändern können im model builder
 # TODO: bild als hintergrund einstellen zum nachmalen
@@ -265,6 +261,7 @@ class Builder():
         Todo
         ----
         + get rid of the dummy flag for magnetizing the polygons nodes. use parent instead
+        + check if two polygons with same region marker have the same attribute
         """
         # merge all (given) polygons
         if to_merge:
@@ -570,10 +567,4 @@ class Builder():
 
 
 if __name__ == '__main__':
-
-    import sys
-
-    app = QApplication(sys.argv)
-    builderWin = Builder()
-    builderWin.show()
-    sys.exit(builderWin.exec_())
+    pass
