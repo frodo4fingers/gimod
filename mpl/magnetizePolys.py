@@ -14,7 +14,7 @@ class MagnetizePolygons():
     def __init__(self, parent, x, y):
         self.figure = parent.figure
         self.span = parent.span
-        self.statusBar = parent.statusBar
+        self.statusBar = parent.statusbar
         self.x = x
         self.y = y
         line, = self.figure.axis.plot([0], [0], 'o', c='#ff0000')
