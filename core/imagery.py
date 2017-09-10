@@ -16,10 +16,17 @@ except ModuleNotFoundError:
 
 class ImageTools():
     """
-    Provides the tools for contrast recognition with OpenCV and the algorithms to split that into multiple paths or set chosen picture as background.
+    Provide the tools for contrast recognition with OpenCV and the algorithms to split that into multiple paths or set chosen picture as background.
     """
 
     def __init__(self, parent=None):
+        """
+        Initialize the parent widgets of the toolbar.
+
+        Todo
+        ----
+        + get rid of the dummy flag imageClicked
+        """
         self.parent = parent
         self.statusbar = parent.statusbar
         self.threshold1 = parent.toolBar.acn_imageThreshold1.value()
@@ -38,7 +45,7 @@ class ImageTools():
 
         Todo
         ----
-        http://scikit-learn.org/stable/auto_examples/cluster/plot_face_ward_segmentation.html
+        maybe: http://scikit-learn.org/stable/auto_examples/cluster/plot_face_ward_segmentation.html
         """
         # read image
         src = cv2.imread(self.fname)
@@ -63,7 +70,7 @@ class ImageTools():
         self.polysFromImage()
 
     def polysFromImage(self):
-        """Take only the number of polys chosen in the spinbox."""
+        """Take the number of polys chosen in the spinbox."""
         cut_down = self.paths[:self.imagePolys.value()]
         self.contours = []
         for path in cut_down:
@@ -74,9 +81,7 @@ class ImageTools():
         self.dotDensityOfPolygons()
 
     def dotDensityOfPolygons(self):
-        """
-            takes every n-th tuple specified by imageDensity spinbox
-        """
+        """Take every n-th tuple specified by imageDensity spinbox."""
         self.contoursCutted = []
         for p in self.contours:
             self.contoursCutted.append([p[i] for i in range(0, len(p), self.polyDensity.value())])
@@ -84,21 +89,21 @@ class ImageTools():
         self.imagePlot()
 
     def imagePlot(self):
+        """Scatter plot all found paths from figure."""
         self.figure.axis.cla()
         for p in self.contoursCutted:
             self.figure.axis.scatter(*zip(*p), alpha=0.5, s=2)
         self.figure.canvas.draw()
 
     def setBackground(self):
-        """
-            set chosen image file as background to draw over
-        """
+        """Set chosen image file as background to draw over."""
         self.figure.axis.cla()
         img = plt.imread(self.fname)
         self.figure.axis.imshow(img, alpha=0.6)
         self.figure.canvas.draw()
 
     def imagery(self):
+        """Hide and show the widget for image threshold in the toolbar."""
         if self.imageClicked is True:
             # FIXME: cheeky piece of shit... wont accept given formats
             self.fname = QFileDialog.getOpenFileName(None, caption='choose sketch')[0]
@@ -118,9 +123,19 @@ class ImageTools():
             self.imageClicked = True
 
     def updateImagery(self):
+        """
+        GET RID OF THIS. but great reminder for how slow things are... this is called everytime something changes in the image threshold widget from the toolbar!!!!
+
+        Todo
+        ----
+        storm my brain to find a better and faster solution for this
+        """
         self.getContours()
 
     def imageryBackground(self):
+        """
+        Set chosen image as background of the figure so the traces can be drawn by hand. If chosen the rest is not needed.
+        """
         if self.parent.toolBar.acn_imageAsBackground.isChecked() is True:
             self.parent.toolBar.acn_imageThreshold1.setEnabled(False)
             self.parent.toolBar.acn_imageThreshold2.setEnabled(False)
