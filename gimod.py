@@ -99,12 +99,12 @@ class GIMod(QMainWindow):
         self.info_tree = InfoTree(self)
 
         # instanciate the mesh options tab to adjust the mesh parameters
-        self.mesh_options = MeshOptions(self)
+        self.mesh_opt = MeshOptions(self)
 
         tabBox = QTabWidget(self)
         tabBox.setTabPosition(QTabWidget.West)
-        tabBox.addTab(self.info_tree, "Polygons")
-        tabBox.addTab(self.mesh_options, "Mesh Options")
+        tabBox.addTab(self.info_tree, QIcon('icons/ic_info.svg'), "Polygons")
+        tabBox.addTab(self.mesh_opt, QIcon('icons/ic_mesh.svg'), "Mesh Options")
         # tabBox.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         v_plotWidget = QVBoxLayout()
         v_plotWidget.addWidget(self.plotWidget)
@@ -164,9 +164,9 @@ class GIMod(QMainWindow):
         print(export_mesh)
         # if export_poly:
         if export_mesh.endswith(".bms"):
-            exportFenicsHDF5Mesh(self.mesh_options.mesh, export_mesh)
+            exportFenicsHDF5Mesh(self.mesh_opt.mesh, export_mesh)
         else:
-            exportFenicsHDF5Mesh(self.mesh_options.mesh, export_mesh + ".bms")
+            exportFenicsHDF5Mesh(self.mesh_opt.mesh, export_mesh + ".bms")
 
     def openAnyFile(self):
         """
