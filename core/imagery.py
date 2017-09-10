@@ -21,7 +21,7 @@ class ImageTools():
 
     def __init__(self, parent=None):
         self.parent = parent
-        self.statusBar = parent.statusBar
+        self.statusbar = parent.statusbar
         self.threshold1 = parent.toolBar.acn_imageThreshold1.value()
         self.threshold2 = parent.toolBar.acn_imageThreshold2.value()
         self.imagePolys = parent.toolBar.acn_imagePolys
@@ -52,7 +52,7 @@ class ImageTools():
         paths = sorted(contours, key=cv2.contourArea)[::-1]
         # sort out those structures that are smaller than 6 dots, first one is frame
         self.paths = [i for i in paths if len(i) > 5][1:]
-        self.statusBar.showMessage("{} possible polygons found".format(len(self.paths)))
+        self.statusbar.showMessage("{} possible polygons found".format(len(self.paths)))
 
         # adjust the spinbox with number of polygons
         # TODO: get this out of here!!

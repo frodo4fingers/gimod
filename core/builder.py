@@ -142,7 +142,7 @@ class Builder():
         for i, contour in enumerate(self.parent.image_tools.contoursCutted):
             self.marker += 1
             # show progress in statusbar
-            self.parent.statusBar.showMessage("processing found polygons {}/{}".format(i, n_contours))
+            self.parent.statusbar.showMessage("processing found polygons {}/{}".format(i, n_contours))
             # construct poly
             self.constructPoly('Polygon', None, None, None, None, contour, self.marker)
 
@@ -151,7 +151,7 @@ class Builder():
         # fill the info tree as bulk
         for i, contour in enumerate(self.parent.image_tools.contoursCutted):
             # show progress in statusbar
-            self.parent.statusBar.showMessage("processing table entries {}/{}".format(i, n_contours))
+            self.parent.statusbar.showMessage("processing table entries {}/{}".format(i, n_contours))
             # fill the info tree as bulk
             self.parent.info_tree.fillTable(form='Polygon', polygon=contour, parent_marker=i)
 
