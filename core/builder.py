@@ -41,7 +41,7 @@ class Builder():
         self.parent = parent
         self.figure = parent.plotWidget
         self.toolbar = parent.toolBar
-        self.statusBar = parent.statusBar
+        self.statusbar = parent.statusbar
         # initialize the marker at -1 to get the starting polygon (WORLD *fingers crossed*) with a 0 marker
         self.marker = -1
         # new_markers holds the marker positions that were manually corrected with self.markersMove
@@ -153,13 +153,13 @@ class Builder():
             # show progress in statusbar
             self.parent.statusBar.showMessage("processing table entries {}/{}".format(i, n_contours))
             # fill the info tree as bulk
-            self.parent.info_tree.fillTable(form='Polygon', polygon=contour, parent_marker=i+1)
+            self.parent.info_tree.fillTable(form='Polygon', polygon=contour, parent_marker=i)
 
         # turn on buttons to reset figure or delete last build polygon
         self.parent.info_tree.btn_undo.setEnabled(True)
         self.parent.toolBar.acn_reset_figure.setEnabled(True)
         # change message in statusbar to info about the polygon
-        self.statusBar.showMessage(str(self.poly))
+        self.statusbar.showMessage(str(self.poly))
         self.parent.setCursor(Qt.ArrowCursor)
 
     def printCoordinates(self, x1, y1, x2, y2, form):
@@ -301,11 +301,8 @@ class Builder():
 
     def enabelingToolBarFunctions(self):
         """
-        After drawing a polygon check whether the ``world`` needs to be disabled after creation or the other tools if no world exists.
-
-        Todo
-        ----
-        After resetting the figure the connected signal from any polytool remains. Thats obviously a problem if one hits the canvas by accident.
+        After drawing a polygon check whether the ``world`` needs to be
+        disabled after creation or the other tools if no world exists.
         """
         # get the poly form as first position from every tuple
         existence = [poly[0] for poly in self.hand_drawn_polys]
@@ -319,6 +316,7 @@ class Builder():
             self.toolbar.acn_markerCheck.setEnabled(True)
             self.toolbar.acn_magnetizePoly.setEnabled(True)
             self.toolbar.acn_world.setChecked(False)
+            self.parent.mb_save_poly.setEnabled(True)
         else:
             self.toolbar.acn_world.setEnabled(True)
             self.toolbar.acn_rectangle.setEnabled(False)
@@ -327,8 +325,17 @@ class Builder():
             self.toolbar.acn_polygon.setEnabled(False)
             self.toolbar.acn_markerCheck.setEnabled(False)
             self.toolbar.acn_magnetizePoly.setEnabled(False)
-            # disconnect the last used polytool
-            self.span.disconnect()
+            self.parent.mb_save_poly.setEnabled(False)
+            try:
+                # disconnect the last used polytool
+                self.span.disconnect()
+            except AttributeError:
+                # landing here if handling creating polygons from picture since
+                # there isn't any self.span object from dragging a figure.
+                # using the opportunity instead to activate the marker checking
+                # function and the option to save as poly
+                self.toolbar.acn_markerCheck.setEnabled(True)
+                self.parent.mb_save_poly.setEnabled(True)
 
     def fillInfoTree(self):
         """
@@ -549,14 +556,14 @@ class Builder():
         attrMap = []
         for i, a in enumerate(self.parent.info_tree.polyAttributes):
             if a == '' or a == '\n':
-                self.statusBar.showMessage("ERROR: empty attributes can't be assigned!")
+                self.statusbar.showMessage("ERROR: empty attributes can't be assigned!")
             else:
                 try:
                     a = float(a)
-                    # self.statusBar.showMessage("{} is a float now".format(a))
+                    # self.statusbar.showMessage("{} is a float now".format(a))
                     attrMap.append([self.parent.info_tree.polyMarkers[i], a])
                 except ValueError:
-                    self.statusBar.showMessage("ERROR: some values seem to be string. int or float is needed")
+                    self.statusbar.showMessage("ERROR: some values seem to be string. int or float is needed")
 
         return attrMap
 
