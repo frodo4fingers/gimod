@@ -17,23 +17,25 @@ class SpanLine(object):
         self.onPress = self.onPress
 
     def connect(self):
-        self.cidP = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
-        self.cidR = self.figure.canvas.mpl_connect('button_release_event', self.onRelease)
+        self.cid_p = self.figure.canvas.mpl_connect(
+            'button_press_event', self.onPress)
+        self.cid_r = self.figure.canvas.mpl_connect(
+            'button_release_event', self.onRelease)
 
     def disconnect(self):
-        self.figure.canvas.mpl_disconnect(self.cidP)
-        self.figure.canvas.mpl_disconnect(self.cidR)
+        self.figure.canvas.mpl_disconnect(self.cid_p)
+        self.figure.canvas.mpl_disconnect(self.cid_r)
 
     def onPress(self, event):
         if event.button is 1:
-            self.xP = event.xdata
-            self.yP = event.ydata
+            self.x_p = event.xdata
+            self.y_p = event.ydata
             if self.parent.parent.toolBar.acn_magnetizePoly.isChecked() is True:
-                if self.parent.mp.xP is not None:
-                    self.xP = self.parent.mp.xP
-                    self.yP = self.parent.mp.yP
-            self.x.append(self.xP)
-            self.y.append(self.yP)
+                if self.parent.mp.x_p is not None:
+                    self.x_p = self.parent.mp.x_p
+                    self.y_p = self.parent.mp.y_p
+            self.x.append(self.x_p)
+            self.y.append(self.y_p)
             self.line.set_data(self.x, self.y)
             self.figure.canvas.draw()
             self.clicker += 1
@@ -41,7 +43,8 @@ class SpanLine(object):
     def onRelease(self, event):
         if self.clicker > 0:
             self.line.set_data([0], [0])
-            self.parent.printCoordinates(self.x[self.clicker - 1], self.y[self.clicker - 1], self.x[self.clicker], self.y[self.clicker], form="Line")
+            self.parent.printCoordinates(
+                self.x[self.clicker - 1], self.y[self.clicker - 1], self.x[self.clicker], self.y[self.clicker], form="Line")
 
 
 if __name__ == '__main__':

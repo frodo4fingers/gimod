@@ -24,16 +24,16 @@ class MagnetizePolygons():
         self.plotMagnets()
 
     def connect(self):
-        self.cidP = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
-        self.cidM = self.figure.canvas.mpl_connect('motion_notify_event', self.onMotion)
-        self.cidR = self.figure.canvas.mpl_connect('button_release_event', self.onRelease)
+        self.cid_p = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
+        self.cid_m = self.figure.canvas.mpl_connect('motion_notify_event', self.onMotion)
+        self.cid_r = self.figure.canvas.mpl_connect('button_release_event', self.onRelease)
 
     def disconnect(self):
         self.sc.remove()
         self.figure.canvas.draw()
-        self.figure.canvas.mpl_disconnect(self.cidP)
-        self.figure.canvas.mpl_disconnect(self.cidM)
-        self.figure.canvas.mpl_disconnect(self.cidR)
+        self.figure.canvas.mpl_disconnect(self.cid_p)
+        self.figure.canvas.mpl_disconnect(self.cid_m)
+        self.figure.canvas.mpl_disconnect(self.cid_r)
 
     def plotMagnets(self, x=None, y=None):
         """
@@ -57,9 +57,9 @@ class MagnetizePolygons():
         self.figure.canvas.blit(self.line.axes.bbox)
         try:
             dot = self.vicinity(event.xdata, event.ydata)
-            self.xM = dot[0]
-            self.yM = dot[1]
-            self.line.set_data(self.xM, self.yM)
+            self.x_m = dot[0]
+            self.y_m = dot[1]
+            self.line.set_data(self.x_m, self.y_m)
             self.figure.canvas.restore_region(self.background)
             self.line.axes.draw_artist(self.line)
             self.figure.canvas.blit(self.line.axes.bbox)
@@ -73,11 +73,11 @@ class MagnetizePolygons():
         try:
             dot = self.vicinity(event.xdata, event.ydata)
             if dot is not None:
-                self.xP = dot[0]
-                self.yP = dot[1]
+                self.x_p = dot[0]
+                self.y_p = dot[1]
             else:
-                self.xP = None
-                self.yP = None
+                self.x_p = None
+                self.y_p = None
         except (ValueError, TypeError):
             pass
 

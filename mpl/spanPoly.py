@@ -19,10 +19,14 @@ class SpanPoly(object):
         self.onPress = self.onPress
 
     def connect(self):
-        self.cid_p = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
-        self.cid_dp = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
-        self.cid_m = self.figure.canvas.mpl_connect('motion_notify_event', self.onMotion)
-        self.cid_r = self.figure.canvas.mpl_connect('button_release_event', self.onRelease)
+        self.cid_p = self.figure.canvas.mpl_connect(
+            'button_press_event', self.onPress)
+        self.cid_dp = self.figure.canvas.mpl_connect(
+            'button_press_event', self.onPress)
+        self.cid_m = self.figure.canvas.mpl_connect(
+            'motion_notify_event', self.onMotion)
+        self.cid_r = self.figure.canvas.mpl_connect(
+            'button_release_event', self.onRelease)
 
     def disconnect(self):
         self.figure.canvas.mpl_disconnect(self.cid_p)
@@ -40,7 +44,8 @@ class SpanPoly(object):
         if event.button is 1:
             # BUG: after creating ONE polygon by hand the second one wont draw the already clicked parts of itself
             if event.dblclick:  # close polygon
-                self.parent.printPolygon([[self.x[i], self.y[i]] for i in range(len(self.x))])
+                self.parent.printPolygon(
+                    [[self.x[i], self.y[i]] for i in range(len(self.x))])
                 self.x = []
                 self.y = []
             else:  # append point to polygon
@@ -58,7 +63,8 @@ class SpanPoly(object):
 
     def onMotion(self, event):
         try:  # to draw this stuff
-            self.motionLine.set_data((self.x[-1], event.xdata), (self.y[-1], event.ydata))
+            self.motionLine.set_data(
+                (self.x[-1], event.xdata), (self.y[-1], event.ydata))
             self.figure.canvas.restore_region(self.background)
             self.motionLine.axes.draw_artist(self.motionLine)
             self.figure.canvas.blit(self.motionLine.axes.bbox)
@@ -68,7 +74,8 @@ class SpanPoly(object):
     def onRelease(self, event):
         try:  # to drag the line with the cursor
             self.motionLine.set_animated(True)
-            self.background = self.figure.canvas.copy_from_bbox(self.motionLine.axes.bbox)
+            self.background = self.figure.canvas.copy_from_bbox(
+                self.motionLine.axes.bbox)
             self.motionLine.axes.draw_artist(self.motionLine)
             self.figure.canvas.blit(self.motionLine.axes.bbox)
         except (IndexError, TypeError):
