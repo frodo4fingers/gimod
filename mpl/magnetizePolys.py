@@ -16,7 +16,7 @@ class MagnetizePolygons():
         self.span = parent.span
         self.x = x
         self.y = y
-        line, = self.figure.axis.plot([0], [0], 'o', c='#ff0000')
+        line, = self.figure.axis.plot([], [], 'o', c='#ff0000')
         self.line = line
         self.background = None
 
@@ -63,7 +63,7 @@ class MagnetizePolygons():
             self.line.axes.draw_artist(self.line)
             self.figure.canvas.blit(self.line.axes.bbox)
         except (ValueError, TypeError):
-            self.line.set_data([0], [0])
+            self.line.set_data([], [])
             self.line.axes.draw_artist(self.line)
             self.line.set_animated(False)
             self.background = None
@@ -84,11 +84,11 @@ class MagnetizePolygons():
         try:
             dot = self.vicinity(event.xdata, event.ydata)
             if dot is not None:
-                self.xR = dot[0]
-                self.yR = dot[1]
+                self.x_r = dot[0]
+                self.y_r = dot[1]
             else:
-                self.xR = None
-                self.yR = None
+                self.x_r = None
+                self.y_r = None
         except (ValueError, TypeError):
             pass
 
