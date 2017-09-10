@@ -36,7 +36,6 @@ class MeshOptions(QWidget):
         self.chbx_switches.stateChanged.connect(self.changedChbxSwitches)
         self.chbx_mesh_attr.stateChanged.connect(self.showMesh)
         self.btn_mesh.clicked.connect(self.clickedBtnMesh)
-        self.btn_mesh_export.clicked.connect(self.meshExport)
 
     def setupWidget(self):
         """Design the layout of the tab that holds the options for tetgen."""
@@ -99,14 +98,6 @@ class MeshOptions(QWidget):
         self.btn_mesh = QPushButton("mesh")
         self.btn_mesh.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        # define a button to export the just generated mesh
-        self.btn_mesh_export = QPushButton()
-        self.btn_mesh_export.setToolTip("save as *.bms")
-        self.btn_mesh_export.setIcon(QIcon("icons/ic_save_black_24px.svg"))
-        self.btn_mesh_export.setSizePolicy(
-            QSizePolicy.Minimum, QSizePolicy.Minimum)
-        self.btn_mesh_export.setEnabled(False)
-
         # stack the labels in a vertical layout
         vbox_mesh_labels = QVBoxLayout()
         vbox_mesh_labels.addWidget(la_mesh_quality)
@@ -150,7 +141,7 @@ class MeshOptions(QWidget):
 
         hbox_mesh_n_export = QHBoxLayout()
         hbox_mesh_n_export.addWidget(self.btn_mesh)
-        hbox_mesh_n_export.addWidget(self.btn_mesh_export)
+        # hbox_mesh_n_export.addWidget(self.btn_mesh_export)
 
         vbox_mesh = QVBoxLayout()
         vbox_mesh.addLayout(hbox_mesh)
@@ -210,19 +201,19 @@ class MeshOptions(QWidget):
             # TODO make th switches work -->
             # http://pygimli.org/_examples_auto/modelling/plot_hybrid-mesh-2d.html?highlight=switches
 
-        self.parent.statusBar.showMessage("generating mesh...")
-        self.mesh = createMesh(self.parent.builder.polys(), quality=self.spb_mesh_quality.value(
+        self.parent.statusbar.showMessage("generating mesh...")
+        self.mesh = createMesh(self.parent.builder.polys, quality=self.spb_mesh_quality.value(
         ), area=self.spb_cell_area.value(), smooth=self.smooth_method, switches=self.switches)
 
         if self.mesh_refine is True and self.cbx_mesh_refine.currentText() == "quadratic":
-            self.parent.statusBar.showMessage("create quadratic...")
+            self.parent.statusbar.showMessage("create quadratic...")
             self.mesh = self.mesh.createP2()
         elif self.mesh_refine is True and self.cbx_mesh_refine.currentText() == "spatially":
-            self.parent.statusBar.showMessage("create spatially...")
+            self.parent.statusbar.showMessage("create spatially...")
             self.mesh = self.mesh.createH2()
 
-        self.parent.statusBar.showMessage(str(self.mesh))
-        self.btn_mesh_export.setEnabled(True)
+        self.parent.statusbar.showMessage(str(self.mesh))
+        self.parent.mb_save_mesh.setEnabled(True)
         self.showMesh()
 
     def showMesh(self):
@@ -232,24 +223,12 @@ class MeshOptions(QWidget):
             show(self.mesh, pg.solver.parseArgToArray(self.attr_map, self.mesh.cellCount(
             ), self.mesh), ax=self.parent.plotWidget.axis)
             show(drawMeshBoundaries(self.parent.plotWidget.axis, self.mesh,
-                hideMesh=False),
-                ax=self.parent.plotWidget.axis,
-                fillRegion=False)
+                                    hideMesh=False),
+                 ax=self.parent.plotWidget.axis,
+                 fillRegion=False)
         else:
             show(self.mesh, ax=self.parent.plotWidget.axis)
 
-        self.parent.plotWidget.axis.set_ylim(self.parent.plotWidget.axis.get_ylim()[::-1])
+        self.parent.plotWidget.axis.set_ylim(
+            self.parent.plotWidget.axis.get_ylim()[::-1])
         self.parent.plotWidget.canvas.draw()
-
-    def meshExport(self):
-        """
-            export the final mesh
-        """
-        export_mesh = QFileDialog.getSaveFileName(
-            self, caption="Save Mesh")
-
-        # if export_poly:
-        if export_mesh.endswith(".bms"):
-            writePLC(self.mesh, export_mesh)
-        else:
-            writePLC(self.mesh, export_mesh + ".bms")
