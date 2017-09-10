@@ -12,7 +12,7 @@ except ImportError:
 
 import sys
 import pygimli as pg
-from pygimli.meshtools import createMesh, exportPLC, exportFenicsHDF5Mesh
+from pygimli.meshtools import createMesh, exportPLC, exportFenicsHDF5Mesh, readPLC
 from pygimli.mplviewer import drawMeshBoundaries, drawMesh, drawPLC, drawModel
 
 from core import Builder, ImageTools
@@ -28,6 +28,10 @@ class GIMod(QMainWindow):
 
         # menu actions
         self.mb_aboutVerison.triggered.connect(self.aboutVersion)
+
+        self.mb_open_file.triggered.connect(self.openAnyFile)
+        self.mb_save_poly.triggered.connect(self.exportPoly)
+        self.mb_save_mesh.triggered.connect(self.exportMesh)
 
         # toolbar actions
         self.toolBar.acn_image.triggered.connect(self.image_tools.imagery)
@@ -57,9 +61,6 @@ class GIMod(QMainWindow):
         self.info_tree.btn_redo.clicked.connect(self.builder.redoPoly)
         # self.info_tree.btn_export.clicked.connect(self.exportPoly)
 
-        # mesh/poly export
-        # self.mesh_options.btn_mesh_export.clicked.connect(self.exportMesh)
-
     def initUI(self):
         """Set the GUI together from the other widgets."""
         # instanciate the status bar to prompt some information of what is
@@ -76,10 +77,14 @@ class GIMod(QMainWindow):
         self.menuBarItems()
 
         menu_file = self.menubar.addMenu("&File")
+        # menu_file_open = QMenu("&Open", self)
+        # menu_file_open.addAction(self.mb_open_file)
         menu_file_save = QMenu("&Save", self)
         menu_file_save.addAction(self.mb_save_poly)
         menu_file_save.addAction(self.mb_save_mesh)
 
+        menu_file.addAction(self.mb_open_file)
+        menu_file.addSeparator()
         menu_file.addMenu(menu_file_save)
 
         menu_about = self.menubar.addMenu("&About")
@@ -98,8 +103,8 @@ class GIMod(QMainWindow):
 
         tabBox = QTabWidget(self)
         tabBox.setTabPosition(QTabWidget.West)
-        tabBox.addTab(self.info_tree, "poly properties")
-        tabBox.addTab(self.mesh_options, "mesh options")
+        tabBox.addTab(self.info_tree, "Polygons")
+        tabBox.addTab(self.mesh_options, "Mesh Options")
         # tabBox.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         v_plotWidget = QVBoxLayout()
         v_plotWidget.addWidget(self.plotWidget)
@@ -118,7 +123,7 @@ class GIMod(QMainWindow):
         self.show()
 
     def menuBarItems(self):
-        """Create all entries visible in the menubar and submenus."""
+        """Create all entries visible in the menubar and its submenus."""
         # instanciate entries for "About"
         self.mb_aboutVerison = QAction("Version", self)
         # instanciate entries for "File"
@@ -130,6 +135,9 @@ class GIMod(QMainWindow):
         self.mb_save_mesh = QAction(QIcon('icons/ic_save.svg'), '&Mesh', self)
         self.mb_save_mesh.setStatusTip("Save the generated mesh file")
         self.mb_save_mesh.setEnabled(False)
+        # action to open a file
+        self.mb_open_file = QAction(QIcon('icons/ic_open.svg'), "&Open File", self)
+        self.mb_open_file.setStatusTip("Open a file and lets see if GIMod can handle it")
 
     def aboutVersion(self):
         with open('version.json') as v:
@@ -160,6 +168,24 @@ class GIMod(QMainWindow):
         else:
             exportFenicsHDF5Mesh(self.mesh_options.mesh, export_mesh + ".bms")
 
+    def openAnyFile(self):
+        """
+        Open a qt filedialogbox and open a file.
+
+        Todo
+        ----
+        + open a poly
+            + strip down the polyfile to fill the treewidget with editable info
+        + open a picture
+        + open a mesh
+        """
+        to_open = QFileDialog.getOpenFileName(self, caption="Open File")[0]
+        if to_open:
+            self.builder.poly = readPLC(to_open)
+            self.builder.drawPoly(to_merge=False)
+        else:
+            pass
+
 
 if __name__ == "__main__":
 
@@ -167,7 +193,6 @@ if __name__ == "__main__":
     app.setApplicationName("GIMod")
 
     main = GIMod()
-    # main.resize(600, 600)
     main.show()
 
     sys.exit(app.exec_())

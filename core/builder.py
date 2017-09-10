@@ -253,7 +253,7 @@ class Builder():
         elif form == 'Polygon':
             self.polys.append(plc.createPolygon(polygon, marker=marker, isClosed=True))
 
-    def drawPoly(self, polys=None):
+    def drawPoly(self, polys=None, to_merge=True):
         """
         Merge all created polygons and check for different flags to show the result.
 
@@ -267,11 +267,12 @@ class Builder():
         + get rid of the dummy flag for magnetizing the polygons nodes. use parent instead
         """
         # merge all (given) polygons
-        if polys is None:
-            self.poly = plc.mergePLC(self.polys)
-        else:
-            self.poly = plc.mergePLC(polys)
-        self.figure.axis.cla()
+        if to_merge:
+            if polys is None:
+                self.poly = plc.mergePLC(self.polys)
+            else:
+                self.poly = plc.mergePLC(polys)
+            self.figure.axis.cla()
 
         # check for the region plot option in treeview functions below the table
         if self.parent.info_tree.rbtn_plotRegions.isChecked() is True:
