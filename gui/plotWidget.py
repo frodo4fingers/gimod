@@ -40,6 +40,14 @@ class PlotWidget(QWidget):
     """Provide the standard matplotlib plot."""
 
     def __init__(self, parent=None):
+        """
+        Initialize the widget itself and call super class to get the functionality of QWidget.
+
+        Parameters
+        ----------
+        parent: <__main__.GIMod object>
+            Every widget that needs to be accessed is called in :class:`~GIMod`
+        """
         super(PlotWidget, self).__init__(parent)
 
         # a figure instance to plot on

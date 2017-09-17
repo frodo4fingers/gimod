@@ -4,13 +4,29 @@
 
 class DraggablePoint():
     """
-    thank you very much:
+    Provide the functionality to plot a circle for each polygon at the position
+    of the region marker. Thank you very much:
     http://stackoverflow.com/questions/21654008/matplotlib-drag-overlapping-points-interactively
+
+    Todo
+    ----
+    Make points depend on pixel width not a "random size"
     """
     lock = None  # only one can be animated at a time
 
     def __init__(self, point=None, marker=None, center=None):
-        # print("dp init")
+        """
+        Initialize all necessary variables.
+
+        Parameters
+        ----------
+        point: <matplotlib.patches.Circle>
+            A dot marking the position of the region marker
+        marker: int
+            Integer representing the marker region
+        center: RVector3
+            Position of the region marker
+        """
         self.point = point
         self.press = None
         self.background = None
@@ -18,17 +34,25 @@ class DraggablePoint():
         self.marker = marker
         self.params = (self.marker, self.center)
         self.dict = {}
-        self.on_press = self.on_press
+        self.onPress = self.onPress
 
     def connect(self):
-        """
-            connect to all the events we need
-        """
-        self.cidpress = self.point.figure.canvas.mpl_connect('button_press_event', self.on_press)
-        self.cidrelease = self.point.figure.canvas.mpl_connect('button_release_event', self.on_release)
-        self.cidmotion = self.point.figure.canvas.mpl_connect('motion_notify_event', self.on_motion)
+        """Connect to all the events needed."""
+        self.cid_p = self.point.figure.canvas.mpl_connect(
+            'button_press_event', self.onPress)
+        self.cid_r = self.point.figure.canvas.mpl_connect(
+            'button_release_event', self.onRelease)
+        self.cid_m = self.point.figure.canvas.mpl_connect(
+            'motion_notify_event', self.onMotion)
 
-    def on_press(self, event):
+    def disconnect(self):
+        """Disconnect all the stored connection ids."""
+        self.point.figure.canvas.mpl_disconnect(self.cid_p)
+        self.point.figure.canvas.mpl_disconnect(self.cid_r)
+        self.point.figure.canvas.mpl_disconnect(self.cid_m)
+
+    def onPress(self, event):
+        """Start the process to drag it along if a dot is hit."""
         # if press out ouf point boundary
         if event.inaxes != self.point.axes:
             return
@@ -51,7 +75,8 @@ class DraggablePoint():
         # and blit just the redrawn area
         canvas.blit(axes.bbox)
 
-    def on_motion(self, event):
+    def onMotion(self, event):
+        """Move the dot under the cursor and let it be dragged until release."""
         if DraggablePoint.lock is not self:
             return
         if event.inaxes != self.point.axes:
@@ -59,7 +84,8 @@ class DraggablePoint():
         self.point.center, xpress, ypress = self.press
         dx = event.xdata - xpress
         dy = event.ydata - ypress
-        self.point.center = (self.point.center[0]+dx, self.point.center[1]+dy)
+        self.point.center = (
+            self.point.center[0] + dx, self.point.center[1] + dy)
 
         canvas = self.point.figure.canvas
         axes = self.point.axes
@@ -70,10 +96,8 @@ class DraggablePoint():
         # blit just the redrawn area
         canvas.blit(axes.bbox)
 
-    def on_release(self, event):
-        """
-            on release we reset the press data
-        """
+    def onRelease(self, event):
+        """Reset the press data on release."""
         if DraggablePoint.lock is not self:
             return
         self.press = None
@@ -89,15 +113,16 @@ class DraggablePoint():
 
     def returnValue(self):
         """
-            added by myself to get the final marker position after movement out of the class objects
+        Get the final position of the marker dot out of the object.
+
+        Returns
+        -------
+        dict()
+            Containing the dot's center (x, y) with region marker as key
         """
         self.dict[self.marker] = self.point.center
         return self.dict
 
-    def disconnect(self):
-        """
-            disconnect all the stored connection ids
-        """
-        self.point.figure.canvas.mpl_disconnect(self.cidpress)
-        self.point.figure.canvas.mpl_disconnect(self.cidrelease)
-        self.point.figure.canvas.mpl_disconnect(self.cidmotion)
+
+if __name__ == '__main__':
+    pass

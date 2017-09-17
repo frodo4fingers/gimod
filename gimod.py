@@ -121,7 +121,7 @@ class GIMod(QMainWindow):
 
         self.setCentralWidget(splitter)
 
-        self.setGeometry(200, 100, 1000, 600)
+        self.setGeometry(1500, 100, 1000, 600)
         # window name
         self.setWindowTitle("GIMod")
         self.setWindowIcon(QIcon('icons/logo.png'))
@@ -159,6 +159,7 @@ class GIMod(QMainWindow):
 
     def exportPoly(self):
         """Export the poly figure."""
+        print("hurensohn")
         export_poly = QFileDialog.getSaveFileName(
             self, caption='Save Poly Figure')[0]
 

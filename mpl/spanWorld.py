@@ -2,12 +2,19 @@
 # encoding: UTF-8
 
 from matplotlib.patches import Rectangle
-# BUG: cant create world twice e.g. after undoing the creation due to false dimension it cant be done a second time... shame
 
 
-class SpanWorld(object):
+class SpanWorld():
+    """Provide the visualization for creating a PolyWorld."""
 
     def __init__(self, parent=None):
+        """
+        Initialize all important variables for matplotlib drawing.
+
+        Parameters
+        ----------
+        parent: :class:`core.builder.Builder`
+        """
         self.parent = parent
         self.figure = self.parent.figure
         # empty rectangle
@@ -17,17 +24,20 @@ class SpanWorld(object):
         self.onPress = self.onPress
 
     def connect(self):
+        """Connect all events needed for line drawing and 'preview'."""
         self.cid_p = self.figure.canvas.mpl_connect("button_press_event", self.onPress)
         self.cid_m = self.figure.canvas.mpl_connect("motion_notify_event", self.onMotion)
         self.cid_r = self.figure.canvas.mpl_connect("button_release_event", self.onRelease)
 
     def disconnect(self):
+        """Disconnect all the stored connection ids."""
         self.figure.canvas.mpl_disconnect(self.cid_p)
         self.figure.canvas.mpl_disconnect(self.cid_m)
         self.figure.canvas.mpl_disconnect(self.cid_r)
 
     def onPress(self, event):
-        if event.button is 1:
+        """Collect the data of the starting corner of the rectangle."""
+        if event.button is 1:  # left mouse button
             self.x_p = event.xdata
             self.y_p = event.ydata
             self.rect.set_animated(True)
@@ -37,7 +47,9 @@ class SpanWorld(object):
             self.figure.canvas.blit(self.rect.axes.bbox)
 
     def onMotion(self, event):
-        if event.inaxes != self.rect.axes: return
+        """Resize the helper rectangle while spanning."""
+        if event.inaxes != self.rect.axes:
+            return
         try:
             self.x_m = event.xdata
             self.y_m = event.ydata
@@ -48,11 +60,11 @@ class SpanWorld(object):
             self.figure.canvas.restore_region(self.background)
             self.rect.axes.draw_artist(self.rect)
             self.figure.canvas.blit(self.rect.axes.bbox)
-
         except (AttributeError, TypeError):
             pass
 
     def onRelease(self, event):
+        """Restore the canvas and empty the rectangles data."""
         try:
             self.x_r = event.xdata
             self.y_r = event.ydata
@@ -63,8 +75,8 @@ class SpanWorld(object):
             self.rect.set_animated(False)
             self.background = None
             self.figure.canvas.draw()
+            # send rectangle data to builder
             self.parent.printCoordinates(self.x_p, self.y_p, self.x_r, self.y_r, form='World')
-
         except AttributeError:
             pass
 

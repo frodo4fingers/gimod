@@ -295,6 +295,7 @@ class Builder():
             x, y = self.getNodes()
             self.mp.plotMagnets(x, y)
 
+        self.parent.statusbar.showMessage(str(self.poly))
         self.enabelingToolBarFunctions()
 
     def enabelingToolBarFunctions(self):

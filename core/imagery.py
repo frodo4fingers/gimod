@@ -93,6 +93,7 @@ class ImageTools():
         self.figure.axis.cla()
         for p in self.contoursCutted:
             self.figure.axis.scatter(*zip(*p), alpha=0.5, s=2)
+        # self.figure.axis.set_ylim(self.figure.axis.get_ylim()[::-1])
         self.figure.canvas.draw()
 
     def setBackground(self):

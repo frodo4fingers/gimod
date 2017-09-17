@@ -225,8 +225,8 @@ class MeshOptions(QWidget):
         else:
             show(self.mesh, ax=self.parent.plotWidget.axis)
 
-        self.parent.plotWidget.axis.set_ylim(
-            self.parent.plotWidget.axis.get_ylim()[::-1])
+        # self.parent.plotWidget.axis.set_ylim(
+        #     self.parent.plotWidget.axis.get_ylim()[::-1])
         self.parent.plotWidget.canvas.draw()
 
 

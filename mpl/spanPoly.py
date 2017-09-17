@@ -1,24 +1,41 @@
 #!/usr/bin/env python
 # encoding: UTF-8
 
-from matplotlib.lines import Line2D
 
-
-class SpanPoly(object):
+class SpanPoly():
+    """Provide the visualization for creating a manually drawn Polygon."""
 
     def __init__(self, parent=None):
+        """
+        Initialize all important variables for matplotlib drawing.
+
+        Parameters
+        ----------
+        parent: :class:`core.builder.Builder`
+        """
         self.parent = parent
         self.figure = parent.figure
+        self.setAllComponents()
+
+    def setAllComponents(self):
+        """
+        Set helper line, the line that assembles Polygon parts and the storages
+        lists for establishing those lines.
+        """
+        # helper line to draw between clicks
         motionLine, = self.figure.axis.plot([0], [0], lw=0.5)
+        self.motionLine = motionLine
+        # actual line that will be staying and form the pre-poly
         line, = self.figure.axis.plot([0], [0], c='black')
+        self.line = line
+        # store the clicked data points in lists
         self.x = []
         self.y = []
-        self.line = line
-        self.motionLine = motionLine
         self.background = None
         self.onPress = self.onPress
 
     def connect(self):
+        """Connect all events needed for line drawing and 'preview'."""
         self.cid_p = self.figure.canvas.mpl_connect(
             'button_press_event', self.onPress)
         self.cid_dp = self.figure.canvas.mpl_connect(
@@ -29,39 +46,48 @@ class SpanPoly(object):
             'button_release_event', self.onRelease)
 
     def disconnect(self):
+        """Disconnect all the stored connection ids."""
         self.figure.canvas.mpl_disconnect(self.cid_p)
         self.figure.canvas.mpl_disconnect(self.cid_dp)
         self.figure.canvas.mpl_disconnect(self.cid_m)
         self.figure.canvas.mpl_disconnect(self.cid_r)
 
     def onPress(self, event):
+        """
+        Store the data of first click and enable the drawing of the helper
+        line. Clsoing the polygon happens with doubleclick that sends the x and
+        y values to the builder.
+        """
         # reset line for next click
         self.motionLine.set_data([0], [0])
         self.background = None
         self.motionLine.set_animated(False)
         self.figure.canvas.draw()
 
-        if event.button is 1:
-            # BUG: after creating ONE polygon by hand the second one wont draw the already clicked parts of itself
+        if event.button is 1:  # left mouse button
             if event.dblclick:  # close polygon
                 self.parent.printPolygon(
                     [[self.x[i], self.y[i]] for i in range(len(self.x))])
-                self.x = []
-                self.y = []
+                # reset the necessary components
+                self.setAllComponents()
+
             else:  # append point to polygon
                 self.x_p = event.xdata
                 self.y_p = event.ydata
-                if self.parent.parent.toolBar.acn_magnetizePoly.isChecked() is True:
+                # snap current position to nearest node if magnetized
+                # this will override the just collected event data
+                if self.parent.parent.toolBar.acn_magnetizePoly.isChecked():
                     if self.parent.mp.x_p is not None:
                         self.x_p = self.parent.mp.x_p
                         self.y_p = self.parent.mp.y_p
                 self.x.append(self.x_p)
                 self.y.append(self.y_p)
+                # draw the edge between two points
                 self.line.set_data(self.x, self.y)
-                # self.line.axes.draw_artist(self.line)
                 self.figure.canvas.draw()
 
     def onMotion(self, event):
+        """Set the data of cursor motion to the helper line."""
         try:  # to draw this stuff
             self.motionLine.set_data(
                 (self.x[-1], event.xdata), (self.y[-1], event.ydata))
@@ -72,6 +98,7 @@ class SpanPoly(object):
             pass
 
     def onRelease(self, event):
+        """Reset the data of the motionLine to draw it from scratch."""
         try:  # to drag the line with the cursor
             self.motionLine.set_animated(True)
             self.background = self.figure.canvas.copy_from_bbox(
