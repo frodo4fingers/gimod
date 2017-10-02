@@ -17,6 +17,7 @@ api:
 
 doc: FORCE
 	make api
+	make html
 
 show:
 	xdg-open _build/html/index.html

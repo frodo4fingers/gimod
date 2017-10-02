@@ -7,3 +7,6 @@ examples/
 mpl_examples/
 tests/
 version.sh
+docs/_build/
+docs/gimod/
+git_version.sh
