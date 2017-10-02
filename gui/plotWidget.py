@@ -114,8 +114,8 @@ class PlotWidget(QWidget):
     def resetFigure(self):
         """Set contents margin to start layout after clearing the figures contents."""
         self.axis.cla()
-        self.axis.set_xlim(-1, 1)
-        self.axis.set_ylim(-1, 1)
+        self.axis.set_xlim(-30, 30)
+        self.axis.set_ylim(-30, 0)
         self.figure.canvas.draw()
 
 
