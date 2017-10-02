@@ -381,34 +381,61 @@ class InfoTree(QWidget):
                             i).child(k).text(1))
             polyMeta.append(meta)
 
+        # the lists are being called in builders zipUpMarkerAndAttributes to
+        # establish a map to color the mesh
         self.polyAttributes = []
         self.polyMarkers = []
         polys = []
         for i, p in enumerate(polyMeta):
             if p[0] == 'World':
                 polys.append(plc.createWorld(
-                    start=[float(p[1]), float(p[2])], end=[float(p[3]), float(p[4])], marker=int(p[5]), area=float(p[6])
+                    start=[float(p[1]), float(p[2])],
+                    end=[float(p[3]), float(p[4])],
+                    marker=int(p[5]),
+                    area=float(p[6])
                 ))
                 self.polyAttributes.append(p[7])
                 self.polyMarkers.append(int(p[5]))
 
             elif p[0] == 'Rectangle':
                 polys.append(plc.createRectangle(
-                    start=[float(p[1]), float(p[2])], end=[float(p[3]), float(p[4])], marker=int(p[5]), area=float(p[6]), boundaryMarker=int(p[7]), isHole=int(p[9]), isClosed=int(p[10])
+                    start=[float(p[1]), float(p[2])],
+                    end=[float(p[3]), float(p[4])],
+                    marker=int(p[5]),
+                    area=float(p[6]),
+                    boundaryMarker=int(p[7]),
+                    isHole=int(p[9]),
+                    isClosed=int(p[10])
                 ))  # leftDirection=int(p[8])
                 self.polyAttributes.append(p[11])
                 self.polyMarkers.append(int(p[5]))
 
             elif p[0] == 'Circle':
                 polys.append(plc.createCircle(
-                    pos=tuple(np.asarray(p[1].split(', '), dtype=float)), radius=float(p[2]), segments=int(p[3]), start=float(p[4]), end=float(p[5]), marker=int(p[6]), area=float(p[7]), boundaryMarker=int(p[8]), leftDirection=int(p[9]), isHole=int(p[10]), isClosed=int(p[11])
+                    pos=tuple(np.asarray(p[1].split(', '),
+                    dtype=float)), radius=float(p[2]),
+                    segments=int(p[3]),
+                    start=float(p[4]),
+                    end=float(p[5]),
+                    marker=int(p[6]),
+                    area=float(p[7]),
+                    boundaryMarker=int(p[8]),
+                    leftDirection=int(p[9]),
+                    isHole=int(p[10]),
+                    isClosed=int(p[11])
                 ))
                 self.polyAttributes.append(p[12])
                 self.polyMarkers.append(int(p[6]))
 
             elif p[0] == 'Line':
+                for i in p:
+                    print(i)
                 polys.append(plc.createLine(
-                    start=[float(p[1]), float(p[2])], end=[float(p[3]), float(p[4])], segments=int(p[5]), boundaryMarker=int(p[6]), leftDirection=int(p[7])
+                    start=[float(p[1]), float(p[2])],
+                    end=[float(p[3]), float(p[4])],
+                    segments=int(p[5]),
+                    boundaryMarker=int(p[6]),
+                    leftDirection=int(p[7])
                 ))
             elif p[0] == 'Polygon':
                 # meh..
@@ -417,17 +444,22 @@ class InfoTree(QWidget):
                 verts = [[float(vertStr[i]), float(vertStr[i + 1])]
                          for i in range(0, len(vertStr), 2)]
                 poly = plc.createPolygon(
-                    verts=verts, area=float(p[2]), boundaryMarker=int(p[3]), isClosed=int(p[6]))  # leftDirection=int(p[4])
+                    verts=verts,
+                    area=float(p[2]),
+                    boundaryMarker=int(p[3]),
+                    isClosed=int(p[6]
+                ))  # leftDirection=int(p[4])
 
                 if len(self.parent.builder.new_markers) != 0:
-                    markerPos = self.parent.builder.new_markers[i][0]
+                    marker_pos = self.parent.builder.new_markers[i][0]
                 else:
-                    markerPos = pg.center(verts)
+                    # take the position from the existing polys
+                    marker_pos = list(self.parent.builder.polys[i].regionMarker()[0])[:2]
 
                 if int(p[5]) == 1:
-                    pg.Mesh.addHoleMarker(poly, markerPos)
+                    pg.Mesh.addHoleMarker(poly, marker_pos)
                 else:
-                    pg.Mesh.addRegionMarker(poly, markerPos, marker=int(p[1]))
+                    pg.Mesh.addRegionMarker(poly, marker_pos, marker=int(p[1]))
                 polys.append(poly)
                 self.polyAttributes.append(p[8])
                 self.polyMarkers.append(int(p[1]))
