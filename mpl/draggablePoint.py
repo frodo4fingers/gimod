@@ -14,7 +14,7 @@ class DraggablePoint():
     """
     lock = None  # only one can be animated at a time
 
-    def __init__(self, point=None, marker=None, center=None):
+    def __init__(self, point, marker, center):
         """
         Initialize all necessary variables.
 
