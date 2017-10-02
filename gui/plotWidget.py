@@ -37,11 +37,17 @@ from matplotlib.figure import Figure
 
 
 class PlotWidget(QWidget):
-    """
-        Provides the standard matplotlib plot
-    """
+    """Provide the standard matplotlib plot."""
 
     def __init__(self, parent=None):
+        """
+        Initialize the widget itself and call super class to get the functionality of QWidget.
+
+        Parameters
+        ----------
+        parent: <__main__.GIMod object>
+            Every widget that needs to be accessed is called in :class:`~GIMod`
+        """
         super(PlotWidget, self).__init__(parent)
 
         # a figure instance to plot on
@@ -55,12 +61,13 @@ class PlotWidget(QWidget):
         # self.axis.set_ylim(self.axis.get_ylim()[::-1])
         self.axis.set_aspect('equal')
         self.canvas = FigureCanvas(self.figure)
+        self.resetFigure()
 
         # self.toolbar = PlotToolbar(self.canvas, self)
         self.toolbar = NavigationToolbar(self.canvas, self)
         self.toolbar.setFixedHeight(30)
         self.toolbar.setIconSize(QSize(18, 18))
-        self.toolbar.setContentsMargins(0, 0, 0, 0)
+        # self.toolbar.setContentsMargins(0, 0, 0, 0)
 
         # add buttons
         # self.btn_zoom_in = QToolButton()
@@ -83,9 +90,7 @@ class PlotWidget(QWidget):
         self.setLayout(layout)
 
     # def zoomOut(self):
-    #     """
-    #         zoom Out of the current dimension
-    #     """
+    #     """Zoom Out of the current dimension."""
     #     x_dim = self.axis.get_xlim()
     #     x_dist = abs(x_dim[1] - x_dim[0])
     #     y_dim = self.axis.get_ylim()
@@ -96,9 +101,7 @@ class PlotWidget(QWidget):
     #     self.canvas.draw()
     #
     # def zoomIn(self):
-    #     """
-    #         zoom In of the current dimension
-    #     """
+    #     """Zoom In of the current dimension."""
     #     x_dim = self.axis.get_xlim()
     #     x_dist = abs(x_dim[1] - x_dim[0])
     #     y_dim = self.axis.get_ylim()
@@ -108,12 +111,13 @@ class PlotWidget(QWidget):
     #     self.axis.set_ylim(y_dim[0] + 0.1*y_dist, y_dim[1] - 0.1*y_dist)
     #     self.canvas.draw()
 
+    def resetFigure(self):
+        """Set contents margin to start layout after clearing the figures contents."""
+        self.axis.cla()
+        self.axis.set_xlim(-30, 30)
+        self.axis.set_ylim(-30, 0)
+        self.figure.canvas.draw()
+
 
 if __name__ == '__main__':
-
-    import sys
-
-    app = QApplication(sys.argv)
-    ex = PlotWidget()
-    ex.show()
-    sys.exit(app.exec_())
+    pass

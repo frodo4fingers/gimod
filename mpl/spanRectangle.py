@@ -4,31 +4,42 @@
 from matplotlib.patches import Rectangle
 
 
-class SpanRectangle(object):
+class SpanRectangle():
+    """Provide the visualization for creating a PolyRectangle."""
 
     def __init__(self, parent=None):
+        """
+        Initialize all important variables for matplotlib drawing.
+
+        Parameters
+        ----------
+        parent: :class:`core.builder.Builder`
+        """
         self.parent = parent
         self.figure = self.parent.figure
-        # empty rectangle
+        # empty rectangle to start with
         self.rect = Rectangle((0, 0), 0, 0, fc='none', alpha=0.5, ec='blue')
         self.background = None
         self.figure.axis.add_patch(self.rect)
         self.onPress = self.onPress
 
     def connect(self):
-        self.cidP = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
-        self.cidM = self.figure.canvas.mpl_connect('motion_notify_event', self.onMotion)
-        self.cidR = self.figure.canvas.mpl_connect('button_release_event', self.onRelease)
+        """Connect all events needed for line drawing and 'preview'."""
+        self.cid_p = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
+        self.cid_m = self.figure.canvas.mpl_connect('motion_notify_event', self.onMotion)
+        self.cid_r = self.figure.canvas.mpl_connect('button_release_event', self.onRelease)
 
     def disconnect(self):
-        self.figure.canvas.mpl_disconnect(self.cidP)
-        self.figure.canvas.mpl_disconnect(self.cidM)
-        self.figure.canvas.mpl_disconnect(self.cidR)
+        """Disconnect all the stored connection ids."""
+        self.figure.canvas.mpl_disconnect(self.cid_p)
+        self.figure.canvas.mpl_disconnect(self.cid_m)
+        self.figure.canvas.mpl_disconnect(self.cid_r)
 
     def onPress(self, event):
-        if event.button is 1:
-            self.xP = event.xdata
-            self.yP = event.ydata
+        """Collect the data of the starting corner of the rectangle."""
+        if event.button is 1:  # left mouse button
+            self.x_p = event.xdata
+            self.y_p = event.ydata
             self.rect.set_animated(True)
             self.figure.canvas.draw()
             self.background = self.figure.canvas.copy_from_bbox(self.rect.axes.bbox)
@@ -36,13 +47,16 @@ class SpanRectangle(object):
             self.figure.canvas.blit(self.rect.axes.bbox)
 
     def onMotion(self, event):
-        if event.inaxes != self.rect.axes: return
+        """Resize the helper rectangle while spanning."""
+        if event.inaxes != self.rect.axes:
+            return
         try:
-            self.xM = event.xdata
-            self.yM = event.ydata
-            self.rect.set_width(self.xM - self.xP)
-            self.rect.set_height(self.yM - self.yP)
-            self.rect.set_xy((self.xP, self.yP))
+            self.x_m = event.xdata
+            self.y_m = event.ydata
+            # set the data to the helper while spanning
+            self.rect.set_width(self.x_m - self.x_p)
+            self.rect.set_height(self.y_m - self.y_p)
+            self.rect.set_xy((self.x_p, self.y_p))
 
             self.figure.canvas.restore_region(self.background)
             self.rect.axes.draw_artist(self.rect)
@@ -51,9 +65,10 @@ class SpanRectangle(object):
             pass
 
     def onRelease(self, event):
+        """Restore the canvas and empty the rectangles data."""
         try:
-            self.xR = event.xdata
-            self.yR = event.ydata
+            self.x_r = event.xdata
+            self.y_r = event.ydata
             self.rect.set_width(0)
             self.rect.set_height(0)
             self.rect.set_xy((0, 0))
@@ -66,16 +81,17 @@ class SpanRectangle(object):
             pass
 
     def sendToBuilder(self):
+        """Send the rectangle data to :meth:`core.builder.Builder.printCoordinates`."""
         if self.parent.parent.toolBar.acn_magnetizePoly.isChecked() is True:
-            if self.parent.mp.xR is not None:
-                self.xR = self.parent.mp.xR
-                self.yR = self.parent.mp.yR
+            if self.parent.mp.x_r is not None:
+                self.x_r = self.parent.mp.x_r
+                self.y_r = self.parent.mp.y_r
 
-            if self.parent.mp.xP is not None:
-                self.xP = self.parent.mp.xP
-                self.yP = self.parent.mp.yP
+            if self.parent.mp.x_p is not None:
+                self.x_p = self.parent.mp.x_p
+                self.y_p = self.parent.mp.y_p
 
-        self.parent.printCoordinates(self.xP, self.yP, self.xR, self.yR, form='Rectangle')
+        self.parent.printCoordinates(self.x_p, self.y_p, self.x_r, self.y_r, form='Rectangle')
 
 
 if __name__ == '__main__':
