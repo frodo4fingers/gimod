@@ -63,7 +63,9 @@ class SpanLine():
         if self.clicker > 0:
             self.line.set_data([0], [0])
             self.parent.printCoordinates(
-                self.x[self.clicker - 1], self.y[self.clicker - 1], self.x[self.clicker], self.y[self.clicker], form="Line")
+                self.x[self.clicker - 1], self.y[self.clicker - 1],
+                self.x[self.clicker], self.y[self.clicker], form="Line"
+            )
 
 
 if __name__ == '__main__':
