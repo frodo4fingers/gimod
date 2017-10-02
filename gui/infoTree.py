@@ -273,6 +273,8 @@ class InfoTree(QWidget):
             cbx_is_left.setToolTip("...")
             cbx_is_left.addItem('False')
             cbx_is_left.addItem('True')
+            if form == 'Line':
+                cbx_is_left.setCurrentIndex(1)
             is_left = QTreeWidgetItem()
             is_left.setText(0, "is left:")
             tw_item.addChild(is_left)
@@ -428,8 +430,6 @@ class InfoTree(QWidget):
                 self.polyMarkers.append(int(p[6]))
 
             elif p[0] == 'Line':
-                for i in p:
-                    print(i)
                 polys.append(plc.createLine(
                     start=[float(p[1]), float(p[2])],
                     end=[float(p[3]), float(p[4])],
