@@ -96,58 +96,65 @@ class PolyToolBar(QToolBar):
         self.grp_polyTools = QActionGroup(self)
         # the button that allows to access the drawing of the world
         self.acn_world = QAction(
-            QIcon('icons/ic_spanWorld.svg'), 'world', self.grp_polyTools, checkable=True)
-        self.acn_world.setToolTip(
-            "Create your model world where everything happens")
+            QIcon('icons/ic_spanWorld.svg'),
+            "Create your model world where everything happens",
+            self.grp_polyTools, checkable=True)
 
         # the button that allows to access the drawing of a rectangle
-        self.acn_rectangle = QAction(QIcon(
-            'icons/ic_spanRectangle.svg'), 'rectangle', self.grp_polyTools, checkable=True)
-        self.acn_rectangle.setToolTip("Create a rectangle body")
+        self.acn_rectangle = QAction(
+            QIcon('icons/ic_spanRectangle.svg'),
+            "Create a rectangle body",
+            self.grp_polyTools, checkable=True)
         self.acn_rectangle.setEnabled(False)
 
         # the button that allows to access the drawing of a circle
         self.acn_circle = QAction(
-            QIcon('icons/ic_spanCircle.svg'), 'circle', self.grp_polyTools, checkable=True)
-        self.acn_circle.setToolTip("Create a circle body")
+            QIcon('icons/ic_spanCircle.svg'),
+            "Create a circle body",
+            self.grp_polyTools, checkable=True)
         self.acn_circle.setEnabled(False)
 
         # the button that allows to access the drawing of a line
         self.acn_line = QAction(
-            QIcon('icons/ic_spanLine.png'), 'line', self.grp_polyTools, checkable=True)
-        self.acn_line.setToolTip("Create a line by clicking")
+            QIcon('icons/ic_spanLine.png'),
+            "Create a line by clicking",
+            self.grp_polyTools, checkable=True)
         self.acn_line.setEnabled(False)
 
         # the button that allows to access the drawing of a random polygon
         self.acn_polygon = QAction(
-            QIcon('icons/ic_spanPoly.svg'), 'polygon', self.grp_polyTools, checkable=True)
-        self.acn_polygon.setToolTip(
-            "Create a polygon by clicking, finish with double click")
+            QIcon('icons/ic_spanPoly.svg'),
+            "Create a polygon by clicking, finish with double click",
+            self.grp_polyTools, checkable=True)
         self.acn_polygon.setEnabled(False)
 
         # action to marke each region's marker position.. those dots can be
         # dragged and will be checked for new positions
         self.acn_markerCheck = QAction(
-            QIcon('icons/marker_check.svg'), 'marker', self.grp_polyTools, checkable=True)
-        self.acn_markerCheck.setToolTip("check and reset marker positions")
+            QIcon('icons/marker_check.svg'),
+            "check and reset marker positions",
+            self.grp_polyTools, checkable=True)
         self.acn_markerCheck.setEnabled(False)
 
         # action to turn on/off a grid. should help while creating the model
         self.acn_gridToggle = QAction(
-            QIcon('icons/grid.svg'), 'grid', None, checkable=True)
-        self.acn_gridToggle.setToolTip("turn on and off a grid")
+            QIcon('icons/grid.svg'),
+            "turn on and off a grid",
+            None, checkable=True)
         self.acn_gridToggle.setEnabled(False)
 
         # action to magnetize all grid lines
         self.acn_magnetizeGrid = QAction(
-            QIcon('icons/grid_magnetize.svg'), 'magnetizeGrid', None, checkable=True)
-        self.acn_magnetizeGrid.setToolTip("magnetize the grid junctions")
+            QIcon('icons/grid_magnetize.svg'),
+            "magnetize the grid junctions",
+            None, checkable=True)
         self.acn_magnetizeGrid.setEnabled(False)
 
         # action to magnetize the vertices/nodes of every polygon
         self.acn_magnetizePoly = QAction(
-            QIcon('icons/magnetize.svg'), 'magnetizePoly', None, checkable=True)
-        self.acn_magnetizePoly.setToolTip("magnetize the polygons")
+            QIcon('icons/magnetize.svg'),
+            "magnetize the polygons",
+            None, checkable=True)
         self.acn_magnetizePoly.setEnabled(False)
 
         # add all actions and widgets to the toolbar
