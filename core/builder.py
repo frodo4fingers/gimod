@@ -55,6 +55,10 @@ class Builder():
         self.magnetizeClicked = True
         self.mPolyClicked = True
         self.poly = None
+        self.triggered_polygon = False
+        self.triggered_rectangle = False
+        self.triggered_circle = False
+        self.triggered_line = False
         # introduce polygon form, the edges and (for hand drawn whtaever
         # shaped) polygon as None. Necessary step to prevent the passing of non
         # existent variables when drawing
@@ -69,56 +73,91 @@ class Builder():
         """
         Connect the mouse event to the canvas for accessing plc.createWorld.
         """
-        try:
+        if self.toolbar.acn_world.isChecked():
+            try:
+                self.span.disconnect()
+            except AttributeError:
+                pass
+            self.span = SpanWorld(self)
+            self.span.connect()
+        else:
             self.span.disconnect()
-        except AttributeError:
-            pass
-        self.span = SpanWorld(self)
-        self.span.connect()
 
     def formPolyRectangle(self):
         """
         Connect the mouse event to the canvas for accessing plc.createRectangle.
         """
-        try:
+        # the if statement with triggered flag allows to disable the tool via
+        # second click
+        if not self.triggered_rectangle:
+            self.triggered_rectangle = True
+            try:
+                self.span.disconnect()
+            except AttributeError:
+                pass
+            self.span = SpanRectangle(self)
+            self.span.connect()
+        else:
+            self.triggered_rectangle = False
             self.span.disconnect()
-        except AttributeError:
-            pass
-        self.span = SpanRectangle(self)
-        self.span.connect()
+            self.toolbar.acn_rectangle.setChecked(False)
 
     def formPolyCircle(self):
         """
         Connect the mouse event to the canvas for accessing plc.createCircle.
         """
-        try:
+        # the if statement with triggered flag allows to disable the tool via
+        # second click
+        if not self.triggered_circle:
+            self.triggered_circle = True
+            try:
+                self.span.disconnect()
+            except AttributeError:
+                pass
+            self.span = SpanCircle(self)
+            self.span.connect()
+        else:
+            self.triggered_circle = False
             self.span.disconnect()
-        except AttributeError:
-            pass
-        self.span = SpanCircle(self)
-        self.span.connect()
+            self.toolbar.acn_circle.setChecked(False)
 
     def formPolyLine(self):
         """
         Connect the mouse event to the canvas for accessing plc.createLine.
         """
-        try:
+        # the if statement with triggered flag allows to disable the tool via
+        # second click
+        if not self.triggered_line:
+            self.triggered_line = True
+            try:
+                self.span.disconnect()
+            except AttributeError:
+                pass
+            self.span = SpanLine(self)
+            self.span.connect()
+        else:
+            self.triggered_line = False
             self.span.disconnect()
-        except AttributeError:
-            pass
-        self.span = SpanLine(self)
-        self.span.connect()
+            self.toolbar.acn_line.setChecked(False)
 
     def formPolygon(self):
         """
         Connect the mouse event to the canvas for accessing plc.createPolygon.
         """
-        try:
+        # the if statement with triggered flag allows to disable the tool via
+        # second click
+        if not self.triggered_polygon:
+            self.triggered_polygon = True
+            try:
+                self.span.disconnect()
+            except AttributeError:
+                pass
+            self.span = SpanPoly(self)
+            self.span.connect()
+        else:
+            self.triggered_polygon = False
             self.span.disconnect()
-        except AttributeError:
-            pass
-        self.span = SpanPoly(self)
-        self.span.connect()
+            self.toolbar.acn_polygon.setChecked(False)
 
     def formPolygonFromFigure(self):
         """
@@ -145,6 +184,8 @@ class Builder():
         # draw created polygon
         self.drawPoly()
         # fill the info tree as bulk
+        # NOTE: seperate loop to fill the table since the marker count is now
+        # set and can be made available for all markers
         for i, contour in enumerate(self.parent.image_tools.contoursCutted):
             # show progress in statusbar
             self.parent.statusbar.showMessage("processing table entries {}/{}".format(i, n_contours))
@@ -154,6 +195,16 @@ class Builder():
         # turn on buttons to reset figure or delete last build polygon
         self.parent.info_tree.btn_undo.setEnabled(True)
         self.parent.toolBar.acn_reset_figure.setEnabled(True)
+        # activate all the polytools
+        # NOTE: not calling enabelingToolBarFunctions() because when loading a
+        # figure the world tag doesn't exist which would be necessary to work
+        # this method
+        self.parent.toolBar.acn_polygon.setEnabled(True)
+        self.parent.toolBar.acn_rectangle.setEnabled(True)
+        self.parent.toolBar.acn_circle.setEnabled(True)
+        self.parent.toolBar.acn_line.setEnabled(True)
+        self.parent.toolBar.acn_markerCheck.setEnabled(True)
+        self.parent.toolBar.acn_magnetizePoly.setEnabled(True)
         # change message in statusbar to info about the polygon
         self.statusbar.showMessage(str(self.poly))
         self.parent.setCursor(Qt.ArrowCursor)
@@ -256,7 +307,12 @@ class Builder():
         Parameters
         ----------
         polys: list [None]
-            A polys attribute is only passed from :meth:`~gui.InfoTree.redrawTable` when the (maybe altered) content from the info tree is taken and redrawn
+            A polys attribute is only passed from
+            :meth:`~gui.InfoTree.redrawTable` when the (maybe altered) content
+            from the info tree is taken and redrawn
+
+        to_merge: bool [True]
+            ???CALLED FROM WHERE???
 
         Todo
         ----
@@ -265,10 +321,14 @@ class Builder():
         """
         # merge all (given) polygons
         if to_merge:
-            if polys is None:
-                self.poly = plc.mergePLC(self.polys)
-            else:
-                self.poly = plc.mergePLC(polys)
+            if polys is not None:
+                # necessaray step because redrawing checks for the list of
+                # polys to grep the marker positions. if the renewed marker
+                # positions after marker setting are not yet there, the old
+                # positions are taken and all steps need to be repeated until
+                # eternity
+                self.polys = polys
+            self.poly = plc.mergePLC(self.polys)
             self.figure.axis.cla()
 
         # check for the region plot option in treeview functions below the table
@@ -316,6 +376,15 @@ class Builder():
             self.toolbar.acn_magnetizePoly.setEnabled(True)
             self.toolbar.acn_world.setChecked(False)
             self.parent.mb_save_poly.setEnabled(True)
+            # REVIEW: this down here
+            # try:
+            #     # disconnect the last used polytool
+            #     self.span.disconnect()
+            # except AttributeError:
+            #     # if a figure is loaded and polygonized a world might be drawn
+            #     # around and thats nearly all... so disconnect the drawing
+            #     # signal to prevent unvoluntary drawing
+            #     pass
         else:
             self.toolbar.acn_world.setEnabled(True)
             self.toolbar.acn_rectangle.setEnabled(False)
@@ -380,7 +449,8 @@ class Builder():
         ----
         + get rid of the dummy flag for the marker moving thingy... use parent instead
         """
-        try:  # to avoid emitting a signal and using it multiple ways
+        # disconnect all drawing signals
+        try:
             self.span.disconnect()
         except AttributeError:
             pass
@@ -389,23 +459,38 @@ class Builder():
         if self.markersClicked is True:
             self.markersClicked = False
             self.dps = []
+            # create a draggable point for every polygon, so the marker position can be reset
             for i, p in enumerate(self.polys):
-                m = pg.center(p.positions())
-                mark = patches.Circle(m, radius=self.markerSize(), fc='r')
-                self.figure.axis.add_patch(mark)
-                dp = DraggablePoint(mark, i, m)
-                dp.connect()
-                self.dps.append(dp)
+                # m = pg.center(p.positions())
+                # cast the RegionMarkerPLC object to list and take the first
+                # two entries: x, y
+                try:
+                    pos = list(p.regionMarker()[0])[:2]
+                except IndexError:
+                    # meaning it is a line from createLine
+                    self.dps.append(None)
+                    pass
+                else:
+                    mark = patches.Circle(pos, radius=self.markerSize(), fc='r')
+                    self.figure.axis.add_patch(mark)
+                    dp = DraggablePoint(mark, i, pos)
+                    dp.connect()
+                    self.dps.append(dp)
             self.figure.canvas.draw()
 
         else:
-            # BUG: figure upside down
             self.parent.setCursor(Qt.WaitCursor)
             for p in self.dps:
-                val = p.returnValue()
-                self.new_markers.append(list(val.values()))
-                p.disconnect()
+                try:
+                    val = p.returnValue()
+                except AttributeError:
+                    # meaning that i hit a None - a line
+                    continue
+                else:
+                    self.new_markers.append(list(val.values()))
+                    p.disconnect()
             self.markersClicked = True
+            # uncheck the button
             self.parent.toolBar.acn_markerCheck.setChecked(False)
             self.parent.info_tree.redrawTable()
             self.parent.setCursor(Qt.ArrowCursor)
