@@ -2,12 +2,16 @@
 # encoding: UTF-8
 
 try:
-    from PyQt5.QtWidgets import QMainWindow, QApplication, QVBoxLayout, QSizePolicy, QStatusBar, QTabWidget, QSplitter, QAction, QMessageBox, QFileDialog, QMenu
+    from PyQt5.QtWidgets import (QMainWindow, QApplication, QVBoxLayout,
+        QSizePolicy, QStatusBar, QTabWidget, QSplitter, QAction, QMessageBox,
+        QFileDialog, QMenu)
     from PyQt5.QtCore import Qt
     from PyQt5.QtGui import QIcon
 
 except ImportError:
-    from PyQt4.QtGui import QMainWindow, QApplication, QVBoxLayout, QSizePolicy, QStatusBar, QTabWidget, QSplitter, QAction, QMessageBox, QIcon, QFileDialog, QMenu
+    from PyQt4.QtGui import (QMainWindow, QApplication, QVBoxLayout,
+        QSizePolicy, QStatusBar, QTabWidget, QSplitter, QAction, QMessageBox,
+        QIcon, QFileDialog, QMenu)
     from PyQt4.QtCore import Qt
 
 import sys
@@ -121,7 +125,7 @@ class GIMod(QMainWindow):
 
         self.setCentralWidget(splitter)
 
-        self.setGeometry(1500, 100, 1000, 600)
+        # self.setGeometry(1500, 100, 1000, 600)
         # window name
         self.setWindowTitle("GIMod")
         self.setWindowIcon(QIcon('icons/logo.png'))
@@ -159,7 +163,6 @@ class GIMod(QMainWindow):
 
     def exportPoly(self):
         """Export the poly figure."""
-        print("hurensohn")
         export_poly = QFileDialog.getSaveFileName(
             self, caption='Save Poly Figure')[0]
 

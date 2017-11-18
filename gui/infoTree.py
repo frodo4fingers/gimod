@@ -3,12 +3,16 @@
 
 
 try:
-    from PyQt5.QtWidgets import QWidget, QTreeWidget, QTreeWidgetItem, QPushButton, QRadioButton, QSizePolicy, QHBoxLayout, QVBoxLayout, QComboBox, QSpinBox, QDoubleSpinBox
+    from PyQt5.QtWidgets import (QWidget, QTreeWidget, QTreeWidgetItem,
+        QPushButton, QRadioButton, QSizePolicy, QHBoxLayout, QVBoxLayout,
+        QComboBox, QSpinBox, QDoubleSpinBox)
     from PyQt5.QtCore import Qt, QSize
     from PyQt5.QtGui import QIcon, QFont, QColor
 
 except ImportError:
-    from PyQt4.QtGui import QWidget, QTreeWidget, QTreeWidgetItem, QPushButton, QRadioButton, QSizePolicy, QHBoxLayout, QVBoxLayout, QComboBox, QSpinBox, QDoubleSpinBox, QIcon, QFont, QColor
+    from PyQt4.QtGui import (QWidget, QTreeWidget, QTreeWidgetItem,
+        QPushButton, QRadioButton, QSizePolicy, QHBoxLayout, QVBoxLayout,
+        QComboBox, QSpinBox, QDoubleSpinBox, QIcon, QFont, QColor)
     from PyQt4.QtCore import Qt, QSize
 
 import numpy as np
