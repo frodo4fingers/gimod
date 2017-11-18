@@ -23,7 +23,7 @@ class MagnetizePolygons():
         y: list
             The y-positions of the polygons
         """
-        print(parent)
+        # print(parent)
         self.figure = parent.figure
         self.span = parent.span
         self.x = x

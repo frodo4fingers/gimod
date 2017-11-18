@@ -37,6 +37,8 @@ class SpanWorld():
 
     def onPress(self, event):
         """Collect the data of the starting corner of the rectangle."""
+        if event.inaxes != self.rect.axes:
+            return
         if event.button is 1:  # left mouse button
             self.x_p = event.xdata
             self.y_p = event.ydata
@@ -65,6 +67,8 @@ class SpanWorld():
 
     def onRelease(self, event):
         """Restore the canvas and empty the rectangles data."""
+        if event.inaxes != self.rect.axes:
+            return
         try:
             self.x_r = event.xdata
             self.y_r = event.ydata

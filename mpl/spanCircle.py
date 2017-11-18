@@ -39,6 +39,8 @@ class SpanCircle():
         Collect x,y-positions from the event and prepare the canvas for drawing
         while dragging.
         """
+        if event.inaxes != self.circle.axes:
+            return
         if event.button is 1:
             self.x_p = event.xdata
             self.y_p = event.ydata
@@ -69,6 +71,8 @@ class SpanCircle():
 
     def onRelease(self, event):
         """Restore the canvas and empty the circles data."""
+        if event.inaxes != self.circle.axes:
+            return
         try:
             # inconsistent mpl stuff
             self.circle.center = (0, 0)
