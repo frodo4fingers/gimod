@@ -62,7 +62,7 @@ class GIMod(QMainWindow):
         self.toolBar.acn_markerCheck.triggered.connect(self.builder.markersMove)
 
         self.toolBar.acn_gridToggle.triggered.connect(self.builder.toggleGrid)
-        self.toolBar.acn_magnetizeGrid.triggered.connect(self.builder.magnetizeGrid)
+        self.toolBar.acn_magnetizeGrid.triggered.connect(self.builder.enableMagnetizedGrid)
         self.toolBar.acn_magnetizePoly.triggered.connect(self.builder.magnetizePoly)
 
         self.info_tree.btn_redraw.clicked.connect(self.info_tree.redrawTable)
