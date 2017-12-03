@@ -86,7 +86,7 @@ class SpanRectangle():
 
     def sendToBuilder(self):
         """Send the rectangle data to :meth:`core.builder.Builder.printCoordinates`."""
-        if self.parent.parent.toolBar.acn_magnetizePoly.isChecked() is True:
+        if self.parent.parent.toolBar.acn_magnetizePoly.isChecked():
             if self.parent.mp.x_r is not None:
                 self.x_r = self.parent.mp.x_r
                 self.y_r = self.parent.mp.y_r
@@ -94,6 +94,15 @@ class SpanRectangle():
             if self.parent.mp.x_p is not None:
                 self.x_p = self.parent.mp.x_p
                 self.y_p = self.parent.mp.y_p
+
+        if self.parent.parent.toolBar.acn_magnetizeGrid.isChecked():
+            if self.parent.grid.x_r is not None:
+                self.x_r = self.parent.grid.x_r
+                self.y_r = self.parent.grid.y_r
+
+            if self.parent.grid.x_p is not None:
+                self.x_p = self.parent.grid.x_p
+                self.y_p = self.parent.grid.y_p
 
         self.parent.printCoordinates(self.x_p, self.y_p, self.x_r, self.y_r, form='Rectangle')
 
