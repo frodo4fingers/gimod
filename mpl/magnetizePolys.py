@@ -9,6 +9,10 @@ class MagnetizePolygons():
     Provide the visualization of the list with nodes to magnetize and take care
     that the click-sensitive area will return the correct value to the
     magnetized coordinate.
+
+    Todo
+    ----
+    Magnetize the edges too!!
     """
 
     def __init__(self, parent, x, y):
@@ -133,7 +137,7 @@ class MagnetizePolygons():
 
         Returns
         -------
-        '': tuple
+        tuple()
             A tuple holding the cartesian x,y-coordinates of the point that will be snapped to
         """
         pixel = tuple(self.figure.axis.transData.transform((x, y)))
