@@ -11,7 +11,7 @@ except ImportError:
 
 from matplotlib import patches
 
-from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly, DraggablePoint, MagnetizePolygons
+from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly, DraggablePoint, MagnetizePolygons, MagnetizedGrid
 
 import pygimli as pg
 from pygimli.mplviewer import drawMesh, drawMeshBoundaries, drawModel
@@ -333,7 +333,7 @@ class Builder():
 
         # check for the region plot option in treeview functions below the table
         if self.parent.info_tree.rbtn_plotRegions.isChecked() is True:
-            drawMesh(self.figure.axis, self.poly, fitView=False)
+            drawMesh(self.figure.axis, self.poly, fitView=False, zorder=9e99)
             self.figure.canvas.draw()
         # if the attribute radiobutton below the tree widget is checked the
         # mesh view is slightly more complicated
@@ -344,8 +344,8 @@ class Builder():
                 temp_mesh = createMesh(self.poly)
                 # parse the attributes to the mesh
                 attrMap = pg.solver.parseMapToCellArray(attrMap, temp_mesh)
-                drawMeshBoundaries(self.figure.axis, temp_mesh, hideMesh=True)
-                drawModel(self.figure.axis, temp_mesh, tri=True, data=attrMap)
+                drawMeshBoundaries(self.figure.axis, temp_mesh, hideMesh=True, zorder=9e99)
+                drawModel(self.figure.axis, temp_mesh, tri=True, data=attrMap, zorder=9e99)
                 self.figure.canvas.draw()
             else:  # empty
                 QMessageBox.question(None, 'Whoops..', "Your regions don't have any attributes to plot!", QMessageBox.Ok)
@@ -507,41 +507,24 @@ class Builder():
         return abs(m - n)/50
 
     def toggleGrid(self):
-        """
-        Plot a grid to orientate the polygon creation.
-
-        Todo
-        ----
-        + MAKE THIS WORK!!
-        + also it would be nice if the grid was freely scalable.. like ctrl+g+wheel to set the stepping width of the grid
-        + get ffin rid of those dummy flags!!!
-        """
-        if self.gridClicked is True:
-            self.figure.axis.grid()
-            self.gridClicked = False
+        """."""
+        if self.parent.toolBar.acn_gridToggle.isChecked():
+            self.grid = MagnetizedGrid(self)
+            self.parent.toolBar.acn_magnetizeGrid.setEnabled(True)
         else:
-            self.figure.axis.grid(False)
-            self.gridClicked = True
-            self.acn_gridToggle.setChecked(False)
-        self.figure.canvas.draw()
+            self.parent.toolBar.acn_magnetizeGrid.setEnabled(False)
+            self.grid.disconnect()
+            self.grid.disable()
+        # grid.grid()
 
-    def magnetizeGrid(self):
-        """
-        Magnetize the grid to better snap to a hard point.
-
-        Todo
-        ----
-        + MAKE THIS WORK!!
-        + magnetize intersections and edges?!
-        """
-        if self.magnetize is True:
-            self.figure.axis.grid()
-            self.magnetize = False
+    def enableMagnetizedGrid(self):
+        """."""
+        if self.parent.toolBar.acn_magnetizeGrid.isChecked():
+            self.grid.connect()
         else:
-            self.figure.axis.grid(False)
-            self.magnetize = True
-            self.parent.toolBarself.acn_magnetizeGrid.setChecked(False)
-        self.figure.canvas.draw()
+            self.grid.disconnect()
+            self.grid.dot.set_data([], [])
+            self.figure.canvas.draw()
 
     def magnetizePoly(self):
         """
