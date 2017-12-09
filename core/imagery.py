@@ -7,11 +7,7 @@ try:
 except ImportError:
     from PyQt4.QtGui import QFileDialog
 
-try:
-    import cv2
-except ModuleNotFoundError:
-    self.parent.acn_imageAsBackground.setChecked(True)
-    self.parent.acn_imageAsBackground.setEnabled(False)
+import cv2
 
 
 class ImageTools():
