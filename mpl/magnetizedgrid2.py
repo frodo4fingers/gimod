@@ -41,41 +41,27 @@ class MagnetizedGrid():
             self.figure.canvas.mpl_disconnect(self.cid_m)
             self.figure.canvas.mpl_disconnect(self.cid_r)
         except AttributeError:
-            # bc the grid might never be magnetized, thus not having any cid to diconnect
+            # bc the grid might never be magnetized, thus not having any cid to disconnect
             pass
 
     def disable(self):
         """."""
-        for line in self.all_xlines + self.all_ylines:
-            line.set_data([], [])
+        # for line in self.all_xlines + self.all_ylines:
+        #     line.set_data([], [])
+        # disable the grid
+        self.figure.axis.grid(False)
         self.figure.canvas.draw()
 
     def grid(self):
         """."""
+        # set the actual grid
+        self.figure.axis.grid(True)
+        self.figure.canvas.draw()
         # get the axis ticks. returns a list of x,y-tuple
         x_ticks = [i.get_position()[0] for i in
             self.figure.axis.get_xticklabels()]
         y_ticks = [i.get_position()[1] for i in
             self.figure.axis.get_yticklabels()]
-
-        # create the coordinates für the grid lines for the x-axis
-        x_coord = [[[i, i], [y_ticks[0], y_ticks[-1]]] for i in x_ticks]
-        y_coord = [[[x_ticks[0], x_ticks[-1]], [i, i]] for i in y_ticks]
-        # print(x_ticks)
-        # print(y_ticks)
-
-        # create all the line objects for the x axis
-        self.all_xlines = [
-            Line2D(*coord, linewidth=0.5, color='b', zorder=-9e99) for coord in x_coord
-            ]
-        # create all the line objects for the y axis
-        self.all_ylines = [
-            Line2D(*coord, linewidth=0.5, color='b', zorder=-9e99) for coord in y_coord
-            ]
-        # plot 'em all
-        for line in self.all_xlines + self.all_ylines:
-            self.figure.axis.add_line(line)
-        self.figure.canvas.draw()
 
         # establish all cross sections as pixel position data
         self.crossings = []
