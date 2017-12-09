@@ -333,7 +333,7 @@ class Builder():
 
         # check for the region plot option in treeview functions below the table
         if self.parent.info_tree.rbtn_plotRegions.isChecked() is True:
-            drawMesh(self.figure.axis, self.poly, fitView=False, zorder=9e99)
+            drawMesh(self.figure.axis, self.poly, fitView=False)
             self.figure.canvas.draw()
         # if the attribute radiobutton below the tree widget is checked the
         # mesh view is slightly more complicated
@@ -344,11 +344,21 @@ class Builder():
                 temp_mesh = createMesh(self.poly)
                 # parse the attributes to the mesh
                 attrMap = pg.solver.parseMapToCellArray(attrMap, temp_mesh)
-                drawMeshBoundaries(self.figure.axis, temp_mesh, hideMesh=True, zorder=9e99)
-                drawModel(self.figure.axis, temp_mesh, tri=True, data=attrMap, zorder=9e99)
+                drawMeshBoundaries(self.figure.axis, temp_mesh, hideMesh=True)
+                drawModel(self.figure.axis, temp_mesh, tri=True, data=attrMap)
                 self.figure.canvas.draw()
             else:  # empty
                 QMessageBox.question(None, 'Whoops..', "Your regions don't have any attributes to plot!", QMessageBox.Ok)
+
+        # redraw the grid if it is checked:
+        if self.parent.toolBar.acn_gridToggle.isChecked():
+            # if it is checked there is a self.grid
+            self.grid.disable()
+            self.grid.grid()
+
+        if self.parent.toolBar.acn_magnetizeGrid.isChecked():
+            self.grid.disconnect()
+            self.grid.connect()
 
         # TODO: get rid of the dummy flag
         if not self.mPolyClicked:
