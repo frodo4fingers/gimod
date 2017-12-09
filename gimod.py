@@ -19,7 +19,14 @@ import pygimli as pg
 from pygimli.meshtools import createMesh, exportPLC, exportFenicsHDF5Mesh, readPLC
 from pygimli.mplviewer import drawMeshBoundaries, drawMesh, drawPLC, drawModel
 
-from core import Builder, ImageTools
+from core import Builder
+try:
+    from core.imagery import ImageTools
+    opencv = True
+except ModuleNotFoundError:
+    # set global flag
+    opencv = False
+
 from gui import InfoTree, MeshOptions, PlotWidget, PolyToolBar
 
 
@@ -33,7 +40,10 @@ class GIMod(QMainWindow):
         """
         super(GIMod, self).__init__(parent)
         self.initUI()
-        self.image_tools = ImageTools(self)
+        if opencv:
+            self.image_tools = ImageTools(self)
+        else:
+            self.toolBar.acn_image.setEnabled(False)
 
         # menu actions
         self.mb_aboutVerison.triggered.connect(self.aboutVersion)
@@ -42,13 +52,19 @@ class GIMod(QMainWindow):
         self.mb_save_poly.triggered.connect(self.exportPoly)
         self.mb_save_mesh.triggered.connect(self.exportMesh)
 
-        # toolbar actions
-        self.toolBar.acn_image.triggered.connect(self.image_tools.imagery)
-        self.toolBar.acn_imageAsBackground.stateChanged.connect(self.image_tools.imageryBackground)
-        self.toolBar.acn_imageThreshold1.valueChanged.connect(self.image_tools.updateImagery)
-        self.toolBar.acn_imageThreshold2.valueChanged.connect(self.image_tools.updateImagery)
-        self.toolBar.acn_imageDensity.valueChanged.connect(self.image_tools.updateImagery)
-        self.toolBar.acn_imagePolys.valueChanged.connect(self.image_tools.polysFromImage)
+        # connect the toolbar action signals to their methods if opencv is present
+        if opencv:
+            self.toolBar.acn_imageAsBackground.stateChanged.connect(
+                self.image_tools.imageryBackground)
+            self.toolBar.acn_imageThreshold1.valueChanged.connect(
+                self.image_tools.updateImagery)
+            self.toolBar.acn_imageThreshold2.valueChanged.connect(
+                self.image_tools.updateImagery)
+            self.toolBar.acn_imageDensity.valueChanged.connect(
+                self.image_tools.updateImagery)
+            self.toolBar.acn_imagePolys.valueChanged.connect(
+                self.image_tools.polysFromImage)
+            self.toolBar.acn_image.triggered.connect(self.image_tools.imagery)
 
         self.toolBar.acn_polygonize.triggered.connect(self.builder.formPolygonFromFigure)
 
