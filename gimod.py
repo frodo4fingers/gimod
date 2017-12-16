@@ -6,12 +6,12 @@ try:
         QSizePolicy, QStatusBar, QTabWidget, QSplitter, QAction, QMessageBox,
         QFileDialog, QMenu)
     from PyQt5.QtCore import Qt
-    from PyQt5.QtGui import QIcon
+    from PyQt5.QtGui import QIcon, QCursor
 
 except ImportError:
     from PyQt4.QtGui import (QMainWindow, QApplication, QVBoxLayout,
         QSizePolicy, QStatusBar, QTabWidget, QSplitter, QAction, QMessageBox,
-        QIcon, QFileDialog, QMenu)
+        QIcon, QFileDialog, QMenu, QCursor)
     from PyQt4.QtCore import Qt
 
 import sys
@@ -39,11 +39,16 @@ class GIMod(QMainWindow):
         layout of GIMod and connect all signals to their respective methods.
         """
         super(GIMod, self).__init__(parent)
+        # self.cursor = QCursor()
         self.initUI()
         if opencv:
             self.image_tools = ImageTools(self)
         else:
             self.toolBar.acn_image.setEnabled(False)
+
+        # when resizing the mainwindow
+        if self.toolBar.acn_gridToggle.isChecked():
+            self.resizeEvent(self.builder.grid.getCanvasHeight)
 
         # menu actions
         self.mb_aboutVerison.triggered.connect(self.aboutVersion)

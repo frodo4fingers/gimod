@@ -2,6 +2,18 @@ from matplotlib.lines import Line2D
 # from numpy import allclose
 import numpy as np
 
+try:
+    # from PyQt5.QtWidgets import QMessageBox
+    from PyQt5.QtGui import QCursor
+    from PyQt5.QtCore import QPoint
+
+except ImportError:
+    # from PyQt4.QtGui import QMessageBox
+    from PyQt4.QtQui import QCursor
+    from PyQt4.QtCore import QPoint
+
+import time
+
 
 class MagnetizedGrid():
     """
@@ -23,23 +35,29 @@ class MagnetizedGrid():
         """Initialize the important variables."""
         self.figure = parent.figure
         self.parent = parent
+        self.gimod = parent.parent
         dot, = self.figure.axis.plot([], [], 'o', c='#ff0000')
         self.dot = dot
         self.grid()
+        self.getCanvasHeight()
         self.onMotion = self.onMotion
+
+    def getCanvasHeight(self):
+        """."""
+        _, self.height = self.figure.canvas.get_width_height()
 
     def connect(self):
         """."""
         self.cid_p = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
         self.cid_m = self.figure.canvas.mpl_connect('motion_notify_event', self.onMotion)
-        self.cid_r = self.figure.canvas.mpl_connect('button_release_event', self.onRelease)
+        # self.cid_r = self.figure.canvas.mpl_connect('button_release_event', self.onRelease)
 
     def disconnect(self):
         """."""
         try:
             self.figure.canvas.mpl_disconnect(self.cid_p)
             self.figure.canvas.mpl_disconnect(self.cid_m)
-            self.figure.canvas.mpl_disconnect(self.cid_r)
+            # self.figure.canvas.mpl_disconnect(self.cid_r)
         except AttributeError:
             # bc the grid might never be magnetized, thus not having any cid to disconnect
             pass
@@ -69,30 +87,28 @@ class MagnetizedGrid():
             for y in y_ticks:
                 self.crossings.append(tuple(self.figure.axis.transData.transform((x, y))))
 
-    def onPress(self, event):
-        """."""
-        if event.inaxes:
-            try:
-                dot, _ = self.vicinity(event.xdata, event.ydata)
-                if dot is not None:
-                    self.x_p = dot[0]
-                    self.y_p = dot[1]
-                else:
-                    self.x_p = None
-                    self.y_p = None
-            except TypeError:
-                # TypeError: pressing the button was not in the vicinity of a gridline
-                pass
-
-            # # print(event.xdata, event.ydata, dot)
-            # except TypeError:
-            #     # TypeError: pressing the button was not in the vicinity of a gridline
-            #     pass
-            # else:
+    # def onPress(self, event):
+    #     """."""
+    #     if event.inaxes:
+    #         try:
+    #             dot, _ = self.vicinity(event.xdata, event.ydata)
+    #             if dot is not None:
+    #                 self.x_p = dot[0]
+    #                 self.y_p = dot[1]
+    #             else:
+    #                 self.x_p = None
+    #                 self.y_p = None
+    #         except TypeError:
+    #             # TypeError: pressing the button was not in the vicinity of a gridline
+    #             pass
 
     def onMotion(self, event):
         """."""
         if event.inaxes:  # meaning within the plotting area
+            # print(self.gimod.mapToGlobal(QPoint(*self.transform(event.xdata, event.ydata))))
+            dot = list(self.transform(event.xdata, event.ydata))
+            # print(QPoint(dot[0], dot[1]))
+            # print(self.gimod.cursor().pos())
             self.dot.set_animated(True)
             self.figure.canvas.draw()
             self.background = self.figure.canvas.copy_from_bbox(self.dot.axes.bbox)
@@ -112,26 +128,60 @@ class MagnetizedGrid():
                 self.dot.axes.draw_artist(self.dot)
                 self.dot.set_animated(False)
                 self.background = None
+        # else:
+        #     dot = list(self.transform(event.xdata, event.ydata))
+        #     print(QPoint(dot[0], dot[1]))
+        #     print(self.gimod.cursor().pos())
 
-    def onRelease(self, event):
+
+    # def onRelease(self, event):
+    #     """."""
+    #     if event.inaxes:
+    #         try:
+    #             dot, _ = self.vicinity(event.xdata, event.ydata)
+    #             if dot is not None:
+    #                 self.x_r = dot[0]
+    #                 self.y_r = dot[1]
+    #             else:
+    #                 self.x_r = None
+    #                 self.y_r = None
+    #         except TypeError:
+    #             # TypeError: pressing the button was not in the vicinity of a gridline
+    #             pass
+    def onPress(self, event):
         """."""
-        if event.inaxes:
-            try:
-                dot, _ = self.vicinity(event.xdata, event.ydata)
-                if dot is not None:
-                    self.x_r = dot[0]
-                    self.y_r = dot[1]
-                else:
-                    self.x_r = None
-                    self.y_r = None
-            except TypeError:
-                # TypeError: pressing the button was not in the vicinity of a gridline
-                pass
+        fix = self.transform(0, -15)
+        # aim: move cursor here from every point clicked on canvas
+        print("HEIGHT", self.height)
+        print("CENTER at", fix)
 
-            # # print(event.xdata, event.ydata, dot)
-            # except TypeError:
-            #     pass
-            # else:
+        # the posisitons of click in coordinate system
+        x = event.xdata
+        y = event.ydata
+        # the position of the "click" event
+        e_pix = QPoint(*self.transform(x, y))
+        print("event position", e_pix, x, y)
+
+        # the current cursor position on the screen when in the drawing area
+        s_pix = self.gimod.cursor().pos()
+        print("screen position BEFORE click", s_pix)
+
+        # the delta between those two
+        delta = [s_pix.x() - e_pix.x(), s_pix.y() - (self.height - e_pix.y())]
+        print("delta", delta)
+
+        cursor = QCursor()
+        cursor.setPos(QPoint(delta[0] + fix[0], delta[1] + (self.height - fix[1])))
+        # self.gimod.cursor().setPos(QPoint(delta[0] + fix[0], delta[1] + (self.height - fix[1])))
+        # cursor.setPos(QPoint(e_pix[0], e_pix[1]))
+        self.gimod.setCursor(cursor)
+            # time.sleep(1)
+        print("screen position AFTER click", self.gimod.cursor().pos())
+
+    def transform(self, x, y):
+        """Transform the given x-y-coordinates to pixel position."""
+        # return self.figure.axis.transData.inverted().transform((x, y))
+        return self.figure.axis.transData.transform((x, y))
 
     def vicinity(self, x, y, picker=15):
         """
@@ -152,7 +202,7 @@ class MagnetizedGrid():
             A tuple holding the cartesian x,y-coordinates of the point that will be snapped to
         """
         # pixel holds the current cursor postion
-        pixel = tuple(self.figure.axis.transData.transform((x, y)))
+        pixel = tuple(self.transform(x, y))
         # crossings are all possible positions of grid lines
         for pos in self.crossings:
             # distance:
@@ -164,6 +214,7 @@ class MagnetizedGrid():
 
             # dot_x, dot_y = pixel
             if dist_x <= picker and dist_y <= picker:
+                # print("MOVED", pos[0], pos[1])
                 self.parent.statusbar.showMessage("Locked X-Y-Axes", 1000)
                 dot_x = pos[0]
                 dot_y = pos[1]
@@ -172,19 +223,30 @@ class MagnetizedGrid():
             # NOTE: 5 <= dist <= picker allows a 5 pixel radius around each
             # joint so that the junctions can be reached better
             elif 5 <= dist_x <= picker and dist_y > picker:
+                # print(dist_x, dist_y)
                 self.parent.statusbar.showMessage("Locked X-Axis", 1000)
                 dot_x = pos[0]
                 dot_y = pixel[1]
                 color = '#ff0000'
+                # self.gimod.setCursor(QCursor.setPos(self.transform(dot_x, dot_y)))
 
             elif 5 <= dist_y <= picker and dist_x > picker:
+                # print(dist_x, dist_y)
                 self.parent.statusbar.showMessage("Locked Y-Axis", 1000)
                 dot_x = pixel[0]
                 dot_y = pos[1]
                 color = '#ff0000'
+                # self.gimod.setCursor(QCursor.setPos(self.transform(dot_x, dot_y)))
+            # elif dist_x > picker and dist_y > picker:
+            #     print(dist_x, dist_y)
+            #     dot_x = pixel[0]
+            #     dot_y = pixel[1]
+            #     color = 'none'
 
             if 'dot_x' and 'dot_y' in locals():
+            # if dot_x is not None and dot_y is not None:
                 # print("yay")
+                # self.gimod.setCursor(QCursor.setPos(self.transform(dot_x, dot_y)))
                 return self.figure.axis.transData.inverted().transform((dot_x, dot_y)), color
             # else:
             #     # this is needed when checking for possible ankers while drawing a polygon
