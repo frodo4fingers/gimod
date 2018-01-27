@@ -13,11 +13,12 @@ class SpanPoly():
         ----------
         parent: :class:`core.builder.Builder`
         """
+        self.gimod = parent.parent
         self.parent = parent
         self.figure = parent.figure
-        self.setAllComponents()
+        self.resetAllComponents()
 
-    def setAllComponents(self):
+    def resetAllComponents(self):
         """
         Set helper line, the line that assembles Polygon parts and the storages
         lists for establishing those lines.
@@ -69,14 +70,14 @@ class SpanPoly():
                 self.parent.printPolygon(
                     [[self.x[i], self.y[i]] for i in range(len(self.x))])
                 # reset the necessary components
-                self.setAllComponents()
+                self.resetAllComponents()
 
             else:  # append point to polygon
                 self.x_p = event.xdata
                 self.y_p = event.ydata
                 # snap current position to nearest node if magnetized
                 # this will override the just collected event data
-                if self.parent.parent.toolBar.acn_magnetizePoly.isChecked():
+                if self.gimod.toolBar.acn_magnetizePoly.isChecked():
                     if self.parent.mp.x_p is not None:
                         self.x_p = self.parent.mp.x_p
                         self.y_p = self.parent.mp.y_p

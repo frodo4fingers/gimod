@@ -2,12 +2,16 @@
 # encoding: UTF-8
 
 try:
-    from PyQt5.QtWidgets import QMainWindow, QApplication, QVBoxLayout, QSizePolicy, QStatusBar, QTabWidget, QSplitter, QAction, QMessageBox, QFileDialog, QMenu
+    from PyQt5.QtWidgets import (QMainWindow, QApplication, QVBoxLayout,
+        QSizePolicy, QStatusBar, QTabWidget, QSplitter, QAction, QMessageBox,
+        QFileDialog, QMenu)
     from PyQt5.QtCore import Qt
-    from PyQt5.QtGui import QIcon
+    from PyQt5.QtGui import QIcon, QCursor
 
 except ImportError:
-    from PyQt4.QtGui import QMainWindow, QApplication, QVBoxLayout, QSizePolicy, QStatusBar, QTabWidget, QSplitter, QAction, QMessageBox, QIcon, QFileDialog, QMenu
+    from PyQt4.QtGui import (QMainWindow, QApplication, QVBoxLayout,
+        QSizePolicy, QStatusBar, QTabWidget, QSplitter, QAction, QMessageBox,
+        QIcon, QFileDialog, QMenu, QCursor)
     from PyQt4.QtCore import Qt
 
 import sys
@@ -15,7 +19,14 @@ import pygimli as pg
 from pygimli.meshtools import createMesh, exportPLC, exportFenicsHDF5Mesh, readPLC
 from pygimli.mplviewer import drawMeshBoundaries, drawMesh, drawPLC, drawModel
 
-from core import Builder, ImageTools
+from core import Builder
+# try:
+from core.imagery import ImageTools
+#     opencv = True
+# except ModuleNotFoundError:
+#     # set global flag
+#     opencv = False
+
 from gui import InfoTree, MeshOptions, PlotWidget, PolyToolBar
 
 
@@ -28,8 +39,14 @@ class GIMod(QMainWindow):
         layout of GIMod and connect all signals to their respective methods.
         """
         super(GIMod, self).__init__(parent)
+        # self.cursor = QCursor()
         self.initUI()
+
         self.image_tools = ImageTools(self)
+
+        # when resizing the mainwindow
+        if self.toolBar.acn_gridToggle.isChecked():
+            self.resizeEvent(self.builder.grid.getCanvasHeight)
 
         # menu actions
         self.mb_aboutVerison.triggered.connect(self.aboutVersion)
@@ -38,13 +55,24 @@ class GIMod(QMainWindow):
         self.mb_save_poly.triggered.connect(self.exportPoly)
         self.mb_save_mesh.triggered.connect(self.exportMesh)
 
-        # toolbar actions
-        self.toolBar.acn_image.triggered.connect(self.image_tools.imagery)
-        self.toolBar.acn_imageAsBackground.stateChanged.connect(self.image_tools.imageryBackground)
-        self.toolBar.acn_imageThreshold1.valueChanged.connect(self.image_tools.updateImagery)
-        self.toolBar.acn_imageThreshold2.valueChanged.connect(self.image_tools.updateImagery)
-        self.toolBar.acn_imageDensity.valueChanged.connect(self.image_tools.updateImagery)
-        self.toolBar.acn_imagePolys.valueChanged.connect(self.image_tools.polysFromImage)
+        # connect the toolbar action signals to their methods if opencv is present
+        if self.image_tools.found_cv:
+            self.toolBar.acn_imageAsBackground.stateChanged.connect(
+                self.image_tools.imageryBackground)
+            self.toolBar.acn_imageThreshold1.valueChanged.connect(
+                self.image_tools.updateImagery)
+            self.toolBar.acn_imageThreshold2.valueChanged.connect(
+                self.image_tools.updateImagery)
+            self.toolBar.acn_imageDensity.valueChanged.connect(
+                self.image_tools.updateImagery)
+            self.toolBar.acn_imagePolys.valueChanged.connect(
+                self.image_tools.polysFromImage)
+            self.toolBar.acn_image.triggered.connect(self.image_tools.imagery)
+        else:  # disable their use
+            self.toolBar.acn_imageThreshold1.setEnabled(False)
+            self.toolBar.acn_imageThreshold2.setEnabled(False)
+            self.toolBar.acn_imageDensity.setEnabled(False)
+            self.toolBar.acn_imagePolys.setEnabled(False)
 
         self.toolBar.acn_polygonize.triggered.connect(self.builder.formPolygonFromFigure)
 
@@ -58,7 +86,7 @@ class GIMod(QMainWindow):
         self.toolBar.acn_markerCheck.triggered.connect(self.builder.markersMove)
 
         self.toolBar.acn_gridToggle.triggered.connect(self.builder.toggleGrid)
-        self.toolBar.acn_magnetizeGrid.triggered.connect(self.builder.magnetizeGrid)
+        self.toolBar.acn_magnetizeGrid.triggered.connect(self.builder.toggleMagnetizedGrid)
         self.toolBar.acn_magnetizePoly.triggered.connect(self.builder.magnetizePoly)
 
         self.info_tree.btn_redraw.clicked.connect(self.info_tree.redrawTable)
@@ -121,7 +149,7 @@ class GIMod(QMainWindow):
 
         self.setCentralWidget(splitter)
 
-        self.setGeometry(1500, 100, 1000, 600)
+        # self.setGeometry(1500, 100, 1000, 600)
         # window name
         self.setWindowTitle("GIMod")
         self.setWindowIcon(QIcon('icons/logo.png'))
@@ -159,7 +187,6 @@ class GIMod(QMainWindow):
 
     def exportPoly(self):
         """Export the poly figure."""
-        print("hurensohn")
         export_poly = QFileDialog.getSaveFileName(
             self, caption='Save Poly Figure')[0]
 

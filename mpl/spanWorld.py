@@ -15,6 +15,7 @@ class SpanWorld():
         ----------
         parent: :class:`core.builder.Builder`
         """
+        self.gimod = parent.parent
         self.parent = parent
         self.figure = self.parent.figure
         # empty rectangle
@@ -37,9 +38,14 @@ class SpanWorld():
 
     def onPress(self, event):
         """Collect the data of the starting corner of the rectangle."""
+        if event.inaxes != self.rect.axes:
+            return
         if event.button is 1:  # left mouse button
             self.x_p = event.xdata
             self.y_p = event.ydata
+            if self.gimod.toolBar.acn_magnetizeGrid.isChecked():
+                self.x_p = self.parent.grid.x_p
+                self.y_p = self.parent.grid.y_p
             self.rect.set_animated(True)
             self.figure.canvas.draw()
             self.background = self.figure.canvas.copy_from_bbox(self.rect.axes.bbox)
@@ -65,6 +71,8 @@ class SpanWorld():
 
     def onRelease(self, event):
         """Restore the canvas and empty the rectangles data."""
+        if event.inaxes != self.rect.axes:
+            return
         try:
             self.x_r = event.xdata
             self.y_r = event.ydata
@@ -75,7 +83,17 @@ class SpanWorld():
             self.rect.set_animated(False)
             self.background = None
             self.figure.canvas.draw()
-            # send rectangle data to builder
+            # send rectangle data to builder after check if the cursor postion
+            # was grapped by the magnetized grid
+            if self.gimod.toolBar.acn_magnetizeGrid.isChecked():
+                # if self.parent.grid.x_r is not None:
+                self.x_r = self.parent.grid.x_r
+                self.y_r = self.parent.grid.y_r
+
+                # if self.parent.grid.x_p is not None:
+                #     self.x_p = self.parent.grid.x_p
+                #     self.y_p = self.parent.grid.y_p
+            self.disconnect()
             self.parent.printCoordinates(self.x_p, self.y_p, self.x_r, self.y_r, form='World')
         except AttributeError:
             pass

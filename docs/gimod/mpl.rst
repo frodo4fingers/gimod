@@ -17,14 +17,6 @@ mpl\.draggablePoint module
     :undoc-members:
     :show-inheritance:
 
-mpl\.helper module
-------------------
-
-.. automodule:: mpl.helper
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 mpl\.magnetizePolys module
 --------------------------
 

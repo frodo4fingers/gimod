@@ -10,6 +10,7 @@ class SpanCircle():
 
     def __init__(self, parent=None):
         """Initialize all important variables for matplotlib drawing."""
+        self.gimod = parent.parent
         self.parent = parent
         self.figure = self.parent.figure
         # dummy to be drawn and 'exported' later
@@ -39,9 +40,14 @@ class SpanCircle():
         Collect x,y-positions from the event and prepare the canvas for drawing
         while dragging.
         """
+        if event.inaxes != self.circle.axes:
+            return
         if event.button is 1:
             self.x_p = event.xdata
             self.y_p = event.ydata
+            if self.gimod.toolBar.acn_magnetizeGrid.isChecked():
+                self.x_p = self.parent.grid.x_p
+                self.y_p = self.parent.grid.y_p
             self.circle.set_animated(True)
             self.figure.canvas.draw()
             self.background = self.figure.canvas.copy_from_bbox(self.circle.axes.bbox)
@@ -55,6 +61,9 @@ class SpanCircle():
         try:
             self.x_m = event.xdata
             self.y_m = event.ydata
+            if self.gimod.toolBar.acn_magnetizeGrid.isChecked():
+                self.x_m = self.parent.grid.x_m
+                self.y_m = self.parent.grid.y_m
             # inconsistent mpl stuff
             self.circle.center = (self.x_p, self.y_p)
             self.circle.set_radius(self.distance())
@@ -69,6 +78,8 @@ class SpanCircle():
 
     def onRelease(self, event):
         """Restore the canvas and empty the circles data."""
+        if event.inaxes != self.circle.axes:
+            return
         try:
             # inconsistent mpl stuff
             self.circle.center = (0, 0)

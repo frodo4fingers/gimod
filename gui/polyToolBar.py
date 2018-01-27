@@ -141,7 +141,6 @@ class PolyToolBar(QToolBar):
             QIcon('icons/grid.svg'),
             "turn on and off a grid",
             None, checkable=True)
-        self.acn_gridToggle.setEnabled(False)
 
         # action to magnetize all grid lines
         self.acn_magnetizeGrid = QAction(
@@ -160,7 +159,7 @@ class PolyToolBar(QToolBar):
         # add all actions and widgets to the toolbar
         self.addAction(self.acn_image)
         self.widgetAction = self.addWidget(acnWidget)
-        self.widgetAction.setVisible(False)
+        # self.widgetAction.setVisible(False)
         self.addAction(self.acn_polygonize)
         self.addSeparator()
         self.addAction(self.acn_reset_figure)

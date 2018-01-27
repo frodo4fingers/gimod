@@ -1,9 +1,16 @@
 try:
-    from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QLineEdit,  QPushButton, QMessageBox
+    from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
+        QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QLineEdit,
+        QPushButton, QMessageBox, QGridLayout)
+    from PyQt5.QtCore import Qt
 
 except ImportError:
-    from PyQt4.QtGui import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QLineEdit,  QPushButton, QMessageBox
+    from PyQt4.QtGui import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
+        QSpinBox, QDoubleSpinBox, QComboBox, QSizePolicy, QCheckBox, QLineEdit,
+        QPushButton, QMessageBox, QGridLayout)
+    from PyQt4.QtCore import Qt
 
+import pygimli as pg
 from pygimli import show
 from pygimli.meshtools import createMesh
 from pygimli.mplviewer import drawMeshBoundaries
@@ -26,11 +33,10 @@ class MeshOptions(QWidget):
         self.parent = parent
         self.setupWidget()
 
-        # connect the signals to theri functions
+        # connect the signals to their functions
         self.chbx_mesh_refine.stateChanged.connect(self.changedChbxMeshRefine)
         self.chbx_smooth.stateChanged.connect(self.changedChbxSmooth)
         self.chbx_switches.stateChanged.connect(self.changedChbxSwitches)
-        self.chbx_mesh_attr.stateChanged.connect(self.showMesh)
         self.btn_mesh.clicked.connect(self.clickedBtnMesh)
 
     def setupWidget(self):
@@ -81,7 +87,9 @@ class MeshOptions(QWidget):
         # define the set of switches to override the other adjustments and
         # access tetgen directly through the commandline options
         self.la_switches = QLabel("Switches:")
+        self.la_switches.setEnabled(False)
         self.chbx_switches = QCheckBox()
+        self.chbx_switches.setEnabled(False)
         self.le_switches = QLineEdit("-pzeAfaq31")
         self.le_switches.setEnabled(False)
         self.switches = None
@@ -94,53 +102,43 @@ class MeshOptions(QWidget):
         self.btn_mesh = QPushButton("mesh")
         self.btn_mesh.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        # stack the labels in a vertical layout
-        vbox_mesh_labels = QVBoxLayout()
-        vbox_mesh_labels.addWidget(la_mesh_quality)
-        vbox_mesh_labels.addWidget(la_cell_area)
-        vbox_mesh_labels.addWidget(la_mesh_refine)
-        vbox_mesh_labels.addWidget(la_smooth)
-        vbox_mesh_labels.addWidget(self.la_switches)
-        vbox_mesh_labels.addWidget(la_mesh_show_attr)
-
-        # stack the widgets also vertical so it looks nice and clean
-        vbox_mesh_params = QVBoxLayout()
-        vbox_mesh_params.addWidget(self.spb_mesh_quality)
-        vbox_mesh_params.addWidget(self.spb_cell_area)
-
-        hbox_mesh_refine = QHBoxLayout()
-        hbox_mesh_refine.addWidget(self.chbx_mesh_refine)
-        hbox_mesh_refine.addWidget(self.cbx_mesh_refine)
-        vbox_mesh_params.addLayout(hbox_mesh_refine)
-
-        hbox_mesh_smooth = QHBoxLayout()
-        hbox_mesh_smooth.addWidget(self.chbx_smooth)
-        hbox_mesh_smooth.addWidget(self.cbx_smooth)
-        hbox_mesh_smooth.addWidget(self.spb_smooth)
-        vbox_mesh_params.addLayout(hbox_mesh_smooth)
-
-        # TODO: make the label auto adjusted to the changes from the widgets
-        # TODO:disable all widgets if one wants to set the options by hand
-        hbox_mesh_switches = QHBoxLayout()
-        hbox_mesh_switches.addWidget(self.chbx_switches)
-        hbox_mesh_switches.addWidget(self.le_switches)
-        vbox_mesh_params.addLayout(hbox_mesh_switches)
-
-        hbox_mesh_attr = QHBoxLayout()
-        hbox_mesh_attr.addWidget(self.chbx_mesh_attr)
-        hbox_mesh_attr.addStretch(1)
-        vbox_mesh_params.addLayout(hbox_mesh_attr)
-
-        hbox_mesh = QHBoxLayout()
-        hbox_mesh.addLayout(vbox_mesh_labels)
-        hbox_mesh.addLayout(vbox_mesh_params)
+        layout = QGridLayout()
+        # first row
+        layout.addWidget(la_mesh_quality, 0, 0, 1, 1)
+        layout.addWidget(self.spb_mesh_quality, 0, 1, 1, 1)
+        # second row
+        layout.addWidget(la_cell_area, 1, 0, 1, 1)
+        layout.addWidget(self.spb_cell_area, 1, 1, 1, 1)
+        # third row
+        layout.addWidget(la_mesh_refine, 2, 0, 1, 1)
+        box_refine = QHBoxLayout()
+        box_refine.addWidget(self.chbx_mesh_refine)
+        box_refine.addWidget(self.cbx_mesh_refine)
+        layout.addLayout(box_refine, 2, 1, 1, 1)
+        # fourth row
+        layout.addWidget(la_smooth, 3, 0, 1, 1)
+        box_smooth = QHBoxLayout()
+        box_smooth.addWidget(self.chbx_smooth)
+        box_smooth.addWidget(self.cbx_smooth)
+        box_smooth.addWidget(self.spb_smooth)
+        layout.addLayout(box_smooth, 3, 1, 1, 1)
+        # fifth row
+        layout.addWidget(self.la_switches, 4, 0, 1, 1)
+        box_switch = QHBoxLayout()
+        box_switch.addWidget(self.chbx_switches)
+        box_switch.addWidget(self.le_switches)
+        layout.addLayout(box_switch, 4, 1, 1, 1)
+        # sixth row
+        layout.addWidget(la_mesh_show_attr, 5, 0, 1, 1)
+        layout.addWidget(self.chbx_mesh_attr, 5, 1, 1, 1)
 
         hbox_mesh_n_export = QHBoxLayout()
         hbox_mesh_n_export.addWidget(self.btn_mesh)
         # hbox_mesh_n_export.addWidget(self.btn_mesh_export)
 
         vbox_mesh = QVBoxLayout()
-        vbox_mesh.addLayout(hbox_mesh)
+        vbox_mesh.addLayout(layout)
+        # vbox_mesh.addLayout(hbox_mesh)
         vbox_mesh.addLayout(hbox_mesh_n_export)
         vbox_mesh.addStretch(1)
 
@@ -213,21 +211,86 @@ class MeshOptions(QWidget):
         self.showMesh()
 
     def showMesh(self):
+        """."""
         self.parent.plotWidget.axis.cla()
         if self.chbx_mesh_attr.isChecked() is True:
-            self.regionGetAttributes()
-            show(self.mesh, pg.solver.parseArgToArray(self.attr_map, self.mesh.cellCount(
-            ), self.mesh), ax=self.parent.plotWidget.axis)
-            show(drawMeshBoundaries(self.parent.plotWidget.axis, self.mesh,
-                                    hideMesh=False),
-                 ax=self.parent.plotWidget.axis,
-                 fillRegion=False)
+            success = False
+            # gather the attributes from other tab
+            attr_map, success = self.regionGetAttributes()
+            if success:
+                show(self.mesh, pg.solver.parseArgToArray(
+                    attr_map, self.mesh.cellCount(), self.mesh),
+                    ax=self.parent.plotWidget.axis
+                    )
+                show(drawMeshBoundaries(
+                    self.parent.plotWidget.axis, self.mesh, hideMesh=False),
+                    ax=self.parent.plotWidget.axis,
+                    fillRegion=False
+                    )
         else:
+            success = True
             show(self.mesh, ax=self.parent.plotWidget.axis)
 
-        # self.parent.plotWidget.axis.set_ylim(
-        #     self.parent.plotWidget.axis.get_ylim()[::-1])
-        self.parent.plotWidget.canvas.draw()
+        if success:
+            self.parent.plotWidget.canvas.draw()
+
+    def regionGetAttributes(self):
+        """
+        Reach out to the info table where all polygon information is stored.
+        Get the 'Attribute' information for each region and establish a
+        attribute map.
+
+        Returns
+        -------
+        attr_map: List[List[int, float]]
+            The attribute map necessary for several purposes (like plotting the
+            values of a region (..totally random example))
+        """
+        # flag for value checking
+        success = True
+        # get the polygon table
+        poly_table = self.parent.info_tree.tw_polys
+        # count the listed items(polygons)
+        n_polys = poly_table.topLevelItemCount()
+        # iterate over them and get the attribute content
+        regions = set()
+        attrs = []
+        for i in range(n_polys):
+            # the item in list
+            poly = poly_table.topLevelItem(i)
+            # # needed is region and attribute
+            for k in range(poly.childCount()):
+                # identify by name.. marker, angle, start_x
+                identifier = poly.child(k).text(0)
+                if identifier == 'Marker:':
+                    regions.add(int(poly_table.itemWidget(poly.child(k), 1).currentText()))
+                if identifier == 'Attributes:':
+                    attr = poly.child(k).text(1)
+                    try:
+                        attrs.append(float(attr))
+                        poly.child(k).setForeground(0, Qt.black)
+                    except ValueError:
+                        # mark missing/wrong values red
+                        poly.child(k).setForeground(0, Qt.red)
+                        # raised on empty field or characters
+                        self.parent.statusbar.showMessage("The value {} could be casted into float. Check your attributes!".format(attr))
+                        success = False
+
+        if not success:
+            return None, success
+
+        if success:
+            # very sloppy check on the attributes
+            if len(regions) != len(attrs):
+                self.parent.statusbar.showMessage(
+                    "Could not cast a few values or a region has been assigned\
+                    multiple values. Check your attributes!".format(attr))
+                success = False
+                return None, success
+
+        if success:
+            attr_map = list(zip(regions, attrs))
+            return attr_map, success
 
 
 if __name__ == '__main__':

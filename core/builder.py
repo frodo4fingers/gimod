@@ -11,7 +11,7 @@ except ImportError:
 
 from matplotlib import patches
 
-from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly, DraggablePoint, MagnetizePolygons
+from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly, DraggablePoint, MagnetizePolygons, MagnetizedGrid
 
 import pygimli as pg
 from pygimli.mplviewer import drawMesh, drawMeshBoundaries, drawModel
@@ -350,6 +350,16 @@ class Builder():
             else:  # empty
                 QMessageBox.question(None, 'Whoops..', "Your regions don't have any attributes to plot!", QMessageBox.Ok)
 
+        # redraw the grid if it is checked:
+        if self.parent.toolBar.acn_gridToggle.isChecked():
+            # if it is checked there is a self.grid
+            self.grid.disable()
+            self.grid.grid()
+
+        if self.parent.toolBar.acn_magnetizeGrid.isChecked():
+            self.grid.disconnect()
+            self.grid.connect()
+
         # TODO: get rid of the dummy flag
         if not self.mPolyClicked:
             x, y = self.getNodes()
@@ -436,7 +446,6 @@ class Builder():
             # set marker to begin with 1
             self.marker = -1
             # hide the iamge dialog again
-            self.parent.toolBar.widgetAction.setVisible(False)
         else:
             pass
 
@@ -507,41 +516,27 @@ class Builder():
         return abs(m - n)/50
 
     def toggleGrid(self):
-        """
-        Plot a grid to orientate the polygon creation.
-
-        Todo
-        ----
-        + MAKE THIS WORK!!
-        + also it would be nice if the grid was freely scalable.. like ctrl+g+wheel to set the stepping width of the grid
-        + get ffin rid of those dummy flags!!!
-        """
-        if self.gridClicked is True:
-            self.figure.axis.grid()
-            self.gridClicked = False
+        """."""
+        if self.parent.toolBar.acn_gridToggle.isChecked():
+            # NOTE: will only call init and nothing more
+            self.grid = MagnetizedGrid(self)
+            self.parent.toolBar.acn_magnetizeGrid.setEnabled(True)
         else:
-            self.figure.axis.grid(False)
-            self.gridClicked = True
-            self.acn_gridToggle.setChecked(False)
-        self.figure.canvas.draw()
+            self.parent.toolBar.acn_magnetizeGrid.setEnabled(False)
+            self.parent.toolBar.acn_magnetizeGrid.setChecked(False)
+            self.grid.disconnect()
+            self.grid.disable()
+        # grid.grid()
 
-    def magnetizeGrid(self):
-        """
-        Magnetize the grid to better snap to a hard point.
-
-        Todo
-        ----
-        + MAKE THIS WORK!!
-        + magnetize intersections and edges?!
-        """
-        if self.magnetize is True:
-            self.figure.axis.grid()
-            self.magnetize = False
+    def toggleMagnetizedGrid(self):
+        """."""
+        if self.parent.toolBar.acn_magnetizeGrid.isChecked():
+            self.grid.connect()
         else:
-            self.figure.axis.grid(False)
-            self.magnetize = True
-            self.parent.toolBarself.acn_magnetizeGrid.setChecked(False)
-        self.figure.canvas.draw()
+            self.grid.disconnect()
+            self.grid.disable()
+            # self.grid.dot.set_data([], [])
+            # self.figure.canvas.draw()
 
     def magnetizePoly(self):
         """
