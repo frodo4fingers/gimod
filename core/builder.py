@@ -446,7 +446,6 @@ class Builder():
             # set marker to begin with 1
             self.marker = -1
             # hide the iamge dialog again
-            # self.parent.toolBar.widgetAction.setVisible(False)
         else:
             pass
 
