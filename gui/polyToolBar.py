@@ -159,7 +159,7 @@ class PolyToolBar(QToolBar):
         # add all actions and widgets to the toolbar
         self.addAction(self.acn_image)
         self.widgetAction = self.addWidget(acnWidget)
-        self.widgetAction.setVisible(False)
+        # self.widgetAction.setVisible(False)
         self.addAction(self.acn_polygonize)
         self.addSeparator()
         self.addAction(self.acn_reset_figure)

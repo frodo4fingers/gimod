@@ -6,8 +6,11 @@ try:
     from PyQt5.QtWidgets import QFileDialog
 except ImportError:
     from PyQt4.QtGui import QFileDialog
-
-import cv2
+try:
+    import cv3
+    found_cv = True
+except ImportError:
+    found_cv = False
 
 
 class ImageTools():
@@ -23,6 +26,7 @@ class ImageTools():
         ----
         + get rid of the dummy flag imageClicked
         """
+        self.found_cv = found_cv
         self.parent = parent
         self.statusbar = parent.statusbar
         self.threshold1 = parent.toolBar.acn_imageThreshold1.value()
@@ -60,7 +64,6 @@ class ImageTools():
         # adjust the spinbox with number of polygons
         # TODO: get this out of here!!
         self.imagePolys.setRange(1, len(self.paths))
-        # self.polyDensity.setRange(1, 10)
 
         # draw initially
         self.polysFromImage()

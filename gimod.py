@@ -20,12 +20,12 @@ from pygimli.meshtools import createMesh, exportPLC, exportFenicsHDF5Mesh, readP
 from pygimli.mplviewer import drawMeshBoundaries, drawMesh, drawPLC, drawModel
 
 from core import Builder
-try:
-    from core.imagery import ImageTools
-    opencv = True
-except ModuleNotFoundError:
-    # set global flag
-    opencv = False
+# try:
+from core.imagery import ImageTools
+#     opencv = True
+# except ModuleNotFoundError:
+#     # set global flag
+#     opencv = False
 
 from gui import InfoTree, MeshOptions, PlotWidget, PolyToolBar
 
@@ -41,10 +41,8 @@ class GIMod(QMainWindow):
         super(GIMod, self).__init__(parent)
         # self.cursor = QCursor()
         self.initUI()
-        if opencv:
-            self.image_tools = ImageTools(self)
-        else:
-            self.toolBar.acn_image.setEnabled(False)
+
+        self.image_tools = ImageTools(self)
 
         # when resizing the mainwindow
         if self.toolBar.acn_gridToggle.isChecked():
@@ -58,7 +56,7 @@ class GIMod(QMainWindow):
         self.mb_save_mesh.triggered.connect(self.exportMesh)
 
         # connect the toolbar action signals to their methods if opencv is present
-        if opencv:
+        if self.image_tools.found_cv:
             self.toolBar.acn_imageAsBackground.stateChanged.connect(
                 self.image_tools.imageryBackground)
             self.toolBar.acn_imageThreshold1.valueChanged.connect(
@@ -70,6 +68,11 @@ class GIMod(QMainWindow):
             self.toolBar.acn_imagePolys.valueChanged.connect(
                 self.image_tools.polysFromImage)
             self.toolBar.acn_image.triggered.connect(self.image_tools.imagery)
+        else:  # disable their use
+            self.toolBar.acn_imageThreshold1.setEnabled(False)
+            self.toolBar.acn_imageThreshold2.setEnabled(False)
+            self.toolBar.acn_imageDensity.setEnabled(False)
+            self.toolBar.acn_imagePolys.setEnabled(False)
 
         self.toolBar.acn_polygonize.triggered.connect(self.builder.formPolygonFromFigure)
 
