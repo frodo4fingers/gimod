@@ -27,9 +27,7 @@ class MagnetizePolygons():
         y: list
             The y-positions of the polygons
         """
-        # print(parent)
         self.figure = parent.figure
-        self.span = parent.span
         self.x = x
         self.y = y
         # the dummy dot to be magnetized and colored later

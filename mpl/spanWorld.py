@@ -15,6 +15,7 @@ class SpanWorld():
         ----------
         parent: :class:`core.builder.Builder`
         """
+        self.gimod = parent.parent
         self.parent = parent
         self.figure = self.parent.figure
         # empty rectangle
@@ -42,9 +43,9 @@ class SpanWorld():
         if event.button is 1:  # left mouse button
             self.x_p = event.xdata
             self.y_p = event.ydata
-            if self.parent.parent.toolBar.acn_magnetizeGrid.isChecked():
-                self.x_p = self.parent.grid.x_m
-                self.y_p = self.parent.grid.y_m
+            if self.gimod.toolBar.acn_magnetizeGrid.isChecked():
+                self.x_p = self.parent.grid.x_p
+                self.y_p = self.parent.grid.y_p
             self.rect.set_animated(True)
             self.figure.canvas.draw()
             self.background = self.figure.canvas.copy_from_bbox(self.rect.axes.bbox)
@@ -84,15 +85,15 @@ class SpanWorld():
             self.figure.canvas.draw()
             # send rectangle data to builder after check if the cursor postion
             # was grapped by the magnetized grid
-            if self.parent.parent.toolBar.acn_magnetizeGrid.isChecked():
+            if self.gimod.toolBar.acn_magnetizeGrid.isChecked():
                 # if self.parent.grid.x_r is not None:
-                self.x_r = self.parent.grid.x_m
-                self.y_r = self.parent.grid.y_m
+                self.x_r = self.parent.grid.x_r
+                self.y_r = self.parent.grid.y_r
 
                 # if self.parent.grid.x_p is not None:
                 #     self.x_p = self.parent.grid.x_p
                 #     self.y_p = self.parent.grid.y_p
-
+            self.disconnect()
             self.parent.printCoordinates(self.x_p, self.y_p, self.x_r, self.y_r, form='World')
         except AttributeError:
             pass

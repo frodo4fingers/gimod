@@ -19,6 +19,7 @@ class SpanLine():
         ----------
         parent: :class:`~core.builder.Builder`
         """
+        self.gimod = parent.parent
         self.parent = parent
         self.figure = self.parent.figure
         # introduce empty line to start with
@@ -48,7 +49,7 @@ class SpanLine():
             self.y_p = event.ydata
             # snap current position to nearest node if magnetized
             # this will override the just collected event data
-            if self.parent.parent.toolBar.acn_magnetizePoly.isChecked() is True:
+            if self.gimod.toolBar.acn_magnetizePoly.isChecked() is True:
                 if self.parent.mp.x_p is not None:
                     self.x_p = self.parent.mp.x_p
                     self.y_p = self.parent.mp.y_p

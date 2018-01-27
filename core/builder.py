@@ -519,22 +519,25 @@ class Builder():
     def toggleGrid(self):
         """."""
         if self.parent.toolBar.acn_gridToggle.isChecked():
+            # NOTE: will only call init and nothing more
             self.grid = MagnetizedGrid(self)
             self.parent.toolBar.acn_magnetizeGrid.setEnabled(True)
         else:
             self.parent.toolBar.acn_magnetizeGrid.setEnabled(False)
+            self.parent.toolBar.acn_magnetizeGrid.setChecked(False)
             self.grid.disconnect()
             self.grid.disable()
         # grid.grid()
 
-    def enableMagnetizedGrid(self):
+    def toggleMagnetizedGrid(self):
         """."""
         if self.parent.toolBar.acn_magnetizeGrid.isChecked():
             self.grid.connect()
         else:
             self.grid.disconnect()
-            self.grid.dot.set_data([], [])
-            self.figure.canvas.draw()
+            self.grid.disable()
+            # self.grid.dot.set_data([], [])
+            # self.figure.canvas.draw()
 
     def magnetizePoly(self):
         """
