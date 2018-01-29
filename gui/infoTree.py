@@ -5,14 +5,14 @@
 try:
     from PyQt5.QtWidgets import (QWidget, QTreeWidget, QTreeWidgetItem,
         QPushButton, QRadioButton, QSizePolicy, QHBoxLayout, QVBoxLayout,
-        QComboBox, QSpinBox, QDoubleSpinBox)
+        QComboBox, QSpinBox, QDoubleSpinBox, QAction, QMenu)
     from PyQt5.QtCore import Qt, QSize
     from PyQt5.QtGui import QIcon, QFont, QColor
 
 except ImportError:
     from PyQt4.QtGui import (QWidget, QTreeWidget, QTreeWidgetItem,
         QPushButton, QRadioButton, QSizePolicy, QHBoxLayout, QVBoxLayout,
-        QComboBox, QSpinBox, QDoubleSpinBox, QIcon, QFont, QColor)
+        QComboBox, QSpinBox, QDoubleSpinBox, QIcon, QFont, QColor, QAction, QMenu)
     from PyQt4.QtCore import Qt, QSize
 
 import numpy as np
@@ -39,8 +39,10 @@ class InfoTree(QWidget):
         """
         super(InfoTree, self).__init__(parent)
         self.parent = parent
-
         self.setupWidget()
+
+        # connect the rightclick to contextmenu
+        self.tw_polys.customContextMenuRequested.connect(self.contextmenu.rightClicked)
 
     def setupWidget(self):
         """
@@ -53,6 +55,7 @@ class InfoTree(QWidget):
 
         # instanciate the widget that holds all information about each polygon
         self.tw_polys = QTreeWidget()
+        self.tw_polys.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tw_polys.setAlternatingRowColors(True)
         self.tw_polys.setUniformRowHeights(True)
         self.tw_polys.setContentsMargins(0, 0, 0, 0)
@@ -109,6 +112,8 @@ class InfoTree(QWidget):
         vbox.setContentsMargins(0, 0, 0, 0)
         self.setLayout(vbox)
 
+        self.contextmenu = ContextMenu(self)
+
     def fillTable(self, form, x_p=None, y_p=None, x_r=None, y_r=None, polygon=None, parent_marker=None):
         """
         Fill the tree widget on the left with information accessible in several
@@ -137,6 +142,7 @@ class InfoTree(QWidget):
         """
         # create an entry item
         tw_item = QTreeWidgetItem()
+        # tw_item.setContextMenuPolicy(Qt.CustomContextMenu)
         tw_item.setText(0, form)
         tw_item.setFont(0, self.bold)
 
@@ -471,6 +477,39 @@ class InfoTree(QWidget):
         self.parent.statusbar.clearMessage()
         self.parent.builder.drawPoly(polys=polys)
         self.parent.setCursor(Qt.ArrowCursor)
+
+
+class ContextMenu(QMenu):
+    """
+    Hold the functionality for right clicking an item in the treewidget.
+    (or later rightclicking a polygon)
+    """
+
+    def __init__(self, parent=None):
+        """."""
+        super(ContextMenu, self).__init__(parent)
+        self.parent = parent  # the infotree
+        self.setupMenu()
+
+        # connec the signals of the right click menu
+        self.acn_remove.triggered.connect(self.parent.parent.builder.undoPoly)
+
+    def setupMenu(self):
+        """Organize the methods in the menu."""
+        # Popup Menu is not visible, but we add actions from above
+        self.acn_remove = QAction("Remove this Polygon from Mesh creation",
+            None, checkable=False)
+
+        self.popMenu = QMenu(self)
+        self.popMenu.addAction(self.acn_remove)
+
+    def rightClicked(self, point):
+        clicked_item = self.parent.tw_polys.itemAt(point)
+        # only show the item if its the parent!
+        if clicked_item.childCount() != 0:
+            self.to_del = self.parent.tw_polys.indexOfTopLevelItem(clicked_item)
+            self.popMenu.exec_(self.parent.tw_polys.mapToGlobal(point))
+            self.to_del = None
 
 
 if __name__ == '__main__':

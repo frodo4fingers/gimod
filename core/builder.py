@@ -196,7 +196,7 @@ class Builder():
         self.parent.info_tree.btn_undo.setEnabled(True)
         self.parent.toolBar.acn_reset_figure.setEnabled(True)
         # activate all the polytools
-        # NOTE: not calling enabelingToolBarFunctions() because when loading a
+        # NOTE: not calling enableToolBarFunctions() because when loading a
         # figure the world tag doesn't exist which would be necessary to work
         # this method
         self.parent.toolBar.acn_polygon.setEnabled(True)
@@ -366,9 +366,9 @@ class Builder():
             self.mp.plotMagnets(x, y)
 
         self.parent.statusbar.showMessage(str(self.poly))
-        self.enabelingToolBarFunctions()
+        self.enableToolBarFunctions()
 
-    def enabelingToolBarFunctions(self):
+    def enableToolBarFunctions(self):
         """
         After drawing a polygon check whether the ``world`` needs to be
         disabled after creation or the other tools if no world exists.
@@ -442,7 +442,7 @@ class Builder():
             self.parent.info_tree.btn_undo.setEnabled(False)
             self.parent.toolBar.acn_reset_figure.setEnabled(False)
             # enable/disable polytools
-            self.enabelingToolBarFunctions()
+            self.enableToolBarFunctions()
             # set marker to begin with 1
             self.marker = -1
             # hide the iamge dialog again
@@ -592,14 +592,28 @@ class Builder():
         """
         Remove last made polygon from list and store it so it won't be lost completely.
         """
+        print("triggered")
+        # get the index of the rightclicked item if not None
+        if hasattr(self.parent.info_tree.contextmenu, 'to_del'):
+            idx = self.parent.info_tree.contextmenu.to_del
+        else:
+            idx = None
+        if idx is None:
+            idx = -1
+            take_at = self.parent.info_tree.tw_polys.topLevelItemCount() - 1
+        else:
+            take_at = idx
+
+        print(idx, take_at)
         # set the marker down
         self.marker -= 1
         # remove the last created polygon
-        self.undone.append(self.polys.pop())
+        self.undone.append(self.polys.pop(idx))
         # remove the parameters of the last created polygon
-        self.undone_hand_drawn.append(self.hand_drawn_polys.pop())
-        # remove last added entry from treewidget
-        self.parent.info_tree.tw_polys.takeTopLevelItem(self.parent.info_tree.tw_polys.topLevelItemCount() - 1)
+        self.undone_hand_drawn.append(self.hand_drawn_polys.pop(idx))
+        print(len(self.undone), len(self.undone_hand_drawn))
+        # remove entry from treewidget at index
+        self.parent.info_tree.tw_polys.takeTopLevelItem(take_at)
         # since the one removed wandered into the redo list, the button can now be enabled
         self.parent.info_tree.btn_redo.setEnabled(True)
         if not len(self.polys) == 0:
@@ -609,7 +623,7 @@ class Builder():
             self.figure.axis.cla()
             self.figure.canvas.draw()
             self.parent.info_tree.btn_undo.setEnabled(False)
-            self.enabelingToolBarFunctions()
+            self.enableToolBarFunctions()
 
     def redoPoly(self):
         """
