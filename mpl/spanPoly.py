@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # encoding: UTF-8
 
+from matplotlib.patches import Polygon
+from .mplbase import MPLBase
 
-class SpanPoly():
+
+class SpanPoly(MPLBase):
     """Provide the visualization for creating a manually drawn Polygon."""
 
     def __init__(self, parent=None):
@@ -13,6 +16,7 @@ class SpanPoly():
         ----------
         parent: :class:`core.builder.Builder`
         """
+        super(SpanPoly, self).__init__(parent)
         self.gimod = parent.parent
         self.parent = parent
         self.figure = parent.figure
@@ -24,34 +28,16 @@ class SpanPoly():
         lists for establishing those lines.
         """
         # helper line to draw between clicks
-        motionLine, = self.figure.axis.plot([0], [0], lw=0.5)
+        motionLine, = self.figure.axis.plot([0], [0], c='lightblue')
         self.motionLine = motionLine
         # actual line that will be staying and form the pre-poly
-        line, = self.figure.axis.plot([0], [0], c='black')
+        line, = self.figure.axis.plot([0], [0], c='white')
         self.line = line
         # store the clicked data points in lists
         self.x = []
         self.y = []
         self.background = None
         self.onPress = self.onPress
-
-    def connect(self):
-        """Connect all events needed for line drawing and 'preview'."""
-        self.cid_p = self.figure.canvas.mpl_connect(
-            'button_press_event', self.onPress)
-        self.cid_dp = self.figure.canvas.mpl_connect(
-            'button_press_event', self.onPress)
-        self.cid_m = self.figure.canvas.mpl_connect(
-            'motion_notify_event', self.onMotion)
-        self.cid_r = self.figure.canvas.mpl_connect(
-            'button_release_event', self.onRelease)
-
-    def disconnect(self):
-        """Disconnect all the stored connection ids."""
-        self.figure.canvas.mpl_disconnect(self.cid_p)
-        self.figure.canvas.mpl_disconnect(self.cid_dp)
-        self.figure.canvas.mpl_disconnect(self.cid_m)
-        self.figure.canvas.mpl_disconnect(self.cid_r)
 
     def onPress(self, event):
         """
@@ -67,8 +53,11 @@ class SpanPoly():
 
         if event.button is 1:  # left mouse button
             if event.dblclick:  # close polygon
-                self.parent.printPolygon(
-                    [[self.x[i], self.y[i]] for i in range(len(self.x))])
+                # self.parent.printPolygon(
+                #     [[self.x[i], self.y[i]] for i in range(len(self.x))])
+                poly = Polygon([[self.x[i], self.y[i]] for i in range(len(self.x))])
+                self.parent.storeMPLPaths(poly, ['Polygon',
+                    [[self.x[i], self.y[i]] for i in range(len(self.x))]])
                 # reset the necessary components
                 self.resetAllComponents()
 
@@ -77,7 +66,7 @@ class SpanPoly():
                 self.y_p = event.ydata
                 # snap current position to nearest node if magnetized
                 # this will override the just collected event data
-                if self.gimod.toolBar.acn_magnetizePoly.isChecked():
+                if self.gimod.toolbar.acn_magnetizePoly.isChecked():
                     if self.parent.mp.x_p is not None:
                         self.x_p = self.parent.mp.x_p
                         self.y_p = self.parent.mp.y_p
