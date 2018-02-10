@@ -47,6 +47,7 @@ class PlotWidget(QTabWidget):
 
         # connect the signal if the current tab changed
         self.currentChanged.connect(self.linkToInfoTree)
+        self.currentChanged.connect(self.enablePolyToolbar)
 
     def setupTabs(self):
         """."""
@@ -64,6 +65,18 @@ class PlotWidget(QTabWidget):
         else:
             self.parent.tabBox.setCurrentIndex(1)
 
+    def enablePolyToolbar(self):
+        """
+        The Toolbar only holds methods necessary for creation.
+
+        So if the second or third tab (gimod poly/ gimod mesh) is clicked, the
+        PolyToolbar will be disabled to no mess can be created like
+        "accidentally" draw into the mesh.
+        """
+        if self.currentIndex() > 0:
+            self.parent.toolbar.setEnabled(False)
+        else:
+            self.parent.toolbar.setEnabled(True)
 
 class Plot(QWidget):
     """Provide the standard matplotlib plot."""
