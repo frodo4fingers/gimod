@@ -60,6 +60,7 @@ class MPLBase():
 
     def drawToCanvas(self, patches):
         """Convenience function to add the gathered path to the current figure."""
+        self.figure.axis.cla()
         cmap = plt.cm.get_cmap(None, len(patches))
         for i, patch in enumerate(patches):
             # patch.set_fc((*cmap(i)[:3], 0.8))
