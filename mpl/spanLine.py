@@ -3,15 +3,12 @@
 
 from matplotlib.lines import Line2D
 from .mplbase import MPLBase
+import numpy as np
 
 
 class SpanLine(MPLBase):
     """
     Provide the visualization for creating a PolyLine.
-
-    Todo
-    ----
-    Add helper line like in spanPoly
     """
 
     def __init__(self, parent=None):
@@ -23,17 +20,24 @@ class SpanLine(MPLBase):
         parent: :class:`~core.builder.Builder`
         """
         super(SpanLine, self).__init__(parent)
-        self.gimod = parent.parent
         self.parent = parent
-        self.figure = self.parent.figure
-        # introduce empty line to start with
+        self.figure = parent.figure
+        self.gimod = parent.parent
+        # so far a work-around for avoiding getting 'NoneType' as pressed
+        # button event while drawing with magnetized net
+        if hasattr(self.parent, 'grid'):
+            self.parent.grid.update()
+        # dummy to be drawn and 'exported' later
         line, = self.figure.axis.plot([0], [0], c='lightblue')
         self.line = line
+        # dummy line to portrait where the line will be
         motionLine, = self.figure.axis.plot([0], [0], c='white')
         self.motionLine = motionLine
         self.x = []
         self.y = []
+        # counter for plotting a line when there two sets of coordinates
         self.clicker = -1
+        # trigger the drawing process
         self.onPress = self.onPress
 
     def onPress(self, event):
@@ -47,6 +51,11 @@ class SpanLine(MPLBase):
             self.motionLine.set_animated(False)
             self.x_p = event.xdata
             self.y_p = event.ydata
+            # check if cursour was grapped by the magnetized grid
+            if self.gimod.toolbar.acn_magnetizeGrid.isChecked():
+                if self.parent.grid.x_r is not None:
+                    self.x_p = self.parent.grid.x_p
+                    self.y_p = self.parent.grid.y_p
             # snap current position to nearest node if magnetized
             # this will override the just collected event data
             if self.gimod.toolbar.acn_magnetizePoly.isChecked() is True:
@@ -82,16 +91,16 @@ class SpanLine(MPLBase):
             pass
         if self.clicker > 0:
             self.line.set_data([0], [0])
-            # self.parent.printCoordinates(
-            #     self.x[self.clicker - 1], self.y[self.clicker - 1],
-            #     self.x[self.clicker], self.y[self.clicker], form="Line"
-            # )
             line = Line2D(
                 [self.x[self.clicker - 1], self.x[self.clicker]],
-                [self.y[self.clicker - 1], self.y[self.clicker]])
+                [self.y[self.clicker - 1], self.y[self.clicker]], marker='o', c='white', mfc='white', mec='white')
+            self.parent.magnets.append(np.asarray(line.get_data()))
             self.parent.storeMPLPaths(line, ['Line',
                 [self.x[self.clicker - 1], self.y[self.clicker - 1],
                 self.x[self.clicker], self.y[self.clicker]]])
+            # update the magnets
+            if self.gimod.toolbar.acn_magnetizePoly.isChecked():
+                self.parent.mp.plotMagnets()
 
 
 if __name__ == '__main__':

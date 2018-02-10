@@ -17,18 +17,24 @@ class SpanRectangle(MPLBase):
         parent: :class:`core.builder.Builder`
         """
         super(SpanRectangle, self).__init__(parent)
-        self.gimod = parent.parent
+        # parental objects
         self.parent = parent
-        self.figure = self.parent.figure
-        # empty rectangle to start with
-        self.rect = Rectangle((0, 0), 0, 0, fc='none', alpha=0.5, ec='lightblue')
+        self.figure = parent.figure
+        self.gimod = parent.parent
+        # so far a work-around for avoiding getting 'NoneType' as pressed
+        # button event while drawing with magnetized net
+        if hasattr(self.parent, 'grid'):
+            self.parent.grid.update()
+        # dummy to be drawn and 'exported' later
+        self.rect = Rectangle((0, 0), 0, 0, fc='none', ec='lightblue')
         self.background = None
+        # bring the dummy on the canvas
         self.figure.axis.add_patch(self.rect)
+        # trigger the drawing process
         self.onPress = self.onPress
 
     def onPress(self, event):
         """Collect the data of the starting corner of the rectangle."""
-        print("rectangle press")
         if event.inaxes != self.rect.axes:
             return
         if event.button is 1:  # left mouse button
@@ -84,7 +90,6 @@ class SpanRectangle(MPLBase):
 
     def onRelease(self, event):
         """Restore the canvas and empty the rectangles data."""
-        print("rectangle release")
         if event.inaxes != self.rect.axes:
             return
         try:
@@ -100,52 +105,39 @@ class SpanRectangle(MPLBase):
             # send rectangle data to builder after check if the cursor postion
             # was grapped by the magnetized grid
             if self.gimod.toolbar.acn_magnetizeGrid.isChecked():
-                # if self.parent.grid.x_r is not None:
-                self.x_r = self.parent.grid.x_r
-                self.y_r = self.parent.grid.y_r
+                if self.parent.grid.x_r is not None:
+                    self.x_r = self.parent.grid.x_r
+                    self.y_r = self.parent.grid.y_r
+                if self.parent.grid.x_p is not None:
+                    self.x_p = self.parent.grid.x_p
+                    self.y_p = self.parent.grid.y_p
+            # check if the polygons were magnetized
+            if self.gimod.toolbar.acn_magnetizePoly.isChecked():
+                if self.parent.mp.x_r is not None:
+                    self.x_r = self.parent.mp.x_r
+                    self.y_r = self.parent.mp.y_r
+                if self.parent.mp.x_p is not None:
+                    self.x_p = self.parent.mp.x_p
+                    self.y_p = self.parent.mp.y_p
 
-                # if self.parent.grid.x_p is not None:
-                #     self.x_p = self.parent.grid.x_p
-                #     self.y_p = self.parent.grid.y_p
             # draw the actually spanned rectangle
             rect = Rectangle((0, 0), 0, 0, fc='none', lw=1, ec='lightblue')
             rect.set_width(self.x_r - self.x_p)
             rect.set_height(self.y_r - self.y_p)
             rect.set_xy((self.x_p, self.y_p))
-            # self.drawToCanvas(rect)
+            self.drawMagnets(rect.get_verts())
+            self.parent.magnets.append(rect.get_verts())
             self.figure.canvas.draw()
-            # self.disconnect()
-            # self.parent.printCoordinates(self.x_p, self.y_p, self.x_r, self.y_r, form='Rectangle')
             self.parent.storeMPLPaths(rect, ['Rectangle', [self.x_p, self.y_p, self.x_r, self.y_r]])
+            # update the magnets
+            if self.gimod.toolbar.acn_magnetizePoly.isChecked():
+                self.parent.mp.plotMagnets()
             self.x_p = None
             self.y_p = None
             self.x_r = None
             self.y_r = None
         except AttributeError:
             pass
-
-    # def sendToBuilder(self):
-    #     """Send the rectangle data to :meth:`core.builder.Builder.printCoordinates`."""
-    #     if self.gimod.toolbar.acn_magnetizePoly.isChecked():
-    #         if self.parent.mp.x_r is not None:
-    #             self.x_r = self.parent.mp.x_r
-    #             self.y_r = self.parent.mp.y_r
-    #
-    #         if self.parent.mp.x_p is not None:
-    #             self.x_p = self.parent.mp.x_p
-    #             self.y_p = self.parent.mp.y_p
-    #
-    #     # if self.gimod.toolbar.acn_magnetizeGrid.isChecked():
-    #     #     # if self.parent.grid.x_r is not None:
-    #     #     self.x_r = self.parent.grid.x_m
-    #     #     self.y_r = self.parent.grid.y_m
-    #
-    #         # if self.parent.grid.x_p is not None:
-    #         #     self.x_p = self.parent.grid.x_p
-    #         #     self.y_p = self.parent.grid.y_p
-    #
-    #     # self.parent.printCoordinates(self.x_p, self.y_p, self.x_r, self.y_r, form='Rectangle')
-    #     self.parent.storeMPLPaths(['Rectangle', [self.x_p, self.y_p, self.x_r, self.y_r]])
 
 
 if __name__ == '__main__':

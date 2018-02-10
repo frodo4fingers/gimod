@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: UTF-8
 
-from matplotlib.patches import Circle
+from matplotlib.patches import Circle, CirclePolygon
 import numpy as np
 
 from .mplbase import MPLBase
@@ -13,13 +13,20 @@ class SpanCircle(MPLBase):
     def __init__(self, parent=None):
         """Initialize all important variables for matplotlib drawing."""
         super(SpanCircle, self).__init__(parent)
-        self.gimod = parent.parent
+        # parental objects
         self.parent = parent
-        self.figure = self.parent.figure
+        self.figure = parent.figure
+        self.gimod = parent.parent
+        # so far a work-around for avoiding getting 'NoneType' as pressed
+        # button event while drawing with magnetized net
+        if hasattr(self.parent, 'grid'):
+            self.parent.grid.update()
         # dummy to be drawn and 'exported' later
         self.circle = Circle((0, 0), 0, fc='none', ec='lightblue')
         self.background = None
+        # bring the dummy on the canvas
         self.figure.axis.add_patch(self.circle)
+        # trigger the drawing process
         self.onPress = self.onPress
 
     def distance(self):
@@ -87,21 +94,30 @@ class SpanCircle(MPLBase):
     def sendToBuilder(self):
         """Send the circle data to the builder."""
         # TODO: IF necessary the circle needs to be rotated, so that the point where the click is released lies on the edge!
-        # if self.parent.acn_magnetizePoly.isChecked() is True:
-        #     if self.parent.mp.x_m is not None:
-        #         self.x_m = self.parent.mp.x_m
-        #         self.y_m = self.parent.mp.y_m
-        #
-        #     if self.parent.mp.x_p is not None:
-        #         self.x_p = self.parent.mp.x_p
-        #         self.y_p = self.parent.mp.y_p
-        circ = Circle((0, 0), 0, fc='none', ec='lightblue')
-        circ.center = (self.x_p, self.y_p)
-        circ.set_radius(self.distance())
-        # self.drawToCanvas(circ)
+        if self.gimod.toolbar.acn_magnetizeGrid.isChecked():
+            if self.parent.grid.x_r is not None:
+                self.x_r = self.parent.grid.x_r
+                self.y_r = self.parent.grid.y_r
+            if self.parent.grid.x_p is not None:
+                self.x_p = self.parent.grid.x_p
+                self.y_p = self.parent.grid.y_p
+        # check if the polygons were magnetized
+        if self.gimod.toolbar.acn_magnetizePoly.isChecked():
+            if self.parent.mp.x_r is not None:
+                self.x_r = self.parent.mp.x_r
+                self.y_r = self.parent.mp.y_r
+            if self.parent.mp.x_p is not None:
+                self.x_p = self.parent.mp.x_p
+                self.y_p = self.parent.mp.y_p
 
-        # self.parent.printCoordinates(self.x_p, self.y_p, self.distance(), None, form='Circle')
+        # draw the spanned circle
+        circ = CirclePolygon((self.x_p, self.y_p), self.distance(), resolution=12)
+        self.drawMagnets(circ.get_verts())
+        self.parent.magnets.append(circ.get_verts())
         self.parent.storeMPLPaths(circ, ['Circle', [self.x_p, self.y_p, self.distance()]])
+        # update the magnets
+        if self.gimod.toolbar.acn_magnetizePoly.isChecked():
+            self.parent.mp.plotMagnets()
         self.x_p = None
         self.y_p = None
         self.x_r = None

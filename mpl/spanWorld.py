@@ -17,13 +17,20 @@ class SpanWorld(MPLBase):
         parent: :class:`core.builder.Builder`
         """
         super(SpanWorld, self).__init__(parent)
-        self.gimod = parent.parent
+        # parental objects
         self.parent = parent
-        self.figure = self.parent.figure
-        # empty rectangle
-        self.rect = Rectangle((0, 0), 0, 0, fc='none', alpha=0.5, ec='blue')
+        self.figure = parent.figure
+        self.gimod = parent.parent
+        # so far a work-around for avoiding getting 'NoneType' as pressed
+        # button event while drawing with magnetized net
+        if hasattr(self.parent, 'grid'):
+            self.parent.grid.update()
+        # dummy to be drawn and 'exported' later
+        self.rect = Rectangle((0, 0), 0, 0, fc='none', ec='lightblue')
         self.background = None
+        # bring the dummy on the canvas
         self.figure.axis.add_patch(self.rect)
+        # trigger the drawing process
         self.onPress = self.onPress
 
     def onPress(self, event):
@@ -76,18 +83,20 @@ class SpanWorld(MPLBase):
             # send rectangle data to builder after check if the cursor postion
             # was grapped by the magnetized grid
             if self.gimod.toolbar.acn_magnetizeGrid.isChecked():
-                # if self.parent.grid.x_r is not None:
-                self.x_r = self.parent.grid.x_r
-                self.y_r = self.parent.grid.y_r
+                if self.parent.grid.x_r is not None:
+                    self.x_r = self.parent.grid.x_r
+                    self.y_r = self.parent.grid.y_r
+                if self.parent.grid.x_p is not None:
+                    self.x_p = self.parent.grid.x_p
+                    self.y_p = self.parent.grid.y_p
 
-                # if self.parent.grid.x_p is not None:
-                #     self.x_p = self.parent.grid.x_p
-                #     self.y_p = self.parent.grid.y_p
             # draw the actually spanned rectangle
             rect = Rectangle((0, 0), 0, 0, fc='none', lw=1, ec='blue')
             rect.set_width(self.x_r - self.x_p)
             rect.set_height(self.y_r - self.y_p)
             rect.set_xy((self.x_p, self.y_p))
+            self.drawMagnets(rect.get_verts())
+            self.parent.magnets.append(rect.get_verts())
             # self.drawToCanvas(rect)
             self.figure.canvas.draw()
             self.disconnect()

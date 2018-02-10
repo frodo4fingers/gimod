@@ -17,9 +17,13 @@ class SpanPoly(MPLBase):
         parent: :class:`core.builder.Builder`
         """
         super(SpanPoly, self).__init__(parent)
-        self.gimod = parent.parent
         self.parent = parent
         self.figure = parent.figure
+        self.gimod = parent.parent
+        # so far a work-around for avoiding getting 'NoneType' as pressed
+        # button event while drawing with magnetized net
+        if hasattr(self.parent, 'grid'):
+            self.parent.grid.update()
         self.resetAllComponents()
 
     def resetAllComponents(self):
@@ -56,8 +60,13 @@ class SpanPoly(MPLBase):
                 # self.parent.printPolygon(
                 #     [[self.x[i], self.y[i]] for i in range(len(self.x))])
                 poly = Polygon([[self.x[i], self.y[i]] for i in range(len(self.x))])
+                self.drawMagnets(poly.get_verts())
+                self.parent.magnets.append(poly.get_verts())
                 self.parent.storeMPLPaths(poly, ['Polygon',
                     [[self.x[i], self.y[i]] for i in range(len(self.x))]])
+                # update the magnets
+                if self.gimod.toolbar.acn_magnetizePoly.isChecked():
+                    self.parent.mp.plotMagnets()
                 # reset the necessary components
                 self.resetAllComponents()
 
@@ -66,10 +75,16 @@ class SpanPoly(MPLBase):
                 self.y_p = event.ydata
                 # snap current position to nearest node if magnetized
                 # this will override the just collected event data
+                if self.gimod.toolbar.acn_magnetizeGrid.isChecked():
+                    if self.parent.grid.x_p is not None:
+                        self.x_p = self.parent.grid.x_p
+                        self.y_p = self.parent.grid.y_p
+                # check if the polygons were magnetized
                 if self.gimod.toolbar.acn_magnetizePoly.isChecked():
                     if self.parent.mp.x_p is not None:
                         self.x_p = self.parent.mp.x_p
                         self.y_p = self.parent.mp.y_p
+
                 self.x.append(self.x_p)
                 self.y.append(self.y_p)
                 # draw the edge between two points
