@@ -15,7 +15,8 @@ class MagnetizePolygons():
     Magnetize the edges too!!
     """
 
-    def __init__(self, parent, x, y):
+    # def __init__(self, parent, x, y):
+    def __init__(self, parent):
         """
         Initialize all important variables for matplotlib drawing.
 
@@ -28,8 +29,9 @@ class MagnetizePolygons():
             The y-positions of the polygons
         """
         self.figure = parent.figure
-        self.x = x
-        self.y = y
+        self.parent = parent
+        # self.x = x
+        # self.y = y
         # the dummy dot to be magnetized and colored later
         line, = self.figure.axis.plot([], [], 'o', c='#ff0000')
         self.line = line
@@ -51,7 +53,8 @@ class MagnetizePolygons():
         self.figure.canvas.mpl_disconnect(self.cid_m)
         self.figure.canvas.mpl_disconnect(self.cid_r)
 
-    def plotMagnets(self, x=None, y=None):
+    # def plotMagnets(self, x=None, y=None):
+    def plotMagnets(self):
         """
         Overlay the nodes as green magnets that will catch the click if in the
         defined vicinity.
@@ -63,12 +66,19 @@ class MagnetizePolygons():
         y: list [None]
             y-positions of passed attribute after call from :meth:`~core.Builder.drawPoly`
         """
-        if x is None:
-            x = self.x
-            y = self.y
+        # if x is None:
+        #     x = self.x
+        #     y = self.y
         # TODO: adjustable size and maybe color for better visibility if
         # background is shitty... settings feature
-        self.sc, = self.figure.axis.plot(x, y, 'o', c='#61ff00', alpha=0.7, zorder=10)
+        # self.sc, = self.figure.axis.plot(x, y, 'o', c='#61ff00', alpha=0.7, zorder=10)
+        if hasattr(self, 'sc'):
+            self.sc.remove()
+
+        magnets = [m for magnet in self.parent.magnets for m in magnet]
+        x = [m[0] for m in magnets]
+        y = [m[1] for m in magnets]
+        self.sc, = self.figure.axis.plot(x, y, 'o', c='#61ff00', zorder=10)
         self.figure.canvas.draw()
         # magnetized nodes as pixel positions to get a pixel width distance --> vicinity
         self.pixelData = [tuple(self.figure.axis.transData.transform((x[i], y[i]))) for i in range(len(x))]
