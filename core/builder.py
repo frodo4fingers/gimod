@@ -47,11 +47,12 @@ class Builder():
         # store all parameters of a drawn raw polygon
         self.mpl_paths = []
         self.patches = []
+        self.undone_patches = []
         # the positions of every drawn poly-edge to mark those in a scatter plot
         self.magnets = []
         # here the stuff is put after undoing it... the list where everything is hidden
         self.undone = []
-        self.undone_hand_drawn = []
+        self.undone_mpl_paths = []
         # storage for the drawn/spanned matplotlib-polygons
         self.mpl_polys = []
         # TODO: get rid of these!!!
@@ -343,6 +344,7 @@ class Builder():
             The integer identifier to mark a region in the polygon figure.
         """
         # self.mpl_paths.append((form, x_p, y_p, x_r, y_r, polygon, marker))
+        self.polys.clear()
         for poly in self.mpl_paths:
             form = poly[0]
             x_p = poly[1]
@@ -701,16 +703,20 @@ class Builder():
         # set the marker down
         self.marker -= 1
         # remove the last created polygon
-        self.undone.append(self.polys.pop(idx))
+        # self.undone.append(self.polys.pop(idx))
+        self.undone_patches.append(self.patches.pop(idx))
         # remove the parameters of the last created polygon
-        self.undone_hand_drawn.append(self.mpl_paths.pop(idx))
-        print(len(self.undone), len(self.undone_hand_drawn))
+        self.undone_mpl_paths.append(self.mpl_paths.pop(idx))
+        # print(len(self.undone), len(self.undone_mpl_paths))
+        print(len(self.undone_patches), len(self.undone_mpl_paths))
         # remove entry from treewidget at index
         self.parent.info_tree.tw_polys.takeTopLevelItem(take_at)
         # since the one removed wandered into the redo list, the button can now be enabled
         self.parent.info_tree.btn_redo.setEnabled(True)
-        if not len(self.polys) == 0:
-            self.drawPoly()
+        # if not len(self.polys) == 0:
+        if not len(self.patches) == 0:
+            # self.drawPoly()
+            self.span.drawToCanvas(self.patches)
             self.fillInfoTree()
         else:
             self.figure.axis.cla()
@@ -722,16 +728,20 @@ class Builder():
         """
         Redo the undone. Every undone polygon is stored and can be recalled.
         """
-        if len(self.undone) > 0:
+        # if len(self.undone) > 0:
+        if len(self.undone_patches) > 0:
             # append the last undone back to the original
-            self.polys.append(self.undone.pop())
-            self.mpl_paths.append(self.undone_hand_drawn.pop())
+            # self.polys.append(self.undone.pop())
+            self.patches.append(self.undone_patches.pop())
+            self.mpl_paths.append(self.undone_mpl_paths.pop())
             # self.mpl_paths.pop()
             self.marker += 1
-            self.drawPoly()
+            # self.drawPoly()
+            self.span.drawToCanvas(self.patches)
             self.fillInfoTree()
 
-        if len(self.undone) == 0:
+        # if len(self.undone) == 0:
+        if len(self.undone_mpl_paths) == 0:
             self.parent.info_tree.btn_redo.setEnabled(False)
 
     def zipUpMarkerAndAttributes(self):
