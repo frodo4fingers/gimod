@@ -59,7 +59,7 @@ class InfoTree(QWidget):
         self.tw_polys.setAlternatingRowColors(True)
         self.tw_polys.setUniformRowHeights(True)
         self.tw_polys.setContentsMargins(0, 0, 0, 0)
-        self.tw_polys.setHeaderLabels(("Type", "Value"))
+        self.tw_polys.setHeaderLabels(("PolyTool", "Parameters"))
         # TODO: stretch that darn first column to content!
         # self.tw_polys.header().hide()
         # self.tw_polys.showDropIndicator()
