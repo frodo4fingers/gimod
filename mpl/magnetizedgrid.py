@@ -1,6 +1,6 @@
 from matplotlib.lines import Line2D
-# from numpy import allclose
 import numpy as np
+import time
 
 try:
     from PyQt5.QtWidgets import QApplication, QWidget
@@ -11,10 +11,10 @@ except ImportError:
     from PyQt4.QtQui import QCursor, QApplication, QWidget
     from PyQt4.QtCore import Qt, QPoint
 
-import time
+from .mplbase import MPLBase
 
 
-class MagnetizedGrid():
+class MagnetizedGrid(MPLBase):
     """
     Everything the grid resembles is stored here. The drawing, the
     magnetization and 'catching' and the scalability.
@@ -28,48 +28,40 @@ class MagnetizedGrid():
     *[x] make grid
     *[x] make grid magnetized
     *[ ] make grid free scalable
+
+    Bug
+    ---
+    when resizing the window the grid must be updated because the intersections
+    positions kind of drifted away from the net...
     """
 
     def __init__(self, parent=None):
         """Initialize the important variables."""
+        super(MagnetizedGrid, self).__init__(parent)
         self.figure = parent.figure
         self.parent = parent  # builder
         self.gimod = parent.parent
         dot, = self.figure.axis.plot([], [], 'o', c='#ff0000')
         self.dot = dot
         self.grid()
-        self.getCanvasHeight()
+        # self.getCanvasHeight()
         self.onMotion = self.onMotion
 
-    def getCanvasHeight(self):
-        """."""
-        _, self.height = self.figure.canvas.get_width_height()
+    def update(self):
+        """
+        Dummy function.
 
-    def connect(self):
-        """."""
-        self.cid_p = self.figure.canvas.mpl_connect('button_press_event', self.onPress)
-        self.cid_m = self.figure.canvas.mpl_connect('motion_notify_event', self.onMotion)
-        self.cid_ae = self.figure.canvas.mpl_connect('axes_enter_event', self.axesEnter)
-        self.cid_al = self.figure.canvas.mpl_connect('axes_leave_event', self.axesLeave)
-        self.cid_r = self.figure.canvas.mpl_connect('button_release_event', self.onRelease)
-
-    def axesLeave(self, event):
-        QApplication.restoreOverrideCursor()
-
-    def axesEnter(self, event):
-        QApplication.setOverrideCursor(QCursor(Qt.ArrowCursor))
-
-    def disconnect(self):
-        """."""
-        try:
-            self.figure.canvas.mpl_disconnect(self.cid_p)
-            self.figure.canvas.mpl_disconnect(self.cid_m)
-            self.figure.canvas.mpl_disconnect(self.cid_ae)
-            self.figure.canvas.mpl_disconnect(self.cid_al)
-            self.figure.canvas.mpl_disconnect(self.cid_r)
-        except AttributeError:
-            # bc the grid might never be magnetized, thus not having any cid to disconnect
-            pass
+        After switching the polytools, the grid must be renewed because it
+        might happen that there is no x_p on mouse press. I don't know why yet.
+        """
+        self.disable()
+        self.grid()
+        if self.parent.toolbar.acn_magnetizeGrid.isChecked():
+            try:
+                self.disconnect()
+            except AttributeError:
+                pass
+            self.connect()
 
     def disable(self):
         """Disable the grid and reset the dot."""
