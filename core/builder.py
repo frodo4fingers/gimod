@@ -35,8 +35,8 @@ class Builder():
             Every widget that needs to be accessed is called in :class:`~GIMod`
         """
         self.parent = parent
-        self.figure = parent.plotWidget
-        self.toolbar = parent.toolBar
+        self.figure = parent.plotwidget.plot_sketch
+        self.toolbar = parent.toolbar
         self.statusbar = parent.statusbar
         # initialize the marker at -1 to get the starting polygon (WORLD *fingers crossed*) with a 0 marker
         self.marker = -1
@@ -45,20 +45,27 @@ class Builder():
         # store all created polygon objects
         self.polys = []
         # store all parameters of a drawn raw polygon
-        self.hand_drawn_polys = []
+        self.mpl_paths = []
+        self.patches = []
+        # the positions of every drawn poly-edge to mark those in a scatter plot
+        self.magnets = []
         # here the stuff is put after undoing it... the list where everything is hidden
         self.undone = []
         self.undone_hand_drawn = []
+        # storage for the drawn/spanned matplotlib-polygons
+        self.mpl_polys = []
+        # TODO: get rid of these!!!
         # dummy flags for action in :class:`~gui.PolyToolBar` to trigger the right decision
         self.markersClicked = True
         self.gridClicked = True
         self.magnetizeClicked = True
         self.mPolyClicked = True
         self.poly = None
-        self.triggered_polygon = False
-        self.triggered_rectangle = False
-        self.triggered_circle = False
-        self.triggered_line = False
+        self.world_clicked = False
+        self.rect_clicked = False
+        self.circle_clicked = False
+        self.line_clicked = False
+        self.polygon_clicked = False
         # introduce polygon form, the edges and (for hand drawn whtaever
         # shaped) polygon as None. Necessary step to prevent the passing of non
         # existent variables when drawing
@@ -73,7 +80,9 @@ class Builder():
         """
         Connect the mouse event to the canvas for accessing plc.createWorld.
         """
-        if self.toolbar.acn_world.isChecked():
+        # if self.toolbar.acn_world.isChecked():
+        if self.world_clicked is False:
+            self.world_clicked = True
             try:
                 self.span.disconnect()
             except AttributeError:
@@ -82,82 +91,84 @@ class Builder():
             self.span.connect()
         else:
             self.span.disconnect()
+            self.toolbar.acn_world.setChecked(False)
+            self.world_clicked = False
 
     def formPolyRectangle(self):
         """
         Connect the mouse event to the canvas for accessing plc.createRectangle.
         """
-        # the if statement with triggered flag allows to disable the tool via
-        # second click
-        if not self.triggered_rectangle:
-            self.triggered_rectangle = True
+        if self.rect_clicked is False:
+            self.rect_clicked = True
             try:
+                # if something is already checked
                 self.span.disconnect()
             except AttributeError:
+                # nothing else is chcecked
                 pass
             self.span = SpanRectangle(self)
             self.span.connect()
         else:
-            self.triggered_rectangle = False
             self.span.disconnect()
             self.toolbar.acn_rectangle.setChecked(False)
+            self.rect_clicked = False
 
     def formPolyCircle(self):
         """
         Connect the mouse event to the canvas for accessing plc.createCircle.
         """
-        # the if statement with triggered flag allows to disable the tool via
-        # second click
-        if not self.triggered_circle:
-            self.triggered_circle = True
+        if self.circle_clicked is False:
+            self.circle_clicked = True
             try:
+                # if something is already checked
                 self.span.disconnect()
             except AttributeError:
+                # nothing else is chcecked
                 pass
             self.span = SpanCircle(self)
             self.span.connect()
         else:
-            self.triggered_circle = False
             self.span.disconnect()
             self.toolbar.acn_circle.setChecked(False)
+            self.circle_clicked = False
 
     def formPolyLine(self):
         """
         Connect the mouse event to the canvas for accessing plc.createLine.
         """
-        # the if statement with triggered flag allows to disable the tool via
-        # second click
-        if not self.triggered_line:
-            self.triggered_line = True
+        if self.line_clicked is False:
+            self.line_clicked = True
             try:
+                # if something is already checked
                 self.span.disconnect()
             except AttributeError:
+                # nothing else is chcecked
                 pass
             self.span = SpanLine(self)
             self.span.connect()
         else:
-            self.triggered_line = False
             self.span.disconnect()
             self.toolbar.acn_line.setChecked(False)
+            self.line_clicked = False
 
     def formPolygon(self):
         """
         Connect the mouse event to the canvas for accessing plc.createPolygon.
         """
-        # the if statement with triggered flag allows to disable the tool via
-        # second click
-        if not self.triggered_polygon:
-            self.triggered_polygon = True
+        if self.polygon_clicked is False:
+            self.polygon_clicked = True
             try:
+                # if something is already checked
                 self.span.disconnect()
             except AttributeError:
+                # nothing else is chcecked
                 pass
             self.span = SpanPoly(self)
             self.span.connect()
         else:
-            self.triggered_polygon = False
             self.span.disconnect()
             self.toolbar.acn_polygon.setChecked(False)
+            self.polygon_clicked = False
 
     def formPolygonFromFigure(self):
         """
@@ -168,101 +179,149 @@ class Builder():
         + try a progress bar here!! :D
         """
         # clear the table on the side tobe sure
-        self.parent.info_tree.tw_polys.clear()
-        self.polys.clear()
         self.parent.setCursor(Qt.WaitCursor)
 
-        # how many contours were found.. for showing progress purpose
-        n_contours = len(self.parent.image_tools.contoursCutted)
-        for i, contour in enumerate(self.parent.image_tools.contoursCutted):
-            self.marker += 1
-            # show progress in statusbar
-            self.parent.statusbar.showMessage("processing found polygons {}/{}".format(i, n_contours))
-            # construct poly
-            self.constructPoly('Polygon', None, None, None, None, contour, self.marker)
+        if len(self.mpl_paths) > 0:
+            # this when something is drawn by hand
+            self.constructPoly()
+            self.drawPoly()
+        else:
+            # this when something is taken from image
+            self.parent.info_tree.tw_polys.clear()
+            self.polys.clear()
+            # how many contours were found.. for showing progress purpose
+            n_contours = len(self.parent.image_tools.contoursCutted)
+            for i, contour in enumerate(self.parent.image_tools.contoursCutted):
+                self.marker += 1
+                # show progress in statusbar
+                self.parent.statusbar.showMessage("processing found polygons {}/{}".format(i, n_contours))
+                # construct poly
+                self.constructPoly('Polygon', None, None, None, None, contour, self.marker)
 
-        # draw created polygon
-        self.drawPoly()
-        # fill the info tree as bulk
-        # NOTE: seperate loop to fill the table since the marker count is now
-        # set and can be made available for all markers
-        for i, contour in enumerate(self.parent.image_tools.contoursCutted):
-            # show progress in statusbar
-            self.parent.statusbar.showMessage("processing table entries {}/{}".format(i, n_contours))
+            # draw created polygon
+            self.drawPoly()
             # fill the info tree as bulk
-            self.parent.info_tree.fillTable(form='Polygon', polygon=contour, parent_marker=i)
+            # NOTE: seperate loop to fill the table since the marker count is now
+            # set and can be made available for all markers
+            for i, contour in enumerate(self.parent.image_tools.contoursCutted):
+                # show progress in statusbar
+                self.parent.statusbar.showMessage("processing table entries {}/{}".format(i, n_contours))
+                # fill the info tree as bulk
+                self.parent.info_tree.fillTable(form='Polygon', polygon=contour, parent_marker=i)
 
-        # turn on buttons to reset figure or delete last build polygon
-        self.parent.info_tree.btn_undo.setEnabled(True)
-        self.parent.toolBar.acn_reset_figure.setEnabled(True)
-        # activate all the polytools
-        # NOTE: not calling enableToolBarFunctions() because when loading a
-        # figure the world tag doesn't exist which would be necessary to work
-        # this method
-        self.parent.toolBar.acn_polygon.setEnabled(True)
-        self.parent.toolBar.acn_rectangle.setEnabled(True)
-        self.parent.toolBar.acn_circle.setEnabled(True)
-        self.parent.toolBar.acn_line.setEnabled(True)
-        self.parent.toolBar.acn_markerCheck.setEnabled(True)
-        self.parent.toolBar.acn_magnetizePoly.setEnabled(True)
+            # turn on buttons to reset figure or delete last build polygon
+            self.parent.info_tree.btn_undo.setEnabled(True)
+            self.parent.toolbar.acn_reset_figure.setEnabled(True)
+            # activate all the polytools
+            # NOTE: not calling enableToolBarFunctions() because when loading a
+            # figure the world tag doesn't exist which would be necessary to work
+            # this method
+            self.parent.toolbar.acn_polygon.setEnabled(True)
+            self.parent.toolbar.acn_rectangle.setEnabled(True)
+            self.parent.toolbar.acn_circle.setEnabled(True)
+            self.parent.toolbar.acn_line.setEnabled(True)
+            self.parent.toolbar.acn_markerCheck.setEnabled(True)
+            self.parent.toolbar.acn_magnetizePoly.setEnabled(True)
+
         # change message in statusbar to info about the polygon
         self.statusbar.showMessage(str(self.poly))
         self.parent.setCursor(Qt.ArrowCursor)
 
-    def printCoordinates(self, x1, y1, x2, y2, form):
+    def storeMPLPaths(self, patch, d):
         """
-        Create the Polygon for caller/form. This method gets called from :class:`mpl.SpanWorld`, :class:`mpl.SpanRectangle`, :class:`mpl.SpanCircle`, :class:`mpl.SpanLine`, :class:`mpl.SpanPoly`
+        Append the given values from each span and start filling the overview
+        table with the given values.
 
         Parameters
         ----------
-        x1: float
-            The x-value in a cartesian coordinate system where the polygon was started.
-        x2: float
-            The x-value in a cartesian coordinate system where the polygon was finished.
-        y1: float
-            The y-value in a cartesian coordinate system where the polygon was started.
-        y2: float
-            The y-value in a cartesian coordinate system where the polygon was finished.
-        form: str
-            Word describing the polygon that was just drawn.
+        d: dict
+            Dictionary structure containing what was drawn and what are the parameters.
         """
-        # add to the marker for each created polygon
-        self.marker += 1
-        try:
-            self.constructPoly(form, x1, y1, x2, y2, None, self.marker)
-        except TypeError:
-            # REVIEW: what needs to happen that i land here again?! ...boiiii
-            pass
-        else:
-            # turn on buttons to reset figure or delete last build polygon
-            self.parent.info_tree.btn_undo.setEnabled(True)
-            self.parent.toolBar.acn_reset_figure.setEnabled(True)
-            # draw the created polygon
-            self.drawPoly()
-            # bulk fill the info tree
-            self.fillInfoTree()
+        self.patches.append(patch)
+        if d[0] == 'World':
+            self.mpl_paths.append(('World', *d[1], None))
+        elif d[0] == 'Rectangle':
+            self.mpl_paths.append(('Rectangle', *d[1], None))
+        elif d[0] == 'Circle':
+            self.mpl_paths.append(('Circle', *d[1], None, None))
+        elif d[0] == 'Line':
+            self.mpl_paths.append(('Line', *d[1], None))
+        elif d[0] == 'Polygon':
+            self.mpl_paths.append(('Polygon', None, None, None, None, d[1]))
 
-    def printPolygon(self, polygon):
-        """
-        Create the manually designed polygon.
+        # add a marker according to the number of created polygons
+        for i, poly in enumerate(self.mpl_paths):
+            # HACK .. more or less
+            if len(self.mpl_paths[i]) < 7:
+                self.mpl_paths[i] = (*poly, i)
+        # determine the range of markers
+        self.marker = len(self.mpl_paths)
+        # draw them all as mpl objects
+        self.span.drawToCanvas(self.patches)
+        self.enableToolBarFunctions()
 
-        Parameters
-        ----------
-        polygon: list
-            The vertices/nodes of the designed polygon.
-        """
-        # add to the marker for each created polygon
-        self.marker += 1
-        self.constructPoly('Polygon', None, None, None, None, polygon, self.marker)
-        # turn on buttons to reset figure or delete last build polygon
-        self.parent.info_tree.btn_undo.setEnabled(True)
-        self.parent.toolBar.acn_reset_figure.setEnabled(True)
-        # draw the created polygon
-        self.drawPoly()
-        # bulk fill the info tree
         self.fillInfoTree()
 
-    def constructPoly(self, form, x_p, y_p, x_r, y_r, polygon, marker):
+        # turn on buttons to reset figure or delete last build polygon
+        self.parent.info_tree.btn_undo.setEnabled(True)
+        self.parent.toolbar.acn_reset_figure.setEnabled(True)
+        self.parent.toolbar.acn_polygonize.setEnabled(True)
+
+    # def printCoordinates(self, x1, y1, x2, y2, form):
+    #     """
+    #     Create the Polygon for caller/form. This method gets called from :class:`mpl.SpanWorld`, :class:`mpl.SpanRectangle`, :class:`mpl.SpanCircle`, :class:`mpl.SpanLine`, :class:`mpl.SpanPoly`
+    #
+    #     Parameters
+    #     ----------
+    #     x1: float
+    #         The x-value in a cartesian coordinate system where the polygon was started.
+    #     x2: float
+    #         The x-value in a cartesian coordinate system where the polygon was finished.
+    #     y1: float
+    #         The y-value in a cartesian coordinate system where the polygon was started.
+    #     y2: float
+    #         The y-value in a cartesian coordinate system where the polygon was finished.
+    #     form: str
+    #         Word describing the polygon that was just drawn.
+    #     """
+    #     # add to the marker for each created polygon
+    #     self.marker += 1
+    #     try:
+    #         self.constructPoly(form, x1, y1, x2, y2, None, self.marker)
+    #     except TypeError:
+    #         # REVIEW: what needs to happen that i land here again?! ...boiiii
+    #         pass
+    #     else:
+    #         # turn on buttons to reset figure or delete last build polygon
+    #         self.parent.info_tree.btn_undo.setEnabled(True)
+    #         self.parent.toolbar.acn_reset_figure.setEnabled(True)
+    #         # draw the created polygon
+    #         self.drawPoly()
+    #         # bulk fill the info tree
+    #         self.fillInfoTree()
+
+    # def printPolygon(self, polygon):
+    #     """
+    #     Create the manually designed polygon.
+    #
+    #     Parameters
+    #     ----------
+    #     polygon: list
+    #         The vertices/nodes of the designed polygon.
+    #     """
+    #     # add to the marker for each created polygon
+    #     self.marker += 1
+    #     self.constructPoly('Polygon', None, None, None, None, polygon, self.marker)
+    #     # turn on buttons to reset figure or delete last build polygon
+    #     self.parent.info_tree.btn_undo.setEnabled(True)
+    #     self.parent.toolbar.acn_reset_figure.setEnabled(True)
+    #     # draw the created polygon
+    #     self.drawPoly()
+    #     # bulk fill the info tree
+    #     self.fillInfoTree()
+
+    # def constructPoly(self, form, x_p, y_p, x_r, y_r, polygon, marker):
+    def constructPoly(self):
         """
         Actually built all the polygon that will be created during modeling process and store them self.polys.
 
@@ -283,22 +342,30 @@ class Builder():
         marker: int
             The integer identifier to mark a region in the polygon figure.
         """
-        self.hand_drawn_polys.append((form, x_p, y_p, x_r, y_r, polygon, marker))
-        if form == 'World':
-            self.polys.append(plc.createWorld(start=[x_p, y_p], end=[x_r, y_r], marker=marker))
+        # self.mpl_paths.append((form, x_p, y_p, x_r, y_r, polygon, marker))
+        for poly in self.mpl_paths:
+            form = poly[0]
+            x_p = poly[1]
+            y_p = poly[2]
+            x_r = poly[3]
+            y_r = poly[4]
+            polygon = poly[5]
+            marker = poly[6]
+            if form == 'World':
+                self.polys.append(plc.createWorld(start=[x_p, y_p], end=[x_r, y_r], marker=marker))
 
-        elif form == 'Rectangle':
-            self.polys.append(plc.createRectangle(start=[x_p, y_p], end=[x_r, y_r], marker=marker))
+            elif form == 'Rectangle':
+                self.polys.append(plc.createRectangle(start=[x_p, y_p], end=[x_r, y_r], marker=marker))
 
-        elif form == 'Circle':
-            self.polys.append(plc.createCircle(
-            pos=(x_p, y_p), segments=12, radius=x_r, marker=marker))
+            elif form == 'Circle':
+                self.polys.append(plc.createCircle(
+                pos=(x_p, y_p), segments=12, radius=x_r, marker=marker))
 
-        elif form == 'Line':
-            self.polys.append(plc.createLine(start=[x_p, y_p], end=[x_r, y_r], segments=1))
+            elif form == 'Line':
+                self.polys.append(plc.createLine(start=[x_p, y_p], end=[x_r, y_r], segments=1))
 
-        elif form == 'Polygon':
-            self.polys.append(plc.createPolygon(polygon, marker=marker, isClosed=True))
+            elif form == 'Polygon':
+                self.polys.append(plc.createPolygon(polygon, marker=marker, isClosed=True))
 
     def drawPoly(self, polys=None, to_merge=True):
         """
@@ -329,34 +396,37 @@ class Builder():
                 # eternity
                 self.polys = polys
             self.poly = plc.mergePLC(self.polys)
-            self.figure.axis.cla()
+            self.parent.plotwidget.plot_poly.axis.cla()
 
         # check for the region plot option in treeview functions below the table
         if self.parent.info_tree.rbtn_plotRegions.isChecked() is True:
-            drawMesh(self.figure.axis, self.poly, fitView=False)
-            self.figure.canvas.draw()
+            drawMesh(self.parent.plotwidget.plot_poly.axis, self.poly, fitView=False)
+            self.parent.plotwidget.plot_poly.canvas.draw()
         # if the attribute radiobutton below the tree widget is checked the
         # mesh view is slightly more complicated
         else:
-            attrMap = self.zipUpMarkerAndAttributes()
-            if attrMap:  # not empty
+            attr_map = self.zipUpMarkerAndAttributes()
+            if attr_map:  # not empty
                 # create temporary mesh
                 temp_mesh = createMesh(self.poly)
                 # parse the attributes to the mesh
-                attrMap = pg.solver.parseMapToCellArray(attrMap, temp_mesh)
-                drawMeshBoundaries(self.figure.axis, temp_mesh, hideMesh=True)
-                drawModel(self.figure.axis, temp_mesh, tri=True, data=attrMap)
-                self.figure.canvas.draw()
+                attr_map = pg.solver.parseMapToCellArray(attr_map, temp_mesh)
+                drawMeshBoundaries(self.parent.plotwidget.plot_poly.axis, temp_mesh, hideMesh=True)
+                drawModel(self.parent.plotwidget.plot_poly.axis, temp_mesh, tri=True, data=attr_map)
+                self.parent.plotwidget.plot_poly.canvas.draw()
             else:  # empty
                 QMessageBox.question(None, 'Whoops..', "Your regions don't have any attributes to plot!", QMessageBox.Ok)
 
+        # set the tab active where the polygon structure was plotted
+        self.parent.plotwidget.setCurrentIndex(1)
+
         # redraw the grid if it is checked:
-        if self.parent.toolBar.acn_gridToggle.isChecked():
+        if self.parent.toolbar.acn_gridToggle.isChecked():
             # if it is checked there is a self.grid
             self.grid.disable()
             self.grid.grid()
 
-        if self.parent.toolBar.acn_magnetizeGrid.isChecked():
+        if self.parent.toolbar.acn_magnetizeGrid.isChecked():
             self.grid.disconnect()
             self.grid.connect()
 
@@ -366,7 +436,7 @@ class Builder():
             self.mp.plotMagnets(x, y)
 
         self.parent.statusbar.showMessage(str(self.poly))
-        self.enableToolBarFunctions()
+        # self.enableToolBarFunctions()
 
     def enableToolBarFunctions(self):
         """
@@ -374,7 +444,7 @@ class Builder():
         disabled after creation or the other tools if no world exists.
         """
         # get the poly form as first position from every tuple
-        existence = [poly[0] for poly in self.hand_drawn_polys]
+        existence = [poly[0] for poly in self.mpl_paths]
 
         if 'World' in existence:
             self.toolbar.acn_world.setEnabled(False)
@@ -422,7 +492,7 @@ class Builder():
         every new made polygon.
         """
         self.parent.info_tree.tw_polys.clear()
-        for entry in self.hand_drawn_polys:
+        for entry in self.mpl_paths:
             # form, x_p, y_p, x_r, y_r, polygon, marker
             self.parent.info_tree.fillTable(entry[0], entry[1], entry[2], entry[3], entry[4], entry[5], entry[6])
 
@@ -433,14 +503,14 @@ class Builder():
         reply = QMessageBox.question(None, 'Careful there!', "You are about to delete your project.. proceed?", QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             # clear everything from plot
-            self.parent.plotWidget.resetFigure()
-            self.hand_drawn_polys = []
+            self.parent.plotwidget.plot_sketch.resetFigure()
+            self.mpl_paths = []
             self.undone = []
             self.polys = []
             self.parent.info_tree.tw_polys.clear()
             # and disable functions that are only accessible if a poly is there
             self.parent.info_tree.btn_undo.setEnabled(False)
-            self.parent.toolBar.acn_reset_figure.setEnabled(False)
+            self.parent.toolbar.acn_reset_figure.setEnabled(False)
             # enable/disable polytools
             self.enableToolBarFunctions()
             # set marker to begin with 1
@@ -500,7 +570,7 @@ class Builder():
                     p.disconnect()
             self.markersClicked = True
             # uncheck the button
-            self.parent.toolBar.acn_markerCheck.setChecked(False)
+            self.parent.toolbar.acn_markerCheck.setChecked(False)
             self.parent.info_tree.redrawTable()
             self.parent.setCursor(Qt.ArrowCursor)
 
@@ -517,24 +587,46 @@ class Builder():
 
     def toggleGrid(self):
         """."""
-        if self.parent.toolBar.acn_gridToggle.isChecked():
+        if self.parent.toolbar.acn_gridToggle.isChecked():
             # NOTE: will only call init and nothing more
             self.grid = MagnetizedGrid(self)
-            self.parent.toolBar.acn_magnetizeGrid.setEnabled(True)
+            self.parent.toolbar.acn_magnetizeGrid.setEnabled(True)
         else:
-            self.parent.toolBar.acn_magnetizeGrid.setEnabled(False)
-            self.parent.toolBar.acn_magnetizeGrid.setChecked(False)
+            self.parent.toolbar.acn_magnetizeGrid.setEnabled(False)
+            self.parent.toolbar.acn_magnetizeGrid.setChecked(False)
             self.grid.disconnect()
             self.grid.disable()
         # grid.grid()
 
     def toggleMagnetizedGrid(self):
         """."""
-        if self.parent.toolBar.acn_magnetizeGrid.isChecked():
+        if self.parent.toolbar.acn_magnetizeGrid.isChecked():
+            # since the polytools getting 'self' it may occur that they are
+            # triggered before the grid is magnetized and therefor will miss
+            # some mouse event variables. so whatever polytool is enabled it
+            # will be disconnected and re-instanciated again.
+            # if hasattr(self, 'span'):
+            #     self.span.disconnect()
+            if self.world_clicked is True:
+                self.world_clicked = False
+                self.formPolyWorld()
+            elif self.rect_clicked is True:
+                self.rect_clicked = False
+                self.formPolyRectangle()
+            elif self.circle_clicked is True:
+                self.circle_clicked = False
+                self.formPolyCircle()
+            elif self.line_clicked is True:
+                self.line_clicked = False
+                self.formPolyLine()
+            elif self.polygon_clicked is True:
+                self.polygon_clicked = False
+                self.formPolygon()
             self.grid.connect()
+
         else:
             self.grid.disconnect()
-            self.grid.disable()
+            # self.grid.disable()
             # self.grid.dot.set_data([], [])
             # self.figure.canvas.draw()
 
@@ -553,12 +645,13 @@ class Builder():
         + magnetize the edges
         """
         if self.mPolyClicked is True:
-            x = []
-            y = []
-            # collect the positions from the polygon
-            x, y = self.getNodes()
+            # x = []
+            # y = []
+            # # collect the positions from the polygon
+            # x, y = self.getNodes()
 
-            self.mp = MagnetizePolygons(self, x, y)
+            # self.mp = MagnetizePolygons(self, x, y)
+            self.mp = MagnetizePolygons(self)
             self.mp.connect()
             # HACK: against flickering and false data while spanning:
             self.span.disconnect()
@@ -568,25 +661,25 @@ class Builder():
             self.mp.disconnect()
             # self.figure.axis.grid(False)  # why is this here?!
             self.mPolyClicked = True
-            self.parent.toolBar.acn_magnetizeGrid.setChecked(False)
+            # self.parent.toolbar.acn_magnetizeGrid.setChecked(False)
         self.figure.canvas.draw()
 
-    def getNodes(self):
-        """
-        Retrieve the x, y-coordinates for every polygon in the figure.
-
-        Returns
-        -------
-        x: list
-            All the gathered x coordinates.
-        y: list
-            All the gathered y coordinates.
-        """
-        arr = self.poly.positions()
-        x = list(pg.x(arr))
-        y = list(pg.y(arr))
-
-        return x, y
+    # def getNodes(self):
+    #     """
+    #     Retrieve the x, y-coordinates for every polygon in the figure.
+    #
+    #     Returns
+    #     -------
+    #     x: list
+    #         All the gathered x coordinates.
+    #     y: list
+    #         All the gathered y coordinates.
+    #     """
+    #     arr = self.poly.positions()
+    #     x = list(pg.x(arr))
+    #     y = list(pg.y(arr))
+    #
+    #     return x, y
 
     def undoPoly(self):
         """
@@ -610,7 +703,7 @@ class Builder():
         # remove the last created polygon
         self.undone.append(self.polys.pop(idx))
         # remove the parameters of the last created polygon
-        self.undone_hand_drawn.append(self.hand_drawn_polys.pop(idx))
+        self.undone_hand_drawn.append(self.mpl_paths.pop(idx))
         print(len(self.undone), len(self.undone_hand_drawn))
         # remove entry from treewidget at index
         self.parent.info_tree.tw_polys.takeTopLevelItem(take_at)
@@ -632,8 +725,8 @@ class Builder():
         if len(self.undone) > 0:
             # append the last undone back to the original
             self.polys.append(self.undone.pop())
-            self.hand_drawn_polys.append(self.undone_hand_drawn.pop())
-            # self.hand_drawn_polys.pop()
+            self.mpl_paths.append(self.undone_hand_drawn.pop())
+            # self.mpl_paths.pop()
             self.marker += 1
             self.drawPoly()
             self.fillInfoTree()

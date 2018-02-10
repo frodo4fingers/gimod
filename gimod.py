@@ -45,7 +45,7 @@ class GIMod(QMainWindow):
         self.image_tools = ImageTools(self)
 
         # when resizing the mainwindow
-        if self.toolBar.acn_gridToggle.isChecked():
+        if self.toolbar.acn_gridToggle.isChecked():
             self.resizeEvent(self.builder.grid.getCanvasHeight)
 
         # menu actions
@@ -57,41 +57,43 @@ class GIMod(QMainWindow):
 
         # connect the toolbar action signals to their methods if opencv is present
         if self.image_tools.found_cv:
-            self.toolBar.acn_imageAsBackground.stateChanged.connect(
+            self.toolbar.acn_imageAsBackground.stateChanged.connect(
                 self.image_tools.imageryBackground)
-            self.toolBar.acn_imageThreshold1.valueChanged.connect(
+            self.toolbar.acn_imageThreshold1.valueChanged.connect(
                 self.image_tools.updateImagery)
-            self.toolBar.acn_imageThreshold2.valueChanged.connect(
+            self.toolbar.acn_imageThreshold2.valueChanged.connect(
                 self.image_tools.updateImagery)
-            self.toolBar.acn_imageDensity.valueChanged.connect(
+            self.toolbar.acn_imageDensity.valueChanged.connect(
                 self.image_tools.updateImagery)
-            self.toolBar.acn_imagePolys.valueChanged.connect(
+            self.toolbar.acn_imagePolys.valueChanged.connect(
                 self.image_tools.polysFromImage)
-            self.toolBar.acn_image.triggered.connect(self.image_tools.imagery)
+            self.toolbar.acn_image.triggered.connect(self.image_tools.imagery)
         else:  # disable their use
-            self.toolBar.acn_imageThreshold1.setEnabled(False)
-            self.toolBar.acn_imageThreshold2.setEnabled(False)
-            self.toolBar.acn_imageDensity.setEnabled(False)
-            self.toolBar.acn_imagePolys.setEnabled(False)
+            self.toolbar.acn_imageThreshold1.setEnabled(False)
+            self.toolbar.acn_imageThreshold2.setEnabled(False)
+            self.toolbar.acn_imageDensity.setEnabled(False)
+            self.toolbar.acn_imagePolys.setEnabled(False)
 
-        self.toolBar.acn_polygonize.triggered.connect(self.builder.formPolygonFromFigure)
+        self.toolbar.acn_polygonize.triggered.connect(self.builder.formPolygonFromFigure)
 
-        self.toolBar.acn_reset_figure.triggered.connect(self.builder.resetFigure)
+        self.toolbar.acn_reset_figure.triggered.connect(self.builder.resetFigure)
 
-        self.toolBar.acn_world.triggered.connect(self.builder.formPolyWorld)
-        self.toolBar.acn_rectangle.triggered.connect(self.builder.formPolyRectangle)
-        self.toolBar.acn_circle.triggered.connect(self.builder.formPolyCircle)
-        self.toolBar.acn_line.triggered.connect(self.builder.formPolyLine)
-        self.toolBar.acn_polygon.triggered.connect(self.builder.formPolygon)
-        self.toolBar.acn_markerCheck.triggered.connect(self.builder.markersMove)
+        self.toolbar.acn_world.triggered.connect(self.builder.formPolyWorld)
+        self.toolbar.acn_rectangle.triggered.connect(self.builder.formPolyRectangle)
+        self.toolbar.acn_circle.triggered.connect(self.builder.formPolyCircle)
+        self.toolbar.acn_line.triggered.connect(self.builder.formPolyLine)
+        self.toolbar.acn_polygon.triggered.connect(self.builder.formPolygon)
+        self.toolbar.acn_markerCheck.triggered.connect(self.builder.markersMove)
 
-        self.toolBar.acn_gridToggle.triggered.connect(self.builder.toggleGrid)
-        self.toolBar.acn_magnetizeGrid.triggered.connect(self.builder.toggleMagnetizedGrid)
-        self.toolBar.acn_magnetizePoly.triggered.connect(self.builder.magnetizePoly)
+        self.toolbar.acn_gridToggle.triggered.connect(self.builder.toggleGrid)
+        self.toolbar.acn_magnetizeGrid.triggered.connect(self.builder.toggleMagnetizedGrid)
+        self.toolbar.acn_magnetizePoly.triggered.connect(self.builder.magnetizePoly)
 
         self.info_tree.btn_redraw.clicked.connect(self.info_tree.redrawTable)
         self.info_tree.btn_undo.clicked.connect(self.builder.undoPoly)
         self.info_tree.btn_redo.clicked.connect(self.builder.redoPoly)
+
+        self.tabBox.currentChanged.connect(self.linkToPlotWidget)
 
     def initUI(self):
         """Set the GUI together from the other widgets."""
@@ -101,8 +103,8 @@ class GIMod(QMainWindow):
         self.setStatusBar(self.statusbar)
 
         # instanciate the toolbar with the polytool functionality
-        self.toolBar = PolyToolBar(self)
-        self.addToolBar(self.toolBar)
+        self.toolbar = PolyToolBar(self)
+        self.addToolBar(self.toolbar)
 
         self.menubar = self.menuBar()
         # call the menu generation
@@ -123,7 +125,7 @@ class GIMod(QMainWindow):
         menu_about.addAction(self.mb_aboutVerison)
 
         # instanciate the plot widget where everything will be drawn
-        self.plotWidget = PlotWidget(self)
+        self.plotwidget = PlotWidget(self)
 
         # instanciate all the core functions
         self.builder = Builder(self)
@@ -134,18 +136,18 @@ class GIMod(QMainWindow):
         # instanciate the mesh options tab to adjust the mesh parameters
         self.mesh_opt = MeshOptions(self)
 
-        tabBox = QTabWidget(self)
-        tabBox.setTabPosition(QTabWidget.West)
-        tabBox.addTab(self.info_tree, QIcon('icons/ic_info.svg'), "Polygons")
-        tabBox.addTab(self.mesh_opt, QIcon('icons/ic_mesh.svg'), "Mesh Options")
-        # tabBox.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        v_plotWidget = QVBoxLayout()
-        v_plotWidget.addWidget(self.plotWidget)
+        self.tabBox = QTabWidget(self)
+        self.tabBox.setTabPosition(QTabWidget.West)
+        self.tabBox.addTab(self.info_tree, QIcon('icons/ic_info.svg'), "Polygons")
+        self.tabBox.addTab(self.mesh_opt, QIcon('icons/ic_mesh.svg'), "Mesh Options")
+        # self.tabBox.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        v_plotwidget = QVBoxLayout()
+        v_plotwidget.addWidget(self.plotwidget)
 
         # tile the GUI in two resizable sides
         splitter = QSplitter(Qt.Horizontal)
-        splitter.addWidget(tabBox)
-        splitter.addWidget(self.plotWidget)
+        splitter.addWidget(self.tabBox)
+        splitter.addWidget(self.plotwidget)
 
         self.setCentralWidget(splitter)
 
@@ -154,6 +156,13 @@ class GIMod(QMainWindow):
         self.setWindowTitle("GIMod")
         self.setWindowIcon(QIcon('icons/logo.png'))
         self.show()
+
+    def linkToPlotWidget(self):
+        """If the first two tabs are active then show the first tab on the info tree or else."""
+        if self.tabBox.currentIndex() == 0:
+            self.plotwidget.setCurrentIndex(0)
+        else:
+            self.plotwidget.setCurrentIndex(2)
 
     def menuBarItems(self):
         """Create all entries visible in the menubar and its submenus."""

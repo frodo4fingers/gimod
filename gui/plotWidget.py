@@ -6,7 +6,7 @@ try:
     matplotlib.use("Qt5Agg")
     from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
     from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-    from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout
+    from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout, QTabWidget
     from PyQt5.QtCore import QSize
     from PyQt5.QtGui import QIcon
 
@@ -14,7 +14,7 @@ except ImportError:
     matplotlib.use("Qt4Agg")
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
     from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
-    from PyQt4.QtGui import QWidget, QApplication, QVBoxLayout, QIcon
+    from PyQt4.QtGui import QWidget, QApplication, QVBoxLayout, QIcon, QTabWidget
     from PyQt4.QtCore import QSize
 
 from matplotlib.figure import Figure
@@ -36,7 +36,36 @@ from matplotlib.figure import Figure
 #         NavigationToolbar.__init__(self, plot, parent=None, coordinates=False)
 
 
-class PlotWidget(QWidget):
+class PlotWidget(QTabWidget):
+    """."""
+
+    def __init__(self, parent=None):
+        """."""
+        super(PlotWidget, self).__init__(parent)
+        self.parent = parent
+        self.setupTabs()
+
+        # connect the signal if the current tab changed
+        self.currentChanged.connect(self.linkToInfoTree)
+
+    def setupTabs(self):
+        """."""
+        self.plot_sketch = Plot(self)
+        self.plot_poly = Plot(self)
+        self.plot_mesh = Plot(self)
+        self.addTab(self.plot_sketch, 'Sketch')
+        self.addTab(self.plot_poly, 'Poly')
+        self.addTab(self.plot_mesh, 'Mesh')
+
+    def linkToInfoTree(self):
+        """If the first two tabs are active then show the first tab on the info tree or else."""
+        if self.currentIndex() <= 1:
+            self.parent.tabBox.setCurrentIndex(0)
+        else:
+            self.parent.tabBox.setCurrentIndex(1)
+
+
+class Plot(QWidget):
     """Provide the standard matplotlib plot."""
 
     def __init__(self, parent=None):
@@ -48,7 +77,7 @@ class PlotWidget(QWidget):
         parent: <__main__.GIMod object>
             Every widget that needs to be accessed is called in :class:`~GIMod`
         """
-        super(PlotWidget, self).__init__(parent)
+        super(Plot, self).__init__(parent)
 
         # a figure instance to plot on
         self.figure = Figure()

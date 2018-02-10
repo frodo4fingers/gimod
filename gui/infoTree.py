@@ -245,8 +245,10 @@ class InfoTree(QWidget):
         if form != 'Line':
             # insert marker
             a = QComboBox()
-            [a.addItem(str(m + 1))
-             for m in range(-1, self.parent.builder.marker)]
+            [a.addItem(str(m))
+             for m in range(self.parent.builder.marker)]
+            # [a.addItem(str(m + 1))
+            #  for m in range(-1, self.parent.builder.marker)]
             a.setToolTip("Choose a marker the polygon should belong to")
             a.setCurrentIndex(parent_marker)
             marker = QTreeWidgetItem()

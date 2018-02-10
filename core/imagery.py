@@ -7,7 +7,7 @@ try:
 except ImportError:
     from PyQt4.QtGui import QFileDialog
 try:
-    import cv3
+    import cv2
     found_cv = True
 except ImportError:
     found_cv = False
@@ -29,13 +29,13 @@ class ImageTools():
         self.found_cv = found_cv
         self.parent = parent
         self.statusbar = parent.statusbar
-        self.threshold1 = parent.toolBar.acn_imageThreshold1.value()
-        self.threshold2 = parent.toolBar.acn_imageThreshold2.value()
-        self.imagePolys = parent.toolBar.acn_imagePolys
-        self.polyDensity = parent.toolBar.acn_imageDensity
-        self.background = parent.toolBar.acn_imageAsBackground
-        # self.fname = parent.toolBar.fname
-        self.figure = parent.plotWidget
+        self.threshold1 = parent.toolbar.acn_imageThreshold1.value()
+        self.threshold2 = parent.toolbar.acn_imageThreshold2.value()
+        self.imagePolys = parent.toolbar.acn_imagePolys
+        self.polyDensity = parent.toolbar.acn_imageDensity
+        self.background = parent.toolbar.acn_imageAsBackground
+        # self.fname = parent.toolbar.fname
+        self.figure = parent.plotwidget.plot_sketch
 
         self.imageClicked = True
 
@@ -108,18 +108,18 @@ class ImageTools():
             # FIXME: cheeky piece of shit... wont accept given formats
             self.fname = QFileDialog.getOpenFileName(None, caption='choose sketch')[0]
             if self.fname:
-                self.parent.toolBar.widgetAction.setVisible(True)
-                self.parent.toolBar.acn_polygonize.setEnabled(True)
-                self.parent.toolBar.acn_reset_figure.setEnabled(True)
+                self.parent.toolbar.widgetAction.setVisible(True)
+                self.parent.toolbar.acn_polygonize.setEnabled(True)
+                self.parent.toolbar.acn_reset_figure.setEnabled(True)
                 self.imageClicked = False
                 # instanciate the imageTools class
                 # self.imageTools = ImageTools(self)
                 self.getContours()
 
         else:
-            self.parent.toolBar.widgetAction.setVisible(False)
-            self.parent.toolBar.acn_polygonize.setEnabled(False)
-            self.parent.toolBar.acn_image.setChecked(False)
+            self.parent.toolbar.widgetAction.setVisible(False)
+            self.parent.toolbar.acn_polygonize.setEnabled(False)
+            self.parent.toolbar.acn_image.setChecked(False)
             self.imageClicked = True
 
     def updateImagery(self):
@@ -136,20 +136,20 @@ class ImageTools():
         """
         Set chosen image as background of the figure so the traces can be drawn by hand. If chosen the rest is not needed.
         """
-        if self.parent.toolBar.acn_imageAsBackground.isChecked() is True:
-            self.parent.toolBar.acn_imageThreshold1.setEnabled(False)
-            self.parent.toolBar.acn_imageThreshold2.setEnabled(False)
-            self.parent.toolBar.acn_imagePolys.setEnabled(False)
-            self.parent.toolBar.acn_imageDensity.setEnabled(False)
-            self.parent.toolBar.acn_polygonize.setEnabled(False)
+        if self.parent.toolbar.acn_imageAsBackground.isChecked() is True:
+            self.parent.toolbar.acn_imageThreshold1.setEnabled(False)
+            self.parent.toolbar.acn_imageThreshold2.setEnabled(False)
+            self.parent.toolbar.acn_imagePolys.setEnabled(False)
+            self.parent.toolbar.acn_imageDensity.setEnabled(False)
+            self.parent.toolbar.acn_polygonize.setEnabled(False)
             self.setBackground()
         else:
             self.updateImagery()
-            self.parent.toolBar.acn_imageThreshold1.setEnabled(True)
-            self.parent.toolBar.acn_imageThreshold2.setEnabled(True)
-            self.parent.toolBar.acn_imagePolys.setEnabled(True)
-            self.parent.toolBar.acn_imageDensity.setEnabled(True)
-            self.parent.toolBar.acn_polygonize.setEnabled(True)
+            self.parent.toolbar.acn_imageThreshold1.setEnabled(True)
+            self.parent.toolbar.acn_imageThreshold2.setEnabled(True)
+            self.parent.toolbar.acn_imagePolys.setEnabled(True)
+            self.parent.toolbar.acn_imageDensity.setEnabled(True)
+            self.parent.toolbar.acn_polygonize.setEnabled(True)
 
 
 if __name__ == '__main__':

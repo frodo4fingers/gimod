@@ -31,6 +31,7 @@ class MeshOptions(QWidget):
         # call the super class to establish the functionality of a QWidget
         super(MeshOptions, self).__init__(parent)
         self.parent = parent
+        self.plot_mesh = parent.plotwidget.plot_mesh
         self.setupWidget()
 
         # connect the signals to their functions
@@ -212,7 +213,7 @@ class MeshOptions(QWidget):
 
     def showMesh(self):
         """."""
-        self.parent.plotWidget.axis.cla()
+        self.plot_mesh.axis.cla()
         if self.chbx_mesh_attr.isChecked() is True:
             success = False
             # gather the attributes from other tab
@@ -220,19 +221,19 @@ class MeshOptions(QWidget):
             if success:
                 show(self.mesh, pg.solver.parseArgToArray(
                     attr_map, self.mesh.cellCount(), self.mesh),
-                    ax=self.parent.plotWidget.axis
+                    ax=self.plot_mesh.axis
                     )
                 show(drawMeshBoundaries(
-                    self.parent.plotWidget.axis, self.mesh, hideMesh=False),
-                    ax=self.parent.plotWidget.axis,
+                    self.plot_mesh.axis, self.mesh, hideMesh=False),
+                    ax=self.plot_mesh.axis,
                     fillRegion=False
                     )
         else:
             success = True
-            show(self.mesh, ax=self.parent.plotWidget.axis)
+            show(self.mesh, ax=self.plot_mesh.axis)
 
         if success:
-            self.parent.plotWidget.canvas.draw()
+            self.plot_mesh.canvas.draw()
 
     def regionGetAttributes(self):
         """
