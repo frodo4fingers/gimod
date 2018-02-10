@@ -5,6 +5,7 @@ The matplotlib basiscs for the polygon behaviour.
 from matplotlib import pyplot as plt
 from matplotlib import patches
 from matplotlib import lines
+import numpy as np
 
 try:
     from PyQt5.QtWidgets import QApplication
@@ -50,13 +51,19 @@ class MPLBase():
         """Prepend matplotlibs new feature to create a QWaitCursor while dragging some stuff."""
         QApplication.setOverrideCursor(QCursor(Qt.ArrowCursor))
 
+    def drawMagnets(self, magnets):
+        """."""
+        x = magnets[:, 0]
+        y = magnets[:, 1]
+        self.figure.axis.plot(x, y, 'o', c='white', zorder=10)
+        self.figure.canvas.draw()
+
     def drawToCanvas(self, patches):
         """Convenience function to add the gathered path to the current figure."""
-        # self.figure.axis.add_patch(patch)
         cmap = plt.cm.get_cmap(None, len(patches))
         for i, patch in enumerate(patches):
             # patch.set_fc((*cmap(i)[:3], 0.8))
-            patch.set_lw(2)
+            patch.set_lw(1)
             if isinstance(patch, lines.Line2D):
                 patch.set_color(cmap(i))
                 self.figure.axis.add_line(patch)
@@ -68,5 +75,10 @@ class MPLBase():
                     patch.set_ec('#000000')
                 self.figure.axis.add_patch(patch)
 
+        verts = self.parent.magnets[0]
+        x = [v[0] for v in verts]
+        y = [v[1] for v in verts]
+        self.figure.axis.set_xlim([min(x), max(x)])
+        self.figure.axis.set_ylim([min(y), max(y)])
 
         self.figure.canvas.draw()
