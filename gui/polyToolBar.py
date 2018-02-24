@@ -35,7 +35,7 @@ class PolyToolBar(QToolBar):
         # create a group for the image tools
         self.grp_imageTools = QActionGroup(self)
         self.acn_image = QAction(
-            QIcon('icons/ic_image.svg'), 'image', self.grp_imageTools, checkable=True)
+            QIcon('icons/ic_image.svg'), 'image', self.grp_imageTools)
         self.acn_image.setToolTip(
             "Load image to set as model background or try to extract polygons from")
 
@@ -89,8 +89,9 @@ class PolyToolBar(QToolBar):
         acnBox.addWidget(self.acn_imageDensity)
         acnBox.addWidget(self.acn_imagePolys)
         acnBox.setContentsMargins(0, 0, 0, 1)
-        acnWidget = QWidget()
-        acnWidget.setLayout(acnBox)
+        self.acnWidget = QWidget()
+        self.acnWidget.setLayout(acnBox)
+        self.acnWidget.setEnabled(False)
 
         # next group for the polyttols of GIMLi
         self.grp_polyTools = QActionGroup(self)
@@ -158,7 +159,8 @@ class PolyToolBar(QToolBar):
 
         # add all actions and widgets to the toolbar
         self.addAction(self.acn_image)
-        self.widgetAction = self.addWidget(acnWidget)
+        self.addWidget(self.acnWidget)
+        # self.widgetAction = self.addWidget(acnWidget)
         # self.widgetAction.setVisible(False)
         self.addAction(self.acn_polygonize)
         self.addSeparator()

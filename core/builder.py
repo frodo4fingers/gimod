@@ -10,8 +10,10 @@ except ImportError:
     from PyQt4.QtCore import Qt
 
 from matplotlib import patches
+from matplotlib.patches import Polygon, Rectangle
 
-from mpl import SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly, DraggablePoint, MagnetizePolygons, MagnetizedGrid
+from mpl import (SpanWorld, SpanRectangle, SpanCircle, SpanLine, SpanPoly,
+        DraggablePoint, MagnetizePolygons, MagnetizedGrid, MPLBase)
 
 import pygimli as pg
 from pygimli.mplviewer import drawMesh, drawMeshBoundaries, drawModel
@@ -187,28 +189,30 @@ class Builder():
             self.constructPoly()
             self.drawPoly()
         else:
-            # this when something is taken from image
+            # this is called when an image is being taken into polygon form
             self.parent.info_tree.tw_polys.clear()
             self.polys.clear()
-            # how many contours were found.. for showing progress purpose
-            n_contours = len(self.parent.image_tools.contoursCutted)
-            for i, contour in enumerate(self.parent.image_tools.contoursCutted):
-                self.marker += 1
-                # show progress in statusbar
-                self.parent.statusbar.showMessage("processing found polygons {}/{}".format(i, n_contours))
-                # construct poly
-                self.constructPoly('Polygon', None, None, None, None, contour, self.marker)
+            self.span = MPLBase(self)
+            
+            # get the current axes limitations to establish the world polygon first
+            xlim = self.figure.axis.get_xlim()
+            ylim = self.figure.axis.get_ylim()
+            world = Rectangle((int(xlim[0]), int(ylim[0])), int(xlim[1] - xlim[0]), int(ylim[1] - ylim[0]), fc='none', lw=1, ec='blue')
+            verts = world.get_verts()
+            self.span.drawMagnets(verts)
+            self.magnets.append(verts)
+            self.storeMPLPaths(world, ['World', [int(xlim[0]), int(ylim[0]), int(xlim[1]), int(ylim[1])]])
 
+            for p in self.parent.image_tools.contoursCutted:
+                poly = Polygon(p)
+                verts = poly.get_verts()
+                self.span.drawMagnets(verts)
+                self.magnets.append(verts)
+                self.storeMPLPaths(poly, ['Polygon', p])
+            
+            self.constructPoly()
             # draw created polygon
             self.drawPoly()
-            # fill the info tree as bulk
-            # NOTE: seperate loop to fill the table since the marker count is now
-            # set and can be made available for all markers
-            for i, contour in enumerate(self.parent.image_tools.contoursCutted):
-                # show progress in statusbar
-                self.parent.statusbar.showMessage("processing table entries {}/{}".format(i, n_contours))
-                # fill the info tree as bulk
-                self.parent.info_tree.fillTable(form='Polygon', polygon=contour, parent_marker=i)
 
             # turn on buttons to reset figure or delete last build polygon
             self.parent.info_tree.btn_undo.setEnabled(True)
@@ -268,60 +272,6 @@ class Builder():
         self.parent.toolbar.acn_reset_figure.setEnabled(True)
         self.parent.toolbar.acn_polygonize.setEnabled(True)
 
-    # def printCoordinates(self, x1, y1, x2, y2, form):
-    #     """
-    #     Create the Polygon for caller/form. This method gets called from :class:`mpl.SpanWorld`, :class:`mpl.SpanRectangle`, :class:`mpl.SpanCircle`, :class:`mpl.SpanLine`, :class:`mpl.SpanPoly`
-    #
-    #     Parameters
-    #     ----------
-    #     x1: float
-    #         The x-value in a cartesian coordinate system where the polygon was started.
-    #     x2: float
-    #         The x-value in a cartesian coordinate system where the polygon was finished.
-    #     y1: float
-    #         The y-value in a cartesian coordinate system where the polygon was started.
-    #     y2: float
-    #         The y-value in a cartesian coordinate system where the polygon was finished.
-    #     form: str
-    #         Word describing the polygon that was just drawn.
-    #     """
-    #     # add to the marker for each created polygon
-    #     self.marker += 1
-    #     try:
-    #         self.constructPoly(form, x1, y1, x2, y2, None, self.marker)
-    #     except TypeError:
-    #         # REVIEW: what needs to happen that i land here again?! ...boiiii
-    #         pass
-    #     else:
-    #         # turn on buttons to reset figure or delete last build polygon
-    #         self.parent.info_tree.btn_undo.setEnabled(True)
-    #         self.parent.toolbar.acn_reset_figure.setEnabled(True)
-    #         # draw the created polygon
-    #         self.drawPoly()
-    #         # bulk fill the info tree
-    #         self.fillInfoTree()
-
-    # def printPolygon(self, polygon):
-    #     """
-    #     Create the manually designed polygon.
-    #
-    #     Parameters
-    #     ----------
-    #     polygon: list
-    #         The vertices/nodes of the designed polygon.
-    #     """
-    #     # add to the marker for each created polygon
-    #     self.marker += 1
-    #     self.constructPoly('Polygon', None, None, None, None, polygon, self.marker)
-    #     # turn on buttons to reset figure or delete last build polygon
-    #     self.parent.info_tree.btn_undo.setEnabled(True)
-    #     self.parent.toolbar.acn_reset_figure.setEnabled(True)
-    #     # draw the created polygon
-    #     self.drawPoly()
-    #     # bulk fill the info tree
-    #     self.fillInfoTree()
-
-    # def constructPoly(self, form, x_p, y_p, x_r, y_r, polygon, marker):
     def constructPoly(self):
         """
         Actually built all the polygon that will be created during modeling process and store them self.polys.

@@ -57,10 +57,10 @@ class MagnetizedGrid(MPLBase):
         self.disable()
         self.grid()
         if self.parent.toolbar.acn_magnetizeGrid.isChecked():
-            try:
-                self.disconnect()
-            except AttributeError:
-                pass
+            # try:
+            self.disconnect()
+            # except AttributeError:
+            #     pass
             self.connect()
 
     def disable(self):

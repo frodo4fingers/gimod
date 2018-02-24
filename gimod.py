@@ -45,8 +45,9 @@ class GIMod(QMainWindow):
         self.image_tools = ImageTools(self)
 
         # when resizing the mainwindow
-        if self.toolbar.acn_gridToggle.isChecked():
-            self.resizeEvent(self.builder.grid.getCanvasHeight)
+        # if self.toolbar.acn_gridToggle.isChecked():
+        #     print("resize")
+        #     self.resizeEvent.connect(self.builder.grid.update)
 
         # menu actions
         self.mb_aboutVerison.triggered.connect(self.aboutVersion)
@@ -67,12 +68,13 @@ class GIMod(QMainWindow):
                 self.image_tools.updateImagery)
             self.toolbar.acn_imagePolys.valueChanged.connect(
                 self.image_tools.polysFromImage)
-            self.toolbar.acn_image.triggered.connect(self.image_tools.imagery)
         else:  # disable their use
             self.toolbar.acn_imageThreshold1.setEnabled(False)
             self.toolbar.acn_imageThreshold2.setEnabled(False)
             self.toolbar.acn_imageDensity.setEnabled(False)
             self.toolbar.acn_imagePolys.setEnabled(False)
+        
+        self.toolbar.acn_image.triggered.connect(self.image_tools.imagery)
 
         self.toolbar.acn_polygonize.triggered.connect(self.builder.formPolygonFromFigure)
 

@@ -11,5 +11,6 @@ from .spanPoly import SpanPoly
 from .draggablePoint import DraggablePoint
 
 from .magnetizePolys import MagnetizePolygons
-# from .magnetizedgrid2 import MagnetizedGrid
 from .magnetizedgrid import MagnetizedGrid
+
+from .mplbase import MPLBase

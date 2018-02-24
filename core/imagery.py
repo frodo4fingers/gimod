@@ -37,7 +37,7 @@ class ImageTools():
         # self.fname = parent.toolbar.fname
         self.figure = parent.plotwidget.plot_sketch
 
-        self.imageClicked = True
+        # self.imageClicked = True
 
     def getContours(self):
         """
@@ -78,14 +78,13 @@ class ImageTools():
                 tuples.append([float(tup[0][0]), float(tup[0][1])])
             self.contours.append(tuples)
         self.dotDensityOfPolygons()
+        self.imagePlot()
 
     def dotDensityOfPolygons(self):
         """Take every n-th tuple specified by imageDensity spinbox."""
         self.contoursCutted = []
         for p in self.contours:
             self.contoursCutted.append([p[i] for i in range(0, len(p), self.polyDensity.value())])
-        # self.findMinMax()
-        self.imagePlot()
 
     def imagePlot(self):
         """Scatter plot all found paths from figure."""
@@ -104,23 +103,25 @@ class ImageTools():
 
     def imagery(self):
         """Hide and show the widget for image threshold in the toolbar."""
-        if self.imageClicked is True:
-            # FIXME: cheeky piece of shit... wont accept given formats
-            self.fname = QFileDialog.getOpenFileName(None, caption='choose sketch')[0]
-            if self.fname:
-                self.parent.toolbar.widgetAction.setVisible(True)
-                self.parent.toolbar.acn_polygonize.setEnabled(True)
-                self.parent.toolbar.acn_reset_figure.setEnabled(True)
-                self.imageClicked = False
-                # instanciate the imageTools class
-                # self.imageTools = ImageTools(self)
+        # if self.imageClicked is True:
+        # FIXME: cheeky piece of shit... wont accept given formats
+        self.fname = QFileDialog.getOpenFileName(None, caption='choose sketch')[0]
+        if self.fname:
+            self.parent.toolbar.acnWidget.setEnabled(True)
+            self.parent.toolbar.acn_polygonize.setEnabled(True)
+            self.parent.toolbar.acn_reset_figure.setEnabled(True)
+            if not found_cv:
+                self.parent.toolbar.acn_imageThreshold1.setEnabled(False)
+                self.parent.toolbar.acn_imageThreshold2.setEnabled(False)
+                self.parent.toolbar.acn_imageDensity.setEnabled(False)
+                self.parent.toolbar.acn_imagePolys.setEnabled(False)
+                # so everything regarding opencv has failed, thus taking
+                # the image as background
+                self.parent.toolbar.acn_imageAsBackground.setChecked(True)
+                self.imageryBackground()
+                
+            else:
                 self.getContours()
-
-        else:
-            self.parent.toolbar.widgetAction.setVisible(False)
-            self.parent.toolbar.acn_polygonize.setEnabled(False)
-            self.parent.toolbar.acn_image.setChecked(False)
-            self.imageClicked = True
 
     def updateImagery(self):
         """
@@ -136,12 +137,12 @@ class ImageTools():
         """
         Set chosen image as background of the figure so the traces can be drawn by hand. If chosen the rest is not needed.
         """
-        if self.parent.toolbar.acn_imageAsBackground.isChecked() is True:
-            self.parent.toolbar.acn_imageThreshold1.setEnabled(False)
-            self.parent.toolbar.acn_imageThreshold2.setEnabled(False)
-            self.parent.toolbar.acn_imagePolys.setEnabled(False)
-            self.parent.toolbar.acn_imageDensity.setEnabled(False)
-            self.parent.toolbar.acn_polygonize.setEnabled(False)
+        if self.parent.toolbar.acn_imageAsBackground.isChecked():
+            # self.parent.toolbar.acn_imageThreshold1.setEnabled(False)
+            # self.parent.toolbar.acn_imageThreshold2.setEnabled(False)
+            # self.parent.toolbar.acn_imagePolys.setEnabled(False)
+            # self.parent.toolbar.acn_imageDensity.setEnabled(False)
+            # self.parent.toolbar.acn_polygonize.setEnabled(False)
             self.setBackground()
         else:
             self.updateImagery()
